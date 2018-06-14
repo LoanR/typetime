@@ -8,6 +8,7 @@ Vue.use(VueRouter)
 
 const routes = [
   {path: '/', component: Hello},
+  {path: '/Typetime-front', component: Hello}, // gh-pages landing special case
   {path: '/about', component: About}
 ]
 
