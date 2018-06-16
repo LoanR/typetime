@@ -5,6 +5,7 @@
             <img src="../assets/logo.png">
             <h1>{{title}}</h1>
             <button-component :content="startContent"></button-component>
+            <checkboxes-component :checkboxes="checkboxesDatas"></checkboxes-component>
             <nav>
                 <router-link v-bind:to="'/about'">About</router-link>
             </nav>
@@ -16,13 +17,15 @@
 <script>
 import animateTitle from '../js/animateTitle.js';
 
-import buttonComponent from './buttons/button.vue';
+import buttonComponent from './buttons/Button.vue';
+import checkboxesComponent from './sections/Checkboxes.vue';
 
 export default {
     name: 'Landing',
 
     components: {
         'button-component': buttonComponent,
+        'checkboxes-component': checkboxesComponent,
     },
 
     data() {
@@ -33,6 +36,20 @@ export default {
             firstTimeOut: 3000,
             wantsToPlay: false,
             startContent: 'start',
+            checkboxesDatas: [
+                {
+                    label: 'label',
+                    modifier: 'modifier',
+                },
+                {
+                    label: 'label2',
+                    modifier: 'modifier2',
+                },
+                {
+                    label: 'label3',
+                    modifier: 'modifier3',
+                },
+            ],
         };
     },
 
@@ -75,5 +92,10 @@ export default {
     li {
         display: inline-block;
         margin: 0 10px;
+    }
+
+    .modifier-container {
+        display: flex;
+        justify-content: center;
     }
 </style>
