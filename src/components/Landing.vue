@@ -35,9 +35,11 @@ export default {
     },
 
     mounted() {
-        this.timeOut = window.setTimeout(() => {
-            this.overwriteTitle();
-        }, this.firstTimeOut);
+        if (this.shouldShuffleTitle) {
+            this.timeOut = window.setTimeout(() => {
+                this.overwriteTitle();
+            }, this.firstTimeOut);
+        };
     }
 };
 </script>
