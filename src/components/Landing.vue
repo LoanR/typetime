@@ -2,10 +2,15 @@
     <section>
         <div v-if="wantsToPlay"></div>
         <div v-else>
-            <img src="../assets/logo.png">
-            <h1>{{title}}</h1>
+            <header>
+                <img src="../assets/logo.png">
+                <h1>{{title}}</h1>
+            </header>
             <button-component :content="startContent"></button-component>
-            <checkboxes-component :checkboxes="checkboxesDatas"></checkboxes-component>
+            <checkboxes-component
+                :checkboxes="checkboxesDatas"
+                @toggleCheck="mutateModifiers">
+            </checkboxes-component>
             <nav>
                 <router-link v-bind:to="'/about'">About</router-link>
             </nav>
@@ -40,14 +45,22 @@ export default {
                 {
                     label: 'label',
                     modifier: 'modifier',
+                    isChecked: false,
                 },
                 {
                     label: 'label2',
                     modifier: 'modifier2',
+                    isChecked: false,
+                },
+                {
+                    label: 'labelx',
+                    modifier: 'modifierx',
+                    isChecked: false,
                 },
                 {
                     label: 'label3',
                     modifier: 'modifier3',
+                    isChecked: false,
                 },
             ],
         };
@@ -60,6 +73,10 @@ export default {
             this.timeOut = window.setTimeout(() => {
                 this.overwriteTitle();
             }, animateTitle.randomNum(3000, 200));
+        },
+
+        mutateModifiers(toggledModifier) {
+            this.checkboxesDatas.find(modifier => modifier.label === toggledModifier.label).isChecked = toggledModifier.isChecked;
         },
     },
 
@@ -75,6 +92,19 @@ export default {
 
 <style lang="scss" scoped>
     @import '../styles/common';
+
+    header {
+        height: 200px;
+        position: relative;
+        margin-bottom: 50px;
+        h1 {
+            margin: 0;
+            position: absolute;
+            left: 50%;                        /* horizontal alignment */
+            top: 50%;                         /* vertical alignment */
+            transform: translate(-50%, -50%); /* precise centering; see link below */
+        }
+    }
 
     section {
         text-align: center;
@@ -98,4 +128,5 @@ export default {
         display: flex;
         justify-content: center;
     }
+
 </style>

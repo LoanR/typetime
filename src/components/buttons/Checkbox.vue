@@ -1,6 +1,9 @@
 <template>
     <div data-truc="truc">
-        <input type="checkbox" name="" :id="label" v-model="checked">
+        <input type="checkbox" name=""
+            :id="label"
+            v-model="isChecked"
+            v-on:change="toggleCheck">
         <label :for="label" class="button-style"><span>{{label}}</span></label>
     </div>
 </template>
@@ -9,12 +12,18 @@
 export default {
     name: 'Checkbox',
 
-    props: ['label', 'modifier', 'specificClass'],
+    props: ['label', 'modifier'],
 
     data() {
         return {
-            checked: false,
+            isChecked: false,
         };
+    },
+
+    methods: {
+        toggleCheck() {
+            this.$emit('toggleCheck', {label: this.label, isChecked: this.isChecked});
+        },
     },
 };
 </script>

@@ -3,7 +3,8 @@
         <checkbox-component v-for="item in checkboxes"
             :key="item.label"
             :label="item.label"
-            :modifier="item.modifier">
+            :modifier="item.modifier"
+            @toggleCheck="toggleCheck">
         </checkbox-component>
     </div>
 </template>
@@ -23,6 +24,12 @@ export default {
         return {
             checked: false,
         };
+    },
+
+    methods: {
+        toggleCheck(eventData) {
+            this.$emit('toggleCheck', eventData);
+        },
     },
 };
 </script>
