@@ -1,14 +1,14 @@
 import Vue from 'vue';
 import App from './App';
 import VueRouter from 'vue-router';
-import Hello from './components/HelloWorld';
+import Landing from './components/Landing';
 import About from './components/About';
 
 Vue.use(VueRouter);
 
 const routes = [
-    {path: '/', component: Hello},
-    {path: '/Typetime-front', component: Hello}, // gh-pages landing special case
+    {path: '/', component: Landing},
+    {path: '/Typetime-front', component: Landing}, // gh-pages landing special case
     {path: '/about', component: About}
 ];
 
