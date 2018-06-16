@@ -1,10 +1,14 @@
 <template>
     <section>
-        <img src="../assets/logo.png">
-        <h1>{{title}}</h1>
-        <nav>
-            <router-link v-bind:to="'/about'">About</router-link>
-        </nav>
+        <div v-if="wantsToPlay"></div>
+        <div v-else>
+            <img src="../assets/logo.png">
+            <h1>{{title}}</h1>
+            <button-component :content="startContent"></button-component>
+            <nav>
+                <router-link v-bind:to="'/about'">About</router-link>
+            </nav>
+        </div>
 
     </section>
 </template>
@@ -12,15 +16,23 @@
 <script>
 import animateTitle from '../js/animateTitle.js';
 
+import buttonComponent from './buttons/button.vue';
+
 export default {
     name: 'Landing',
+
+    components: {
+        'button-component': buttonComponent,
+    },
 
     data() {
         return {
             title: 'TypeTime',
             shouldShuffleTitle: true,
             timeOut: null,
-            firstTimeOut: 3000
+            firstTimeOut: 3000,
+            wantsToPlay: false,
+            startContent: 'start',
         };
     },
 
@@ -31,7 +43,7 @@ export default {
             this.timeOut = window.setTimeout(() => {
                 this.overwriteTitle();
             }, animateTitle.randomNum(3000, 200));
-        }
+        },
     },
 
     mounted() {
@@ -40,7 +52,7 @@ export default {
                 this.overwriteTitle();
             }, this.firstTimeOut);
         };
-    }
+    },
 };
 </script>
 

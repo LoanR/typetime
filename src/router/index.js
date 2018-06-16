@@ -8,10 +8,10 @@ Vue.use(Router);
 const routes = [
     {path: '/', component: Landing},
     {path: '/Typetime-front', component: Landing}, // gh-pages landing special case
-    {path: '/about', component: About}
+    {path: '/about', component: About},
 ];
 
 export default new Router({
     routes,
-    mode: 'history'
+    mode: 'history',
 });

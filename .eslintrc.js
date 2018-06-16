@@ -28,5 +28,6 @@ module.exports = {
     "semi": ["warn", "always"],
     "indent": ["warn", 4],
     "space-before-function-paren": ["error", "never"],
+    "comma-dangle": ["warn", "always-multiline"],
   }
 }
