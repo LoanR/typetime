@@ -22,9 +22,5 @@ export default {
         span {
             font-size: $base-font-size;
         }
-
-        &::before, &::after {
-            width: 10rem;
-        }
     }
 </style>

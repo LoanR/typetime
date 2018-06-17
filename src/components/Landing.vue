@@ -9,7 +9,7 @@
             <button-component :content="startContent"></button-component>
             <checkboxes-component
                 :checkboxes="checkboxesDatas"
-                @toggleCheck="mutateModifiers">
+                @toggleCheck="toggleModifiers">
             </checkboxes-component>
             <nav>
                 <router-link v-bind:to="'/about'">About</router-link>
@@ -46,21 +46,25 @@ export default {
                     label: 'label',
                     modifier: 'modifier',
                     isChecked: false,
+                    isExclusive: true,
                 },
                 {
                     label: 'label2',
                     modifier: 'modifier2',
-                    isChecked: false,
+                    isChecked: true,
+                    isExclusive: true,
                 },
                 {
                     label: 'labelx',
                     modifier: 'modifierx',
                     isChecked: false,
+                    isExclusive: true,
                 },
                 {
                     label: 'label3',
                     modifier: 'modifier3',
                     isChecked: false,
+                    isExclusive: false,
                 },
             ],
         };
@@ -75,8 +79,21 @@ export default {
             }, animateTitle.randomNum(3000, 200));
         },
 
-        mutateModifiers(toggledModifier) {
-            this.checkboxesDatas.find(modifier => modifier.label === toggledModifier.label).isChecked = toggledModifier.isChecked;
+        toggleModifiers(toggledModifierLabel) {
+            const toggledModifier = this.checkboxesDatas.find(modifier => modifier.label === toggledModifierLabel);
+            if (toggledModifier.isExclusive) {
+                this.unckeckOtherEsclusiveModifiers(toggledModifier);
+            }
+            toggledModifier.isChecked = !toggledModifier.isChecked;
+        },
+
+        unckeckOtherEsclusiveModifiers(toggledModifier) {
+            const exclusiveModifiers = this.checkboxesDatas.filter(modifier => !!modifier.isExclusive);
+            for (let mod of exclusiveModifiers) {
+                if (mod !== toggledModifier) {
+                    mod.isChecked = false;
+                }
+            }
         },
     },
 

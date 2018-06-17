@@ -4,6 +4,7 @@
             :key="item.label"
             :label="item.label"
             :modifier="item.modifier"
+            :isChecked="item.isChecked"
             @toggleCheck="toggleCheck">
         </checkbox-component>
     </div>
@@ -27,8 +28,8 @@ export default {
     },
 
     methods: {
-        toggleCheck(eventData) {
-            this.$emit('toggleCheck', eventData);
+        toggleCheck(modLabel) {
+            this.$emit('toggleCheck', modLabel);
         },
     },
 };
