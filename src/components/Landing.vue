@@ -1,12 +1,12 @@
 <template>
     <section>
-        <div v-if="wantsToPlay"></div>
+        <game-component v-if="wantsToPlay" :words="wordsToType" @nextLevel="nextLevel"></game-component>
         <div v-else>
             <header>
                 <img src="../assets/logo.png">
                 <h1>{{title}}</h1>
             </header>
-            <button-component :content="startContent"></button-component>
+            <button-component :content="startContent" @lauchGame="launchGame"></button-component>
             <checkboxes-component
                 :checkboxes="checkboxesDatas"
                 @toggleCheck="toggleModifiers">
@@ -24,6 +24,7 @@ import animateTitle from '../js/animateTitle.js';
 
 import buttonComponent from './buttons/Button.vue';
 import checkboxesComponent from './sections/Checkboxes.vue';
+import gameComponent from './game/Game.vue';
 
 export default {
     name: 'Landing',
@@ -31,6 +32,7 @@ export default {
     components: {
         'button-component': buttonComponent,
         'checkboxes-component': checkboxesComponent,
+        'game-component': gameComponent,
     },
 
     data() {
@@ -67,6 +69,13 @@ export default {
                     isExclusive: false,
                 },
             ],
+            wordsToType: [
+                'abc',
+                'Hûtte fort',
+                'Canadien',
+                'équinoxe',
+                'haut',
+            ],
         };
     },
 
@@ -95,6 +104,14 @@ export default {
                 }
             }
         },
+
+        launchGame() {
+            this.wantsToPlay = !this.wantsToPlay;
+        },
+
+        nextLevel() {
+            return null;
+        },
     },
 
     mounted() {
@@ -113,17 +130,19 @@ export default {
     header {
         height: 200px;
         position: relative;
-        margin-bottom: 50px;
+        padding: 50px 0;
         h1 {
             margin: 0;
             position: absolute;
-            left: 50%;                        /* horizontal alignment */
-            top: 50%;                         /* vertical alignment */
-            transform: translate(-50%, -50%); /* precise centering; see link below */
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
         }
     }
 
     section {
+        width: 100%;
+        height: 100%;
         text-align: center;
     }
 
