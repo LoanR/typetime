@@ -3,6 +3,7 @@
         <p class="awaited-word">
             <span v-for="(letter, index) in wordToTypeLetters" :key="index" ref="letterToType">{{letter}}</span>
         </p>
+        <p>Level: {{level}}</p>
         <p>{{countdownDisplay}}</p>
         <input :disabled="!canStillPlay" type="text" name="" ref="gameInput" @blur="reFocus" @input="compareInputToExpected" v-model="entry">
     </div>
@@ -12,7 +13,7 @@
 export default {
     name: 'Game',
 
-    props: ['words'],
+    props: ['words', 'level'],
 
     data() {
         return {
@@ -25,7 +26,6 @@ export default {
             canStillPlay: true,
             hundrethSecondMinute: 6000,
             wordsPerMinute: 10,
-            level: 1,
         };
     },
 
@@ -59,11 +59,12 @@ export default {
                         this.wordToTypeIndex += 1;
                     } else {
                         this.$emit('nextLevel');
-                        this.level += 1;
                         this.wordToTypeIndex = 0;
                     }
-                    this.launchNewCountdown();
-                    this.stylizeWithClass(this.$refs.letterToType[this.letterToTypeIndex], true, 'letter-to-type');
+                    this.$nextTick(function() {
+                        this.launchNewCountdown();
+                        this.stylizeWithClass(this.$refs.letterToType[this.letterToTypeIndex], true, 'letter-to-type');
+                    });
                 }
             }
             this.entry = '';
