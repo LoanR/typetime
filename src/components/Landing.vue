@@ -69,12 +69,20 @@ export default {
                     isExclusive: false,
                 },
             ],
-            wordsToType: [
+            wordsToType: [ // request wordsToType on start button <= game needs to wait for this list
                 'abc',
-                'Hûtte fort',
-                'Canadien',
-                'équinoxe',
+                'cou',
+                'truc',
+                'batte',
                 'haut',
+            ],
+            nextWordsToType: [ // then request future words from a word of the first request <= on background
+                'bla',
+                'machin',
+                'Érythrocyte', // death upon you
+                'xylophone',
+                'véritable',
+                'besoin',
             ],
         };
     },
@@ -110,7 +118,8 @@ export default {
         },
 
         nextLevel() {
-            return null;
+            this.wordsToType = this.nextWordsToType;
+            // request a new nextWordsToType list
         },
     },
 

@@ -1,9 +1,10 @@
 <template>
-    <div @click="reFocus">
+    <div class="game-window" @click="reFocus">
         <p class="awaited-word">
             <span v-for="(letter, index) in wordToTypeLetters" :key="index" ref="letterToType">{{letter}}</span>
         </p>
-        <input type="text" name="" ref="gameInput" @blur="reFocus" @input="compareInputToExpected" v-model="entry">
+        <p>{{countdownDisplay}}</p>
+        <input :disabled="!canStillPlay" type="text" name="" ref="gameInput" @blur="reFocus" @input="compareInputToExpected" v-model="entry">
     </div>
 </template>
 
@@ -19,6 +20,12 @@ export default {
             letterToTypeIndex: 0,
             entry: '',
             previousEntry: '',
+            levelCountdown: 0,
+            interval: null,
+            canStillPlay: true,
+            hundrethSecondMinute: 6000,
+            wordsPerMinute: 10,
+            level: 1,
         };
     },
 
@@ -46,13 +53,17 @@ export default {
                         this.stylizeWithClass(span, false, 'letter-error');
                         this.stylizeWithClass(span, false, 'letter-found');
                     }
-                    if (this.wordToTypeIndex < this.wordToType.length) {
+                    this.letterToTypeIndex = 0;
+                    if (this.wordToTypeIndex < this.words.length - 1) {
+                        this.clearCountdown();
                         this.wordToTypeIndex += 1;
-                        this.letterToTypeIndex = 0;
-                        this.stylizeWithClass(this.$refs.letterToType[this.letterToTypeIndex], true, 'letter-to-type');
                     } else {
                         this.$emit('nextLevel');
+                        this.level += 1;
+                        this.wordToTypeIndex = 0;
                     }
+                    this.launchNewCountdown();
+                    this.stylizeWithClass(this.$refs.letterToType[this.letterToTypeIndex], true, 'letter-to-type');
                 }
             }
             this.entry = '';
@@ -75,6 +86,29 @@ export default {
                 }
             }
         },
+
+        modifyCountdownDisplay() {
+            if (this.levelCountdown > 0) {
+                this.levelCountdown -= 1;
+            } else {
+                this.timeExceeded();
+            }
+        },
+
+        launchNewCountdown() {
+            this.levelCountdown = this.allotedTime;
+            this.interval = window.setInterval(() => this.modifyCountdownDisplay(), 10);
+        },
+
+        clearCountdown() {
+            window.clearInterval(this.interval);
+        },
+
+        timeExceeded() {
+            this.levelCountdown = 0;
+            this.canStillPlay = false;
+            this.clearCountdown();
+        },
     },
 
     computed: {
@@ -85,11 +119,20 @@ export default {
         wordToTypeLetters() {
             return this.wordToType.split('');
         },
+
+        allotedTime() {
+            return this.hundrethSecondMinute / (this.wordsPerMinute + this.level - 1);
+        },
+
+        countdownDisplay() {
+            return (this.levelCountdown / 100).toFixed(2);
+        },
     },
 
     mounted() {
         this.$refs.gameInput.focus();
         this.stylizeWithClass(this.$refs.letterToType[this.letterToTypeIndex], true, 'letter-to-type');
+        this.launchNewCountdown();
     },
 };
 </script>
@@ -103,7 +146,7 @@ export default {
         80% {font-size: $big-font-size;}
     }
 
-    div {
+    .game-window {
         position: relative;
         overflow: hidden;
         height: 100%;
@@ -111,6 +154,7 @@ export default {
         display: flex;
         align-items: center;
         justify-content: center;
+        flex-direction: column;
 
         .awaited-word {
             margin: 0;
