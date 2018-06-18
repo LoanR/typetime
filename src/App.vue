@@ -12,4 +12,9 @@ export default {
 
 <style lang="scss">
     @import './styles/common';
+
+    #app {
+        width: 100%;
+        height: 100vh;
+    }
 </style>

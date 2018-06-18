@@ -19,12 +19,6 @@ export default {
             this.$emit('toggleCheck', this.label);
         },
     },
-
-    computed: {
-        thing() {
-            return this.isChecked;
-        },
-    },
 };
 </script>
 
