@@ -1,6 +1,6 @@
 <template>
     <section>
-        <game-component v-if="wantsToPlay" :words="wordsToType" :level="gameLevel" @nextLevel="nextLevel"></game-component>
+        <game-hub-component v-if="wantsToPlay" :words="wordsToType" :level="gameLevel" @nextLevel="nextLevel"></game-hub-component>
         <div v-else>
             <header>
                 <img src="../assets/logo.png">
@@ -24,7 +24,7 @@ import random from '../js/random.js';
 
 import buttonComponent from './buttons/Button.vue';
 import checkboxesComponent from './sections/Checkboxes.vue';
-import gameComponent from './game/Game.vue';
+import gameHubComponent from './game/GameHub.vue';
 
 export default {
     name: 'Landing',
@@ -32,7 +32,7 @@ export default {
     components: {
         'button-component': buttonComponent,
         'checkboxes-component': checkboxesComponent,
-        'game-component': gameComponent,
+        'game-hub-component': gameHubComponent,
     },
 
     data() {

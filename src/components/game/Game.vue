@@ -30,10 +30,6 @@ export default {
     },
 
     methods: {
-        toggleCheck() {
-            this.$emit('toggleCheck', this.label);
-        },
-
         reFocus() {
             this.$refs.gameInput.focus();
         },
@@ -61,10 +57,10 @@ export default {
                         this.$emit('nextLevel');
                         this.wordToTypeIndex = 0;
                     }
-                    this.$nextTick(function() {
-                        this.launchNewCountdown();
-                        this.stylizeWithClass(this.$refs.letterToType[this.letterToTypeIndex], true, 'letter-to-type');
-                    });
+                    // this.$nextTick(function() { infinite gamemode ?
+                    this.launchNewCountdown();
+                    this.stylizeWithClass(this.$refs.letterToType[this.letterToTypeIndex], true, 'letter-to-type');
+                    // });
                 }
             }
             this.entry = '';
@@ -98,7 +94,7 @@ export default {
 
         launchNewCountdown() {
             this.levelCountdown = this.allotedTime;
-            this.interval = window.setInterval(() => this.modifyCountdownDisplay(), 10);
+            this.interval = window.setInterval(this.modifyCountdownDisplay, 10);
         },
 
         clearCountdown() {
