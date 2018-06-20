@@ -1,6 +1,14 @@
 <template>
     <div>
-        <game-component v-if="playLevel" :words="words" :level="level" @nextLevel="nextLevel"></game-component>
+        <game-component v-if="playLevel"
+            :words="words"
+            :level="level"
+            :wordsPerMinute="wordsPerMinute"
+            :isResilient="isResilient"
+            :isEconomist="isEconomist"
+            :timeAccount="timeAccount"
+            @nextLevel="nextLevel">
+        </game-component>
         <transition-screen-component v-else></transition-screen-component>
     </div>
 </template>
@@ -17,7 +25,7 @@ export default {
         'transition-screen-component': transitionScreenComponent,
     },
 
-    props: ['words', 'level', 'levelWordsCount'],
+    props: ['words', 'level', 'levelWordsCount', 'wordsPerMinute', 'isResilient', 'isEconomist'],
 
     data() {
         return {
@@ -25,14 +33,23 @@ export default {
             score: 0,
             playLevel: false,
             waitingTime: null,
+            timeAccount: 0,
         };
     },
 
     methods: {
-        nextLevel() {
-            this.playLevel = false;
-            this.$emit('nextLevel');
-            this.waitThenExecute(this.isGameReady, 3000);
+        nextLevel(payload) {
+            if (payload.isEconomist) {
+                this.timeAccount = payload.timeAccount;
+            }
+            if (payload.isResilient) {
+                this.playLevel = true;
+                this.$emit('nextLevel');
+            } else {
+                this.playLevel = false;
+                this.$emit('nextLevel');
+                this.waitThenExecute(this.isGameReady, 3000);
+            }
         },
 
         waitThenExecute(func, time) {

@@ -13,7 +13,7 @@
 export default {
     name: 'Game',
 
-    props: ['words', 'level'],
+    props: ['words', 'level', 'wordsPerMinute', 'isResilient', 'isEconomist', 'timeAccount'],
 
     data() {
         return {
@@ -25,7 +25,6 @@ export default {
             interval: null,
             canStillPlay: true,
             hundrethSecondMinute: 6000,
-            wordsPerMinute: 10,
         };
     },
 
@@ -54,13 +53,14 @@ export default {
                         this.clearCountdown();
                         this.wordToTypeIndex += 1;
                     } else {
-                        this.$emit('nextLevel');
+                        this.$emit('nextLevel', {
+                            isResilient: this.isResilient,
+                            isEconomist: this.isEconomist,
+                            timeAccount: this.levelCountdown,
+                        });
                         this.wordToTypeIndex = 0;
                     }
-                    // this.$nextTick(function() { infinite gamemode ?
-                    this.launchNewCountdown();
-                    this.stylizeWithClass(this.$refs.letterToType[this.letterToTypeIndex], true, 'letter-to-type');
-                    // });
+                    this.setNewWordEnv(this.$refs.letterToType[this.letterToTypeIndex], true, 'letter-to-type');
                 }
             }
             this.entry = '';
@@ -93,7 +93,7 @@ export default {
         },
 
         launchNewCountdown() {
-            this.levelCountdown = this.allotedTime;
+            this.levelCountdown = this.isEconomist ? (this.allotedTime + this.levelCountdown) : this.allotedTime;
             this.interval = window.setInterval(this.modifyCountdownDisplay, 10);
         },
 
@@ -105,6 +105,18 @@ export default {
             this.levelCountdown = 0;
             this.canStillPlay = false;
             this.clearCountdown();
+        },
+
+        setNewWordEnv(element, shouldAdd, styleClass) {
+            if (this.isResilient) {
+                this.$nextTick(function() {
+                    this.launchNewCountdown();
+                    this.stylizeWithClass(element, shouldAdd, styleClass);
+                });
+            } else {
+                this.launchNewCountdown();
+                this.stylizeWithClass(element, shouldAdd, styleClass);
+            }
         },
     },
 
@@ -130,6 +142,7 @@ export default {
         this.$refs.gameInput.focus();
         this.stylizeWithClass(this.$refs.letterToType[this.letterToTypeIndex], true, 'letter-to-type');
         this.launchNewCountdown();
+        this.levelCountdown += this.timeAccount;
     },
 };
 </script>

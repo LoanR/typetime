@@ -4,6 +4,9 @@
             :words="wordsToType"
             :level="gameLevel"
             :levelWordsCount="wordsToTypeCount"
+            :wordsPerMinute="wordsPerMinute"
+            :isResilient="isResilient()"
+            :isEconomist="isEconomist()"
             @nextLevel="nextLevel">
         </game-hub-component>
         <div v-else>
@@ -13,8 +16,12 @@
             </header>
             <button-component :content="startContent" @lauchGame="launchGame"></button-component>
             <checkboxes-component
-                :checkboxes="checkboxesDatas"
+                :modifiers="selectedModifiers"
                 @toggleCheck="toggleModifiers">
+            </checkboxes-component>
+            <checkboxes-component
+                :modifiers="difficulties"
+                @toggleCheck="toggleDifficulties">
             </checkboxes-component>
             <nav>
                 <router-link v-bind:to="'/about'">About</router-link>
@@ -48,39 +55,72 @@ export default {
             firstTimeOut: 3000,
             wantsToPlay: false,
             startContent: 'start',
-            checkboxesDatas: [],
+            selectedModifiers: [],
             modifiers: [
                 {
                     label: 'lexical',
-                    urlBit: 'rel_trg=',
+                    param: 'rel_trg=',
+                    value: '',
+                    option: '',
                     isChecked: false,
                     modCluster: 'parameter',
                 },
                 {
                     label: 'semantic',
-                    urlBit: 'ml=',
+                    param: 'ml=',
+                    value: '',
+                    option: '',
                     isChecked: false,
                     modCluster: 'parameter',
                 },
                 {
                     label: 'phonetic',
-                    urlBit: 'sl=',
+                    param: 'sl=',
+                    value: '',
+                    option: '',
                     isChecked: false,
                     modCluster: 'parameter',
                 },
                 {
                     label: 'rhyme',
-                    urlBit: 'rel_rhy=',
+                    param: 'rel_rhy=',
+                    value: '',
+                    option: '',
                     isChecked: false,
                     modCluster: 'parameter',
                 },
                 {
                     label: 'español',
-                    urlBit: 'ml=ahora&v=es',
+                    param: 'ml=',
+                    value: 'ahora',
+                    option: '&v=es',
                     isChecked: false,
                     modCluster: 'all',
                 },
             ],
+            difficulties: [
+                {
+                    label: 'snail',
+                    isChecked: false,
+                    stringOrder: 3,
+                },
+                {
+                    label: 'economist',
+                    isChecked: false,
+                    stringOrder: 1,
+                },
+                {
+                    label: 'resilient',
+                    isChecked: false,
+                    stringOrder: 0,
+                },
+                {
+                    label: 'occultist',
+                    isChecked: false,
+                    stringOrder: 2,
+                },
+            ],
+            wordsPerMinute: 30,
             wordsToType: [],
             nextWordsToType: [],
             startingWordsToTypeCount: 5,
@@ -110,17 +150,17 @@ export default {
         },
 
         toggleModifiers(toggledModifierLabel) {
-            const toggledModifier = this.checkboxesDatas.find(modifier => modifier.label === toggledModifierLabel);
-            this.unckeckRelatedModifiers(toggledModifier);
+            const toggledModifier = this.selectedModifiers.find(modifier => modifier.label === toggledModifierLabel);
+            this.uncheckRelatedModifiers(toggledModifier);
             toggledModifier.isChecked = !toggledModifier.isChecked;
         },
 
-        unckeckRelatedModifiers(toggledModifier) {
+        uncheckRelatedModifiers(toggledModifier) {
             let clusterMods = [];
             if (toggledModifier.modCluster === 'all') {
-                clusterMods = this.checkboxesDatas;
+                clusterMods = this.selectedModifiers;
             } else {
-                clusterMods = this.checkboxesDatas.filter(modifier => modifier.modCluster === toggledModifier.modCluster || modifier.modCluster === 'all');
+                clusterMods = this.selectedModifiers.filter(modifier => modifier.modCluster === toggledModifier.modCluster || modifier.modCluster === 'all');
             }
             for (let mod of clusterMods) {
                 if (mod !== toggledModifier) {
@@ -132,7 +172,8 @@ export default {
         async launchGame() {
             try {
                 this.wantsToPlay = true;
-                this.wordsToType = await this.requestWords(this.startingWordsToTypeCount, this.queryParameter(), this.queryValue());
+                const query = this.getUrlQuery();
+                this.wordsToType = await this.requestWords(this.startingWordsToTypeCount, query[0], query[1], query[2]);
                 this.requestNextWordsNoWait(this.wordsToTypeCount + 1);
             } catch (err) {
                 window.alert(err);
@@ -161,7 +202,8 @@ export default {
         },
 
         requestNextWordsNoWait(wordCount) {
-            fetch(this.apiEndpoint + this.queryParameter() + this.queryValue()).then(response => {
+            const query = this.getUrlQuery();
+            fetch(this.apiEndpoint + query[0] + query[1] + query[2]).then(response => {
                 if (!response.ok) {
                     throw new Error(response.statusText);
                 }
@@ -184,23 +226,38 @@ export default {
             this.gameLevel += 1;
             while (this.nextWordsToType.length < this.wordsToTypeCount) {
                 const remainingWordCount = this.wordsToTypeCount - this.nextWordsToType.length;
-                this.nextWordsToType.push(...await this.requestWords(remainingWordCount, this.queryParameter(), this.queryValue()));
+                const query = this.getUrlQuery();
+                this.nextWordsToType.push(...await this.requestWords(remainingWordCount, query[0], query[1], query[2]));
             }
             this.wordsToType = this.nextWordsToType;
             this.requestNextWordsNoWait(this.wordsToTypeCount + 1);
         },
 
-        queryParameter() {
-            return this.overrideDefault('parameter') || 'ml=';
+        getUrlQuery() {
+            const checkedMods = this.selectedModifiers.filter(mod => !!mod.isChecked);
+            const randWordModifier = this.modifiers.find(mod => mod.modCluster === 'word');
+            let param = 'ml=';
+            let value = !randWordModifier ? 'care' : randWordModifier.value;
+            let option = '';
+            if (checkedMods.length) {
+                param = this.getParamFromMods(checkedMods);
+                value = this.getValueFromMods(checkedMods);
+                option = this.getOptionFromMods(checkedMods);
+            }
+            const levelTheme = this.thematiseGame();
+            if (levelTheme) {
+                value = levelTheme;
+            }
+            return [param, value, option];
         },
 
-        queryValue() {
+        thematiseGame() {
             if (this.nextWordsToType.length) {
                 return this.cleanQueryValue(this.nextWordsToType[this.nextWordsToType.length - 1]);
             } else if (this.wordsToType.length) {
                 return this.cleanQueryValue(this.wordsToType[this.wordsToType.length - 1]);
             }
-            return this.overrideDefault('word') || this.modifiers.find(mod => mod.modCluster === 'word').urlBit;
+            return null;
         },
 
         cleanQueryValue(string) {
@@ -209,17 +266,25 @@ export default {
             return firstSpaceId !== -1 ? trimmedStr.substring(0, firstSpaceId) : trimmedStr;
         },
 
-        overrideDefault(cluster) {
-            const checkedMods = this.checkboxesDatas.filter(mod => !!mod.isChecked);
-            if (checkedMods.length) {
-                console.log(checkedMods.length);
-                const m = checkedMods.find(mod => mod.modCluster === cluster);
-                console.log(m);
-                if (m) {
-                    return m.urlBit;
-                }
+        getParamFromMods(mods) {
+            const m = mods.filter(mod => mod.param !== '');
+            if (m.length === 1) {
+                return m[0].param;
             }
-            return null;
+        },
+
+        getValueFromMods(mods) {
+            const m = mods.filter(mod => mod.value !== '');
+            if (m.length === 1) {
+                return m[0].value;
+            }
+        },
+
+        getOptionFromMods(mods) {
+            const m = mods.filter(mod => mod.option !== '');
+            if (m.length === 1) {
+                return m[0].option;
+            }
         },
 
         async setModifiers() {
@@ -232,15 +297,48 @@ export default {
                 this.modifiers.push(
                     {
                         label: '"' + mod + '"',
-                        urlBit: mod,
+                        param: '',
+                        value: mod,
+                        option: '',
                         isChecked: false,
                         modCluster: 'word',
                     }
                 );
             });
             for (let i = 0; i < 4; i++) {
-                this.checkboxesDatas.push(this.modifiers.splice(random.randomNum(this.modifiers.length, 0), 1)[0]);
+                this.selectedModifiers.push(this.modifiers.splice(random.randomNum(this.modifiers.length, 0), 1)[0]);
             }
+        },
+
+        toggleDifficulties(toggledDifficultyLabel) {
+            const toggledDifficulty = this.difficulties.find(dif => dif.label === toggledDifficultyLabel);
+            toggledDifficulty.isChecked = !toggledDifficulty.isChecked;
+            if (toggledDifficultyLabel === 'snail') {
+                this.wordsPerMinute = this.wordsPerMinute === 30 ? 10 : 30;
+            }
+        },
+
+        isAnEspagnolRun() {
+            const checkedMods = this.selectedModifiers.filter(mod => !!mod.isChecked);
+            if (checkedMods.length) {
+                const m = checkedMods.find(mod => mod.label === 'español');
+                if (m) {
+                    return m.param + m.value + m.option;
+                }
+            }
+            return false;
+        },
+
+        isResilient() {
+            return this.difficulties.find(dif => dif.label === 'resilient').isChecked;
+        },
+
+        isEconomist() {
+            return this.difficulties.find(dif => dif.label === 'economist').isChecked;
+        },
+
+        isOccultist() {
+            return this.difficulties.find(dif => dif.label === 'occultist').isChecked;
         },
     },
 

@@ -1,10 +1,9 @@
 <template>
     <div class="modifier-container">
-        <checkbox-component v-for="item in checkboxes"
-            :key="item.label"
-            :label="item.label"
-            :modifier="item.modifier"
-            :isChecked="item.isChecked"
+        <checkbox-component v-for="mod in modifiers"
+            :key="mod.label"
+            :label="mod.label"
+            :isChecked="mod.isChecked"
             @toggleCheck="toggleCheck">
         </checkbox-component>
     </div>
@@ -19,13 +18,7 @@ export default {
         'checkbox-component': checkboxComponent,
     },
 
-    props: ['checkboxes'],
-
-    data() {
-        return {
-            checked: false,
-        };
-    },
+    props: ['modifiers'],
 
     methods: {
         toggleCheck(modLabel) {

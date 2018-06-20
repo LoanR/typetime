@@ -9,14 +9,8 @@
 </template>
 
 <script>
-import gameComponent from './Game.vue';
-
 export default {
-    name: 'GameHub',
-
-    components: {
-        'game-component': gameComponent,
-    },
+    name: 'TransitionScreen',
 
     props: ['words', 'level'],
 
