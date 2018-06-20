@@ -132,7 +132,7 @@ export default {
             try {
                 let unformattedData = [];
                 while (unformattedData.length < wordCount) {
-                    const response = await fetch('https://api.datamuse.com/words?sp=évider'); // new word on each request
+                    const response = await fetch('https://api.datamuse.com/words?sp=' + this.queryWord()); // new word on each request
                     unformattedData.push(...await response.json());
                 }
                 return this.selectWords(unformattedData, wordCount);
@@ -142,7 +142,7 @@ export default {
         },
 
         requestNextWordsNoWait(wordCount) {
-            fetch('https://api.datamuse.com/words?sp=truc').then(response => {
+            fetch('https://api.datamuse.com/words?ml=' + this.queryWord()).then(response => {
                 if (!response.ok) {
                     throw new Error(response.statusText);
                 }
@@ -169,6 +169,15 @@ export default {
             }
             this.wordsToType = this.nextWordsToType;
             this.requestNextWordsNoWait(this.wordsToTypeCount + 1);
+        },
+
+        queryWord() {
+            if (this.nextWordsToType.length) {
+                return this.nextWordsToType[this.nextWordsToType.length - 1];
+            } else if (this.wordsToType.length) {
+                return this.wordsToType[this.wordsToType.length - 1];
+            }
+            return '*e*';
         },
     },
 
