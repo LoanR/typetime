@@ -48,36 +48,44 @@ export default {
             firstTimeOut: 3000,
             wantsToPlay: false,
             startContent: 'start',
-            checkboxesDatas: [
+            checkboxesDatas: [],
+            modifiers: [
                 {
-                    label: 'label',
-                    modifier: 'modifier',
+                    label: 'lexical',
+                    urlBit: 'rel_trg=',
                     isChecked: false,
-                    isExclusive: true,
+                    modCluster: 'parameter',
                 },
                 {
-                    label: 'label2',
-                    modifier: 'modifier2',
-                    isChecked: true,
-                    isExclusive: true,
+                    label: 'semantic',
+                    urlBit: 'ml=',
+                    isChecked: false,
+                    modCluster: 'parameter',
                 },
                 {
-                    label: 'labelx',
-                    modifier: 'modifierx',
+                    label: 'phonetic',
+                    urlBit: 'sl=',
                     isChecked: false,
-                    isExclusive: true,
+                    modCluster: 'parameter',
                 },
                 {
-                    label: 'label3',
-                    modifier: 'modifier3',
+                    label: 'rhyme',
+                    urlBit: 'rel_rhy=',
                     isChecked: false,
-                    isExclusive: false,
+                    modCluster: 'parameter',
+                },
+                {
+                    label: 'español',
+                    urlBit: 'ml=ahora&v=es',
+                    isChecked: false,
+                    modCluster: 'all',
                 },
             ],
             wordsToType: [],
             nextWordsToType: [],
             startingWordsToTypeCount: 5,
             gameLevel: 1,
+            apiEndpoint: 'https://api.datamuse.com/words?',
         };
     },
 
@@ -103,15 +111,18 @@ export default {
 
         toggleModifiers(toggledModifierLabel) {
             const toggledModifier = this.checkboxesDatas.find(modifier => modifier.label === toggledModifierLabel);
-            if (toggledModifier.isExclusive) {
-                this.unckeckOtherExclusiveModifiers(toggledModifier);
-            }
+            this.unckeckRelatedModifiers(toggledModifier);
             toggledModifier.isChecked = !toggledModifier.isChecked;
         },
 
-        unckeckOtherExclusiveModifiers(toggledModifier) {
-            const exclusiveModifiers = this.checkboxesDatas.filter(modifier => !!modifier.isExclusive);
-            for (let mod of exclusiveModifiers) {
+        unckeckRelatedModifiers(toggledModifier) {
+            let clusterMods = [];
+            if (toggledModifier.modCluster === 'all') {
+                clusterMods = this.checkboxesDatas;
+            } else {
+                clusterMods = this.checkboxesDatas.filter(modifier => modifier.modCluster === toggledModifier.modCluster || modifier.modCluster === 'all');
+            }
+            for (let mod of clusterMods) {
                 if (mod !== toggledModifier) {
                     mod.isChecked = false;
                 }
@@ -121,19 +132,27 @@ export default {
         async launchGame() {
             try {
                 this.wantsToPlay = true;
-                this.wordsToType = await this.requestWords(this.startingWordsToTypeCount);
+                this.wordsToType = await this.requestWords(this.startingWordsToTypeCount, this.queryParameter(), this.queryValue());
                 this.requestNextWordsNoWait(this.wordsToTypeCount + 1);
             } catch (err) {
                 window.alert(err);
             }
         },
 
-        async requestWords(wordCount) {
+        async requestWords(wordCount, queryParameter, queryValue, option = '') {
             try {
                 let unformattedData = [];
+                let i = 1;
                 while (unformattedData.length < wordCount) {
-                    const response = await fetch('https://api.datamuse.com/words?sp=' + this.queryWord()); // new word on each request
+                    if (i > 1) {
+                        queryParameter = 'ml=';
+                        if (i > 2) {
+                            queryValue = 'effect';
+                        }
+                    }
+                    const response = await fetch(this.apiEndpoint + queryParameter + queryValue + option); // new word on each request
                     unformattedData.push(...await response.json());
+                    i += 1;
                 }
                 return this.selectWords(unformattedData, wordCount);
             } catch (err) {
@@ -142,7 +161,7 @@ export default {
         },
 
         requestNextWordsNoWait(wordCount) {
-            fetch('https://api.datamuse.com/words?ml=' + this.queryWord()).then(response => {
+            fetch(this.apiEndpoint + this.queryParameter() + this.queryValue()).then(response => {
                 if (!response.ok) {
                     throw new Error(response.statusText);
                 }
@@ -165,19 +184,63 @@ export default {
             this.gameLevel += 1;
             while (this.nextWordsToType.length < this.wordsToTypeCount) {
                 const remainingWordCount = this.wordsToTypeCount - this.nextWordsToType.length;
-                this.nextWordsToType.push(...await this.requestWords(remainingWordCount));
+                this.nextWordsToType.push(...await this.requestWords(remainingWordCount, this.queryParameter(), this.queryValue()));
             }
             this.wordsToType = this.nextWordsToType;
             this.requestNextWordsNoWait(this.wordsToTypeCount + 1);
         },
 
-        queryWord() {
+        queryParameter() {
+            return this.overrideDefault('parameter') || 'ml=';
+        },
+
+        queryValue() {
             if (this.nextWordsToType.length) {
-                return this.nextWordsToType[this.nextWordsToType.length - 1];
+                return this.cleanQueryValue(this.nextWordsToType[this.nextWordsToType.length - 1]);
             } else if (this.wordsToType.length) {
-                return this.wordsToType[this.wordsToType.length - 1];
+                return this.cleanQueryValue(this.wordsToType[this.wordsToType.length - 1]);
             }
-            return '*e*';
+            return this.overrideDefault('word') || this.modifiers.find(mod => mod.modCluster === 'word').urlBit;
+        },
+
+        cleanQueryValue(string) {
+            const trimmedStr = string.trim();
+            const firstSpaceId = trimmedStr.indexOf(' ');
+            return firstSpaceId !== -1 ? trimmedStr.substring(0, firstSpaceId) : trimmedStr;
+        },
+
+        overrideDefault(cluster) {
+            const checkedMods = this.checkboxesDatas.filter(mod => !!mod.isChecked);
+            if (checkedMods.length) {
+                console.log(checkedMods.length);
+                const m = checkedMods.find(mod => mod.modCluster === cluster);
+                console.log(m);
+                if (m) {
+                    return m.urlBit;
+                }
+            }
+            return null;
+        },
+
+        async setModifiers() {
+            let mods = [this.cleanQueryValue((await this.requestWords(1, 'ml=', 'toujours', '&max=50'))[0])];
+            mods.push(this.cleanQueryValue((await this.requestWords(1, 'ml=', 'voiture', '&max=50'))[0]));
+            mods.push(this.cleanQueryValue((await this.requestWords(1, 'ml=', 'people', '&max=50'))[0]));
+            mods.push(this.cleanQueryValue((await this.requestWords(1, 'ml=', 'places', '&max=50'))[0]));
+            mods.push(this.cleanQueryValue((await this.requestWords(1, 'ml=', 'because', '&max=50'))[0]));
+            mods.forEach(mod => {
+                this.modifiers.push(
+                    {
+                        label: '"' + mod + '"',
+                        urlBit: mod,
+                        isChecked: false,
+                        modCluster: 'word',
+                    }
+                );
+            });
+            for (let i = 0; i < 4; i++) {
+                this.checkboxesDatas.push(this.modifiers.splice(random.randomNum(this.modifiers.length, 0), 1)[0]);
+            }
         },
     },
 
@@ -193,6 +256,7 @@ export default {
                 this.overwriteTitle();
             }, this.firstTimeOut);
         };
+        this.setModifiers();
     },
 };
 </script>
