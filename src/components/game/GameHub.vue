@@ -17,7 +17,7 @@ export default {
         'transition-screen-component': transitionScreenComponent,
     },
 
-    props: ['words', 'level'],
+    props: ['words', 'level', 'levelWordsCount'],
 
     data() {
         return {
@@ -41,7 +41,7 @@ export default {
 
         isGameReady() {
             window.clearInterval(this.waitingTime);
-            if (this.words.length) {
+            if (this.words.length === this.levelWordsCount) {
                 this.playLevel = true;
             } else {
                 this.waitThenExecute(this.isGameReady, 500);

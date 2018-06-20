@@ -1,6 +1,11 @@
 <template>
     <section>
-        <game-hub-component v-if="wantsToPlay" :words="wordsToType" :level="gameLevel" @nextLevel="nextLevel"></game-hub-component>
+        <game-hub-component v-if="wantsToPlay"
+            :words="wordsToType"
+            :level="gameLevel"
+            :levelWordsCount="wordsToTypeCount"
+            @nextLevel="nextLevel">
+        </game-hub-component>
         <div v-else>
             <header>
                 <img src="../assets/logo.png">
@@ -69,21 +74,8 @@ export default {
                     isExclusive: false,
                 },
             ],
-            wordsToType: [ // request wordsToType on start button <= game needs to wait for this list
-                'abc',
-                'cou',
-                'truc',
-                'batte',
-                'haut',
-            ],
-            nextWordsToType: [ // then request future words from a word of the first request <= on background
-                'bla',
-                'machin',
-                'Érythrocyte', // death upon you
-                'xylophone',
-                'véritable',
-                'besoin',
-            ],
+            wordsToType: [],
+            nextWordsToType: [],
             startingWordsToTypeCount: 5,
             gameLevel: 1,
         };
@@ -128,21 +120,36 @@ export default {
 
         async launchGame() {
             try {
-                await this.launchLevel();
-                this.wantsToPlay = !this.wantsToPlay;
+                this.wantsToPlay = true;
+                this.wordsToType = await this.requestWords(this.startingWordsToTypeCount);
+                this.requestNextWordsNoWait(this.wordsToTypeCount + 1);
             } catch (err) {
                 window.alert(err);
             }
         },
 
-        async launchLevel() {
+        async requestWords(wordCount) {
             try {
-                const response = await fetch('https://api.datamuse.com/words?ml=vache');
-                const unformattedData = await response.json();
-                this.wordsToType = this.selectWords(unformattedData, this.startingWordsToTypeCount + this.gameLevel - 1);
+                let unformattedData = [];
+                while (unformattedData.length < wordCount) {
+                    const response = await fetch('https://api.datamuse.com/words?sp=évider'); // new word on each request
+                    unformattedData.push(...await response.json());
+                }
+                return this.selectWords(unformattedData, wordCount);
             } catch (err) {
                 throw new Error(err);
             }
+        },
+
+        requestNextWordsNoWait(wordCount) {
+            fetch('https://api.datamuse.com/words?sp=truc').then(response => {
+                if (!response.ok) {
+                    throw new Error(response.statusText);
+                }
+                return response.json();
+            }).then(unformattedData => {
+                this.nextWordsToType = this.selectWords(unformattedData, Math.min(wordCount, unformattedData.length));
+            }).catch((err) => window.alert(err));
         },
 
         selectWords(jsonResponse, wordCount) {
@@ -155,14 +162,19 @@ export default {
         },
 
         async nextLevel() {
-            try {
-                this.gameLevel += 1;
-                await this.launchLevel();
-            } catch (err) {
-                window.alert(err);
+            this.gameLevel += 1;
+            while (this.nextWordsToType.length < this.wordsToTypeCount) {
+                const remainingWordCount = this.wordsToTypeCount - this.nextWordsToType.length;
+                this.nextWordsToType.push(...await this.requestWords(remainingWordCount));
             }
-            // this.wordsToType = this.nextWordsToType;
-            // request a new nextWordsToType list
+            this.wordsToType = this.nextWordsToType;
+            this.requestNextWordsNoWait(this.wordsToTypeCount + 1);
+        },
+    },
+
+    computed: {
+        wordsToTypeCount() {
+            return this.startingWordsToTypeCount + this.gameLevel - 1;
         },
     },
 
