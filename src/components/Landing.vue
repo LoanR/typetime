@@ -36,6 +36,7 @@
 
 <script>
 import random from '../js/random.js';
+import wordSelectionRules from '../js/wordSelectionRules.js';
 
 import buttonComponent from './buttons/Button.vue';
 import checkboxesComponent from './sections/Checkboxes.vue';
@@ -183,7 +184,7 @@ export default {
             }
         },
 
-        async requestWords(wordCount, queryParameter, queryValue, option = '') {
+        async requestWords(wordCount, queryParameter, queryValue, option = '', filterAgainstRules = true) {
             try {
                 let unformattedData = [];
                 let i = 1;
@@ -194,11 +195,11 @@ export default {
                             queryValue = 'effect';
                         }
                     }
-                    const response = await fetch(this.apiEndpoint + queryParameter + queryValue + option); // new word on each request
+                    const response = await fetch(this.apiEndpoint + queryParameter + queryValue + option + '&md=f');
                     unformattedData.push(...await response.json());
                     i += 1;
                 }
-                return this.selectWords(unformattedData, wordCount);
+                return this.selectWords(unformattedData, wordCount, filterAgainstRules);
             } catch (err) {
                 throw new Error(err);
             }
@@ -206,7 +207,7 @@ export default {
 
         requestNextWordsNoWait(wordCount) {
             const query = this.getUrlQuery();
-            fetch(this.apiEndpoint + query[0] + query[1] + query[2]).then(response => {
+            fetch(this.apiEndpoint + query[0] + query[1] + query[2] + '&md=f').then(response => {
                 if (!response.ok) {
                     throw new Error(response.statusText);
                 }
@@ -216,10 +217,11 @@ export default {
             }).catch((err) => window.alert(err));
         },
 
-        selectWords(jsonResponse, wordCount) {
+        selectWords(jsonResponse, wordCount, filterAgainstRules = true) {
             let selectedWords = [];
+            const filteredData = filterAgainstRules ? wordSelectionRules.filterWordsOnRule(jsonResponse, this.gameLevel, this.isOccultist(), wordCount) : jsonResponse;
             for (let i = 1; i <= wordCount; i++) {
-                const wordData = jsonResponse.splice(random.randomNum(jsonResponse.length, 0), 1)[0];
+                const wordData = filteredData.splice(random.randomNum(filteredData.length, 0), 1)[0];
                 selectedWords.push(wordData.word);
             }
             return selectedWords;
@@ -243,9 +245,9 @@ export default {
             let value = !randWordModifier ? 'care' : randWordModifier.value;
             let option = '';
             if (checkedMods.length) {
-                param = this.getParamFromMods(checkedMods);
-                value = this.getValueFromMods(checkedMods);
-                option = this.getOptionFromMods(checkedMods);
+                param = this.getParamFromMods(checkedMods) || param;
+                value = this.getValueFromMods(checkedMods) || value;
+                option = this.getOptionFromMods(checkedMods) || option;
             }
             const levelTheme = this.thematiseGame();
             if (levelTheme) {
@@ -291,11 +293,11 @@ export default {
         },
 
         async setModifiers() {
-            let mods = [this.cleanQueryValue((await this.requestWords(1, 'ml=', 'toujours', '&max=50'))[0])];
-            mods.push(this.cleanQueryValue((await this.requestWords(1, 'ml=', 'voiture', '&max=50'))[0]));
-            mods.push(this.cleanQueryValue((await this.requestWords(1, 'ml=', 'people', '&max=50'))[0]));
-            mods.push(this.cleanQueryValue((await this.requestWords(1, 'ml=', 'places', '&max=50'))[0]));
-            mods.push(this.cleanQueryValue((await this.requestWords(1, 'ml=', 'because', '&max=50'))[0]));
+            let mods = [this.cleanQueryValue((await this.requestWords(1, 'ml=', 'toujours', '&max=50', false))[0])];
+            mods.push(this.cleanQueryValue((await this.requestWords(1, 'ml=', 'voiture', '&max=50', false))[0]));
+            mods.push(this.cleanQueryValue((await this.requestWords(1, 'ml=', 'people', '&max=50', false))[0]));
+            mods.push(this.cleanQueryValue((await this.requestWords(1, 'ml=', 'places', '&max=50', false))[0]));
+            mods.push(this.cleanQueryValue((await this.requestWords(1, 'ml=', 'because', '&max=50', false))[0]));
             mods.forEach(mod => {
                 this.modifiers.push(
                     {

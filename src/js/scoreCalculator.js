@@ -65,29 +65,29 @@ const letterScoreMapping = {
 
 const letterComboMapping = {
     0: {
-        'default': 1,
-        'snail': 1,
-        'occultist': 1,
+        default: 1,
+        snail: 1,
+        occultist: 1,
     },
     10: {
-        'default': 2,
-        'snail': 1,
-        'occultist': 3,
+        default: 2,
+        snail: 1,
+        occultist: 3,
     },
     30: {
-        'default': 4,
-        'snail': 2,
-        'occultist': 6,
+        default: 4,
+        snail: 2,
+        occultist: 6,
     },
     60: {
-        'default': 8,
-        'snail': 4,
-        'occultist': 12,
+        default: 8,
+        snail: 4,
+        occultist: 12,
     },
     100: {
-        'default': 16,
-        'snail': 8,
-        'occultist': 24,
+        default: 16,
+        snail: 8,
+        occultist: 24,
     },
 };
 
