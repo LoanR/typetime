@@ -10,9 +10,21 @@
             :isOccultist="isOccultist"
             :timeAccount="timeAccount"
             :previousScore="previousScore"
-            @nextLevel="nextLevel">
+            @nextLevel="nextLevel"
+            @gameOver="gameOver">
         </game-component>
-        <transition-screen-component v-else></transition-screen-component>
+        <transition-screen-component v-else
+            :isGameLaunched="isGameLaunched"
+            :level="level"
+            :isSnail="isSnail"
+            :isEconomist="isEconomist"
+            :isResilient="isResilient"
+            :isOccultist="isOccultist"
+            :gameScore="endGameScore"
+            :nemesisLetter="nemesisLetter"
+            :stuckWord="stuckWord"
+            @rematch="rematch">
+        </transition-screen-component>
     </div>
 </template>
 
@@ -32,17 +44,21 @@ export default {
 
     data() {
         return {
-            truc: true,
+            isGameLaunched: true,
             score: 0,
             playLevel: false,
             waitingTime: null,
             timeAccount: 0,
             previousScore: 0,
+            endGameScore: null,
+            nemesisLetter: '',
+            stuckWord: '',
         };
     },
 
     methods: {
         nextLevel(payload) {
+            this.isGameLaunched = false;
             this.previousScore = payload.levelScore;
             if (payload.isEconomist) {
                 this.timeAccount = payload.timeAccount;
@@ -68,6 +84,18 @@ export default {
             } else {
                 this.waitThenExecute(this.isGameReady, 500);
             }
+        },
+
+        gameOver(payload) {
+            this.isGameLaunched = false;
+            this.endGameScore = payload.totalScore;
+            this.nemesisLetter = payload.nemesisLetter;
+            this.stuckWord = payload.stuckWord;
+            this.playLevel = false;
+        },
+
+        rematch() {
+            this.$emit('rematch');
         },
     },
 

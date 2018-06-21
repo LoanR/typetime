@@ -93,14 +93,14 @@ const letterComboMapping = {
 
 export default {
     getLetterScore(letter, letterCombo, level, isSnail, isOccultist) {
-        const combo = this._getCurrentCombo(letterCombo, isSnail, isOccultist);
+        const combo = this.getCurrentCombo(letterCombo, isSnail, isOccultist);
         if (letter.toLowerCase() === letter) {
             return letterScoreMapping[letter] ? letterScoreMapping[letter] * (combo + level - 1) : 1 * (combo + level - 1);
         }
         return letterScoreMapping[letter] ? (letterScoreMapping[letter] + 1) * (combo + level - 1) : 1 * (combo + level - 1);
     },
 
-    _getCurrentCombo(letterCombo, isSnail, isOccultist) {
+    getCurrentCombo(letterCombo, isSnail, isOccultist) {
         const mappingKey = Object.keys(letterComboMapping).reduce((prev, current) => {
             return letterCombo > current ? current : prev;
         });

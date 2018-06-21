@@ -1,22 +1,47 @@
 <template>
     <div class="transition-window">
-        <span>{{preparationMessage}}</span>
-        <div class="circle-spinner spinner" data-anim="base wrapper">
+        <div v-if="!isEndGame" class="circle-spinner spinner" data-anim="base wrapper">
             <div class="half-left-circle spinner" data-anim="base left"></div>
             <div class="half-right-circle spinner" data-anim="base right"></div>
+        </div>
+        <p>{{message}}</p>
+        <p v-if="!isEndGame">Level {{level}}</p>
+        <div v-else>
+            <p>{{endGameScoreMessage}}</p>
+            <p>
+                You got stuck on the letter "{{nemesisLetter}}" of the word "{{stuckWord}}" on level {{level}}.
+            </p>
+            <button-component :content="buttonContent" @bigButtonClick="returnHome"></button-component>
         </div>
     </div>
 </template>
 
 <script>
+import random from '../../js/random.js';
+
+import buttonComponent from '../buttons/Button.vue';
+
 export default {
     name: 'TransitionScreen',
 
-    props: ['words', 'level'],
+    props: ['isGameLaunched', 'level', 'isSnail', 'isEconomist', 'isResilient', 'isOccultist', 'gameScore', 'nemesisLetter', 'stuckWord'],
+
+    components: {
+        'button-component': buttonComponent,
+    },
 
     data() {
         return {
             welcomeMessage: 'Ready?',
+            gameOverMessage: 'GameOver...',
+            inGameMessages: [
+                'You\'ve seen better days, don\'t you?',
+                'You\'re not that fast actually...',
+                'Come on, shake yourself up!',
+                'Are you sure you can continue?',
+                'This phrase in really long, so I\'m sure you w\'ont be able to read it because of the long time it could take. In fact, you could even loos you\'re concentration and I surely don\'t want to do that you know.',
+            ],
+            buttonContent: 'rematch',
         };
     },
 
@@ -24,11 +49,40 @@ export default {
         nextLevel() {
             this.$emit('nextLevel');
         },
+
+        returnHome() {
+            this.$emit('rematch');
+        },
     },
 
     computed: {
-        preparationMessage() {
-            return this.welcomeMessage;
+        message() {
+            let message = this.welcomeMessage;
+            if (this.isEndGame) {
+                message = this.gameOverMessage;
+            }
+            if (!this.isGameLaunched && !this.isEndGame) {
+                message = this.inGameMessages[random.randomNum(this.inGameMessages.length, 0)];
+            }
+            return message;
+        },
+
+        isEndGame() {
+            return !!this.nemesisLetter && !!this.stuckWord;
+        },
+
+        endGameScoreMessage() {
+            let scoreMessage = 'You could have done better, but a total of ' + this.gameScore + ' points is not that bad!';
+            if (this.gameScore < 0) {
+                scoreMessage = 'Do you know your keyboard? I mean you now have a debt of ' + this.gameScore + ' points. I\'m disappointed.';
+            } else if (this.gameScore === 0) {
+                scoreMessage = 'Did you type anything? Well, you made 0 points, that\'s not really time efficient...';
+            } else if (this.gameScore < 400) {
+                scoreMessage = 'You where not truly good, but ' + this.gameScore + ' points is at least something...';
+            } else if (this.gameScore > 2000) {
+                scoreMessage = 'You\'re a beast! ' + this.gameScore + ' points! Bravo!';
+            }
+            return scoreMessage;
         },
     },
 };
@@ -41,12 +95,12 @@ export default {
         from {transform: rotate(0deg);}
         to {transform: rotate(180deg);}
     }
-    /* Rotate the left side of the progress bar from 0 to 360 degrees */
+
     @keyframes left-spin {
         from {transform: rotate(0deg);}
         to {transform: rotate(360deg);}
     }
-    /* Set the wrapper clip to auto, effectively removing the clip */
+
     @keyframes end-spin {
         to {clip: rect(auto, auto, auto, auto);}
     }
@@ -57,6 +111,7 @@ export default {
         display: flex;
         align-items: center;
         justify-content: center;
+        flex-direction: column;
 
         .spinner {
             animation-iteration-count: 1;

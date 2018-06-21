@@ -1,5 +1,5 @@
 <template>
-    <button class="button-style" @click.prevent="$emit('lauchGame')">
+    <button class="button-style" @click.prevent="$emit('bigButtonClick')">
         <span>{{content}}</span>
     </button>
 </template>

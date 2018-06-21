@@ -9,14 +9,15 @@
             :isEconomist="isEconomist()"
             :isResilient="isResilient()"
             :isOccultist="isOccultist()"
-            @nextLevel="nextLevel">
+            @nextLevel="nextLevel"
+            @rematch="restartGame">
         </game-hub-component>
         <div v-else>
             <header>
                 <img src="../assets/logo.png">
                 <h1>{{title}}</h1>
             </header>
-            <button-component :content="startContent" @lauchGame="launchGame"></button-component>
+            <button-component :content="startContent" @bigButtonClick="launchGame"></button-component>
             <checkboxes-component
                 :modifiers="selectedModifiers"
                 @toggleCheck="toggleModifiers">
@@ -345,6 +346,10 @@ export default {
 
         isOccultist() {
             return this.difficulties.find(dif => dif.label === 'occultist').isChecked;
+        },
+
+        restartGame() {
+            this.wantsToPlay = false;
         },
     },
 

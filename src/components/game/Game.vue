@@ -5,6 +5,7 @@
         </p>
         <p>{{countdownDisplay}}</p>
         <p>Level {{level}}</p>
+        <div><span>combo</span><span>time</span><span>points</span></div>
         <p>Score: {{levelScore}}</p>
         <div>
             <span v-for="i in wordToTypeIndex" :key="i">•</span>
@@ -61,9 +62,7 @@ export default {
                         this.stylizeWithClass(span, false, 'letter-found');
                     }
                     if (!this.isEconomist && !this.isSnail) {
-                        console.log(this.levelScore);
-                        this.levelScore += this.levelCountdown;
-                        console.log(this.levelScore);
+                        this.levelScore += parseInt((this.levelCountdown / 10).toFixed());
                     }
                     this.letterToTypeIndex = 0;
                     if (this.wordToTypeIndex < this.words.length - 1) {
@@ -123,6 +122,11 @@ export default {
             this.levelCountdown = 0;
             this.canStillPlay = false;
             this.clearCountdown();
+            this.$emit('gameOver', {
+                totalScore: parseInt(this.levelScore.toFixed()),
+                nemesisLetter: this.wordToTypeLetters[this.letterToTypeIndex],
+                stuckWord: this.wordToType,
+            });
         },
 
         setNewWordEnv(element, shouldAdd, styleClass) {
