@@ -4,9 +4,12 @@
             :words="words"
             :level="level"
             :wordsPerMinute="wordsPerMinute"
-            :isResilient="isResilient"
+            :isSnail="isSnail"
             :isEconomist="isEconomist"
+            :isResilient="isResilient"
+            :isOccultist="isOccultist"
             :timeAccount="timeAccount"
+            :previousScore="previousScore"
             @nextLevel="nextLevel">
         </game-component>
         <transition-screen-component v-else></transition-screen-component>
@@ -25,7 +28,7 @@ export default {
         'transition-screen-component': transitionScreenComponent,
     },
 
-    props: ['words', 'level', 'levelWordsCount', 'wordsPerMinute', 'isResilient', 'isEconomist'],
+    props: ['words', 'level', 'levelWordsCount', 'wordsPerMinute', 'isSnail', 'isEconomist', 'isResilient', 'isOccultist'],
 
     data() {
         return {
@@ -34,11 +37,13 @@ export default {
             playLevel: false,
             waitingTime: null,
             timeAccount: 0,
+            previousScore: 0,
         };
     },
 
     methods: {
         nextLevel(payload) {
+            this.previousScore = payload.levelScore;
             if (payload.isEconomist) {
                 this.timeAccount = payload.timeAccount;
             }

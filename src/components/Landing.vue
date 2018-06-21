@@ -5,8 +5,10 @@
             :level="gameLevel"
             :levelWordsCount="wordsToTypeCount"
             :wordsPerMinute="wordsPerMinute"
-            :isResilient="isResilient()"
+            :isSnail="isSnail()"
             :isEconomist="isEconomist()"
+            :isResilient="isResilient()"
+            :isOccultist="isOccultist()"
             @nextLevel="nextLevel">
         </game-hub-component>
         <div v-else>
@@ -329,12 +331,16 @@ export default {
             return false;
         },
 
-        isResilient() {
-            return this.difficulties.find(dif => dif.label === 'resilient').isChecked;
+        isSnail() {
+            return this.difficulties.find(dif => dif.label === 'snail').isChecked;
         },
 
         isEconomist() {
             return this.difficulties.find(dif => dif.label === 'economist').isChecked;
+        },
+
+        isResilient() {
+            return this.difficulties.find(dif => dif.label === 'resilient').isChecked;
         },
 
         isOccultist() {
