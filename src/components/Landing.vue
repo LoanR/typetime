@@ -1,15 +1,30 @@
 <template>
     <section>
-        <game-component v-if="wantsToPlay" :words="wordsToType" :level="gameLevel" @nextLevel="nextLevel"></game-component>
+        <game-hub-component v-if="wantsToPlay"
+            :words="wordsToType"
+            :level="gameLevel"
+            :levelWordsCount="wordsToTypeCount"
+            :wordsPerMinute="wordsPerMinute"
+            :isSnail="isSnail()"
+            :isEconomist="isEconomist()"
+            :isResilient="isResilient()"
+            :isOccultist="isOccultist()"
+            @nextLevel="nextLevel"
+            @rematch="restartGame">
+        </game-hub-component>
         <div v-else>
             <header>
                 <img src="../assets/logo.png">
                 <h1>{{title}}</h1>
             </header>
-            <button-component :content="startContent" @lauchGame="launchGame"></button-component>
+            <button-component :content="startContent" @bigButtonClick="launchGame"></button-component>
             <checkboxes-component
-                :checkboxes="checkboxesDatas"
+                :modifiers="selectedModifiers"
                 @toggleCheck="toggleModifiers">
+            </checkboxes-component>
+            <checkboxes-component
+                :modifiers="difficulties"
+                @toggleCheck="toggleDifficulties">
             </checkboxes-component>
             <nav>
                 <router-link v-bind:to="'/about'">About</router-link>
@@ -21,10 +36,11 @@
 
 <script>
 import random from '../js/random.js';
+import wordSelectionRules from '../js/wordSelectionRules.js';
 
 import buttonComponent from './buttons/Button.vue';
 import checkboxesComponent from './sections/Checkboxes.vue';
-import gameComponent from './game/Game.vue';
+import gameHubComponent from './game/GameHub.vue';
 
 export default {
     name: 'Landing',
@@ -32,7 +48,7 @@ export default {
     components: {
         'button-component': buttonComponent,
         'checkboxes-component': checkboxesComponent,
-        'game-component': gameComponent,
+        'game-hub-component': gameHubComponent,
     },
 
     data() {
@@ -43,49 +59,77 @@ export default {
             firstTimeOut: 3000,
             wantsToPlay: false,
             startContent: 'start',
-            checkboxesDatas: [
+            selectedModifiers: [],
+            modifiers: [
                 {
-                    label: 'label',
-                    modifier: 'modifier',
+                    label: 'lexical',
+                    param: 'rel_trg=',
+                    value: '',
+                    option: '',
                     isChecked: false,
-                    isExclusive: true,
+                    modCluster: 'parameter',
                 },
                 {
-                    label: 'label2',
-                    modifier: 'modifier2',
-                    isChecked: true,
-                    isExclusive: true,
+                    label: 'semantic',
+                    param: 'ml=',
+                    value: '',
+                    option: '',
+                    isChecked: false,
+                    modCluster: 'parameter',
                 },
                 {
-                    label: 'labelx',
-                    modifier: 'modifierx',
+                    label: 'phonetic',
+                    param: 'sl=',
+                    value: '',
+                    option: '',
                     isChecked: false,
-                    isExclusive: true,
+                    modCluster: 'parameter',
                 },
                 {
-                    label: 'label3',
-                    modifier: 'modifier3',
+                    label: 'rhyme',
+                    param: 'rel_rhy=',
+                    value: '',
+                    option: '',
                     isChecked: false,
-                    isExclusive: false,
+                    modCluster: 'parameter',
+                },
+                {
+                    label: 'español',
+                    param: 'ml=',
+                    value: 'ahora',
+                    option: '&v=es',
+                    isChecked: false,
+                    modCluster: 'all',
                 },
             ],
-            wordsToType: [ // request wordsToType on start button <= game needs to wait for this list
-                'abc',
-                'cou',
-                'truc',
-                'batte',
-                'haut',
+            difficulties: [
+                {
+                    label: 'snail',
+                    isChecked: false,
+                    stringOrder: 3,
+                },
+                {
+                    label: 'economist',
+                    isChecked: false,
+                    stringOrder: 1,
+                },
+                {
+                    label: 'resilient',
+                    isChecked: false,
+                    stringOrder: 0,
+                },
+                {
+                    label: 'occultist',
+                    isChecked: false,
+                    stringOrder: 2,
+                },
             ],
-            nextWordsToType: [ // then request future words from a word of the first request <= on background
-                'bla',
-                'machin',
-                'Érythrocyte', // death upon you
-                'xylophone',
-                'véritable',
-                'besoin',
-            ],
+            wordsPerMinute: 30,
+            wordsToType: [],
+            nextWordsToType: [],
             startingWordsToTypeCount: 5,
             gameLevel: 1,
+            apiEndpoint: 'https://api.datamuse.com/words?',
         };
     },
 
@@ -110,16 +154,19 @@ export default {
         },
 
         toggleModifiers(toggledModifierLabel) {
-            const toggledModifier = this.checkboxesDatas.find(modifier => modifier.label === toggledModifierLabel);
-            if (toggledModifier.isExclusive) {
-                this.unckeckOtherExclusiveModifiers(toggledModifier);
-            }
+            const toggledModifier = this.selectedModifiers.find(modifier => modifier.label === toggledModifierLabel);
+            this.uncheckRelatedModifiers(toggledModifier);
             toggledModifier.isChecked = !toggledModifier.isChecked;
         },
 
-        unckeckOtherExclusiveModifiers(toggledModifier) {
-            const exclusiveModifiers = this.checkboxesDatas.filter(modifier => !!modifier.isExclusive);
-            for (let mod of exclusiveModifiers) {
+        uncheckRelatedModifiers(toggledModifier) {
+            let clusterMods = [];
+            if (toggledModifier.modCluster === 'all') {
+                clusterMods = this.selectedModifiers;
+            } else {
+                clusterMods = this.selectedModifiers.filter(modifier => modifier.modCluster === toggledModifier.modCluster || modifier.modCluster === 'all');
+            }
+            for (let mod of clusterMods) {
                 if (mod !== toggledModifier) {
                     mod.isChecked = false;
                 }
@@ -128,41 +175,189 @@ export default {
 
         async launchGame() {
             try {
-                await this.launchLevel();
-                this.wantsToPlay = !this.wantsToPlay;
+                this.wantsToPlay = true;
+                const query = this.getUrlQuery();
+                this.wordsToType = await this.requestWords(this.startingWordsToTypeCount, query[0], query[1], query[2]);
+                this.requestNextWordsNoWait(this.wordsToTypeCount + 1);
             } catch (err) {
                 window.alert(err);
             }
         },
 
-        async launchLevel() {
+        async requestWords(wordCount, queryParameter, queryValue, option = '', filterAgainstRules = true) {
             try {
-                const response = await fetch('https://api.datamuse.com/words?ml=vache');
-                const unformattedData = await response.json();
-                this.wordsToType = this.selectWords(unformattedData, this.startingWordsToTypeCount + this.gameLevel - 1);
+                let unformattedData = [];
+                let i = 1;
+                while (unformattedData.length < wordCount) {
+                    if (i > 1) {
+                        queryParameter = 'ml=';
+                        if (i > 2) {
+                            queryValue = 'effect';
+                        }
+                    }
+                    const response = await fetch(this.apiEndpoint + queryParameter + queryValue + option + '&md=f');
+                    unformattedData.push(...await response.json());
+                    i += 1;
+                }
+                return this.selectWords(unformattedData, wordCount, filterAgainstRules);
             } catch (err) {
                 throw new Error(err);
             }
         },
 
-        selectWords(jsonResponse, wordCount) {
+        requestNextWordsNoWait(wordCount) {
+            const query = this.getUrlQuery();
+            fetch(this.apiEndpoint + query[0] + query[1] + query[2] + '&md=f').then(response => {
+                if (!response.ok) {
+                    throw new Error(response.statusText);
+                }
+                return response.json();
+            }).then(unformattedData => {
+                this.nextWordsToType = this.selectWords(unformattedData, Math.min(wordCount, unformattedData.length));
+            }).catch((err) => window.alert(err));
+        },
+
+        selectWords(jsonResponse, wordCount, filterAgainstRules = true) {
             let selectedWords = [];
+            const filteredData = filterAgainstRules ? wordSelectionRules.filterWordsOnRule(jsonResponse, this.gameLevel, this.isOccultist(), wordCount) : jsonResponse;
             for (let i = 1; i <= wordCount; i++) {
-                const wordData = jsonResponse.splice(random.randomNum(jsonResponse.length, 0), 1)[0];
+                const wordData = filteredData.splice(random.randomNum(filteredData.length, 0), 1)[0];
                 selectedWords.push(wordData.word);
             }
             return selectedWords;
         },
 
         async nextLevel() {
-            try {
-                this.gameLevel += 1;
-                await this.launchLevel();
-            } catch (err) {
-                window.alert(err);
+            this.gameLevel += 1;
+            while (this.nextWordsToType.length < this.wordsToTypeCount) {
+                const remainingWordCount = this.wordsToTypeCount - this.nextWordsToType.length;
+                const query = this.getUrlQuery();
+                this.nextWordsToType.push(...await this.requestWords(remainingWordCount, query[0], query[1], query[2]));
             }
-            // this.wordsToType = this.nextWordsToType;
-            // request a new nextWordsToType list
+            this.wordsToType = this.nextWordsToType;
+            this.requestNextWordsNoWait(this.wordsToTypeCount + 1);
+        },
+
+        getUrlQuery() {
+            const checkedMods = this.selectedModifiers.filter(mod => !!mod.isChecked);
+            const randWordModifier = this.modifiers.find(mod => mod.modCluster === 'word');
+            let param = 'ml=';
+            let value = !randWordModifier ? 'care' : randWordModifier.value;
+            let option = '';
+            if (checkedMods.length) {
+                param = this.getParamFromMods(checkedMods) || param;
+                value = this.getValueFromMods(checkedMods) || value;
+                option = this.getOptionFromMods(checkedMods) || option;
+            }
+            const levelTheme = this.thematiseGame();
+            if (levelTheme) {
+                value = levelTheme;
+            }
+            return [param, value, option];
+        },
+
+        thematiseGame() {
+            if (this.nextWordsToType.length) {
+                return this.cleanQueryValue(this.nextWordsToType[this.nextWordsToType.length - 1]);
+            } else if (this.wordsToType.length) {
+                return this.cleanQueryValue(this.wordsToType[this.wordsToType.length - 1]);
+            }
+            return null;
+        },
+
+        cleanQueryValue(string) {
+            const trimmedStr = string.trim();
+            const firstSpaceId = trimmedStr.indexOf(' ');
+            return firstSpaceId !== -1 ? trimmedStr.substring(0, firstSpaceId) : trimmedStr;
+        },
+
+        getParamFromMods(mods) {
+            const m = mods.filter(mod => mod.param !== '');
+            if (m.length === 1) {
+                return m[0].param;
+            }
+        },
+
+        getValueFromMods(mods) {
+            const m = mods.filter(mod => mod.value !== '');
+            if (m.length === 1) {
+                return m[0].value;
+            }
+        },
+
+        getOptionFromMods(mods) {
+            const m = mods.filter(mod => mod.option !== '');
+            if (m.length === 1) {
+                return m[0].option;
+            }
+        },
+
+        async setModifiers() {
+            let mods = [this.cleanQueryValue((await this.requestWords(1, 'ml=', 'toujours', '&max=50', false))[0])];
+            mods.push(this.cleanQueryValue((await this.requestWords(1, 'ml=', 'voiture', '&max=50', false))[0]));
+            mods.push(this.cleanQueryValue((await this.requestWords(1, 'ml=', 'people', '&max=50', false))[0]));
+            mods.push(this.cleanQueryValue((await this.requestWords(1, 'ml=', 'places', '&max=50', false))[0]));
+            mods.push(this.cleanQueryValue((await this.requestWords(1, 'ml=', 'because', '&max=50', false))[0]));
+            mods.forEach(mod => {
+                this.modifiers.push(
+                    {
+                        label: '"' + mod + '"',
+                        param: '',
+                        value: mod,
+                        option: '',
+                        isChecked: false,
+                        modCluster: 'word',
+                    }
+                );
+            });
+            for (let i = 0; i < 4; i++) {
+                this.selectedModifiers.push(this.modifiers.splice(random.randomNum(this.modifiers.length, 0), 1)[0]);
+            }
+        },
+
+        toggleDifficulties(toggledDifficultyLabel) {
+            const toggledDifficulty = this.difficulties.find(dif => dif.label === toggledDifficultyLabel);
+            toggledDifficulty.isChecked = !toggledDifficulty.isChecked;
+            if (toggledDifficultyLabel === 'snail') {
+                this.wordsPerMinute = this.wordsPerMinute === 30 ? 10 : 30;
+            }
+        },
+
+        isAnEspagnolRun() {
+            const checkedMods = this.selectedModifiers.filter(mod => !!mod.isChecked);
+            if (checkedMods.length) {
+                const m = checkedMods.find(mod => mod.label === 'español');
+                if (m) {
+                    return m.param + m.value + m.option;
+                }
+            }
+            return false;
+        },
+
+        isSnail() {
+            return this.difficulties.find(dif => dif.label === 'snail').isChecked;
+        },
+
+        isEconomist() {
+            return this.difficulties.find(dif => dif.label === 'economist').isChecked;
+        },
+
+        isResilient() {
+            return this.difficulties.find(dif => dif.label === 'resilient').isChecked;
+        },
+
+        isOccultist() {
+            return this.difficulties.find(dif => dif.label === 'occultist').isChecked;
+        },
+
+        restartGame() {
+            this.wantsToPlay = false;
+        },
+    },
+
+    computed: {
+        wordsToTypeCount() {
+            return this.startingWordsToTypeCount + this.gameLevel - 1;
         },
     },
 
@@ -172,6 +367,7 @@ export default {
                 this.overwriteTitle();
             }, this.firstTimeOut);
         };
+        this.setModifiers();
     },
 };
 </script>

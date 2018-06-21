@@ -3,17 +3,24 @@
         <p class="awaited-word">
             <span v-for="(letter, index) in wordToTypeLetters" :key="index" ref="letterToType">{{letter}}</span>
         </p>
-        <p>Level: {{level}}</p>
         <p>{{countdownDisplay}}</p>
+        <p>Level {{level}}</p>
+        <div><span>combo</span><span>time</span><span>points</span></div>
+        <p>Score: {{levelScore}}</p>
+        <div>
+            <span v-for="i in wordToTypeIndex" :key="i">•</span>
+        </div>
         <input :disabled="!canStillPlay" type="text" name="" ref="gameInput" @blur="reFocus" @input="compareInputToExpected" v-model="entry">
     </div>
 </template>
 
 <script>
+import scoreCalculator from '../../js/scoreCalculator.js';
+
 export default {
     name: 'Game',
 
-    props: ['words', 'level'],
+    props: ['words', 'level', 'wordsPerMinute', 'isSnail', 'isEconomist', 'isResilient', 'isOccultist', 'timeAccount', 'previousScore'],
 
     data() {
         return {
@@ -25,15 +32,12 @@ export default {
             interval: null,
             canStillPlay: true,
             hundrethSecondMinute: 6000,
-            wordsPerMinute: 10,
+            levelScore: 0,
+            letterCombo: 0,
         };
     },
 
     methods: {
-        toggleCheck() {
-            this.$emit('toggleCheck', this.label);
-        },
-
         reFocus() {
             this.$refs.gameInput.focus();
         },
@@ -42,10 +46,14 @@ export default {
             if (this.entry.length) {
                 const currentLetterElement = this.$refs.letterToType[this.letterToTypeIndex];
                 if (this.wordToTypeLetters[this.letterToTypeIndex] === this.entry) {
+                    this.letterCombo += 1;
+                    this.levelScore += scoreCalculator.getLetterScore(this.entry, this.letterCombo, this.level, this.isSnail, this.isOccultist);
                     this.stylizeWithClass(currentLetterElement, false, 'letter-error');
                     this.stylizeWithClass(currentLetterElement, true, 'letter-found');
                     this.nextLetterToFind();
                 } else {
+                    this.levelScore -= scoreCalculator.getLetterScore(this.entry, this.letterCombo, this.level, this.isSnail, this.isOccultist);
+                    this.letterCombo = 0;
                     this.stylizeWithClass(currentLetterElement, true, 'letter-error');
                 }
                 if (this.letterToTypeIndex === this.wordToType.length) {
@@ -53,18 +61,23 @@ export default {
                         this.stylizeWithClass(span, false, 'letter-error');
                         this.stylizeWithClass(span, false, 'letter-found');
                     }
+                    if (!this.isEconomist && !this.isSnail) {
+                        this.levelScore += parseInt((this.levelCountdown / 10).toFixed());
+                    }
                     this.letterToTypeIndex = 0;
                     if (this.wordToTypeIndex < this.words.length - 1) {
                         this.clearCountdown();
                         this.wordToTypeIndex += 1;
                     } else {
-                        this.$emit('nextLevel');
+                        this.$emit('nextLevel', {
+                            isResilient: this.isResilient,
+                            isEconomist: this.isEconomist,
+                            timeAccount: this.levelCountdown,
+                            levelScore: this.levelScore,
+                        });
                         this.wordToTypeIndex = 0;
                     }
-                    this.$nextTick(function() {
-                        this.launchNewCountdown();
-                        this.stylizeWithClass(this.$refs.letterToType[this.letterToTypeIndex], true, 'letter-to-type');
-                    });
+                    this.setNewWordEnv(this.$refs.letterToType[this.letterToTypeIndex], true, 'letter-to-type');
                 }
             }
             this.entry = '';
@@ -97,8 +110,8 @@ export default {
         },
 
         launchNewCountdown() {
-            this.levelCountdown = this.allotedTime;
-            this.interval = window.setInterval(() => this.modifyCountdownDisplay(), 10);
+            this.levelCountdown = this.isEconomist ? (this.allotedTime + this.levelCountdown) : this.allotedTime;
+            this.interval = window.setInterval(this.modifyCountdownDisplay, 10);
         },
 
         clearCountdown() {
@@ -109,6 +122,23 @@ export default {
             this.levelCountdown = 0;
             this.canStillPlay = false;
             this.clearCountdown();
+            this.$emit('gameOver', {
+                totalScore: parseInt(this.levelScore.toFixed()),
+                nemesisLetter: this.wordToTypeLetters[this.letterToTypeIndex],
+                stuckWord: this.wordToType,
+            });
+        },
+
+        setNewWordEnv(element, shouldAdd, styleClass) {
+            if (this.isResilient) {
+                this.$nextTick(function() {
+                    this.launchNewCountdown();
+                    this.stylizeWithClass(element, shouldAdd, styleClass);
+                });
+            } else {
+                this.launchNewCountdown();
+                this.stylizeWithClass(element, shouldAdd, styleClass);
+            }
         },
     },
 
@@ -134,6 +164,8 @@ export default {
         this.$refs.gameInput.focus();
         this.stylizeWithClass(this.$refs.letterToType[this.letterToTypeIndex], true, 'letter-to-type');
         this.launchNewCountdown();
+        this.levelCountdown += this.timeAccount;
+        this.levelScore += this.previousScore;
     },
 };
 </script>
