@@ -24,7 +24,7 @@ import buttonComponent from '../buttons/Button.vue';
 export default {
     name: 'TransitionScreen',
 
-    props: ['isGameLaunched', 'level', 'isSnail', 'isEconomist', 'isResilient', 'isOccultist', 'gameScore', 'nemesisLetter', 'stuckWord'],
+    props: ['isGameLaunched', 'level', 'isSnail', 'isEconomist', 'isResilient', 'isMasochist', 'gameScore', 'nemesisLetter', 'stuckWord'],
 
     components: {
         'button-component': buttonComponent,

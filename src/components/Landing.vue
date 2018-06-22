@@ -8,7 +8,7 @@
             :isSnail="isSnail()"
             :isEconomist="isEconomist()"
             :isResilient="isResilient()"
-            :isOccultist="isOccultist()"
+            :isMasochist="isMasochist()"
             @nextLevel="nextLevel"
             @rematch="restartGame">
         </game-hub-component>
@@ -111,7 +111,7 @@ export default {
                 {
                     label: 'economist',
                     isChecked: false,
-                    stringOrder: 1,
+                    stringOrder: 2,
                 },
                 {
                     label: 'resilient',
@@ -119,9 +119,9 @@ export default {
                     stringOrder: 0,
                 },
                 {
-                    label: 'occultist',
+                    label: 'masochist',
                     isChecked: false,
-                    stringOrder: 2,
+                    stringOrder: 1,
                 },
             ],
             wordsPerMinute: 30,
@@ -219,7 +219,7 @@ export default {
 
         selectWords(jsonResponse, wordCount, filterAgainstRules = true) {
             let selectedWords = [];
-            const filteredData = filterAgainstRules ? wordSelectionRules.filterWordsOnRule(jsonResponse, this.gameLevel, this.isOccultist(), wordCount) : jsonResponse;
+            const filteredData = filterAgainstRules ? wordSelectionRules.filterWordsOnRule(jsonResponse, this.gameLevel, this.isMasochist(), wordCount) : jsonResponse;
             for (let i = 1; i <= wordCount; i++) {
                 const wordData = filteredData.splice(random.randomNum(filteredData.length, 0), 1)[0];
                 selectedWords.push(wordData.word);
@@ -339,8 +339,8 @@ export default {
             return this.difficulties.find(dif => dif.label === 'resilient').isChecked;
         },
 
-        isOccultist() {
-            return this.difficulties.find(dif => dif.label === 'occultist').isChecked;
+        isMasochist() {
+            return this.difficulties.find(dif => dif.label === 'masochist').isChecked;
         },
 
         restartGame() {

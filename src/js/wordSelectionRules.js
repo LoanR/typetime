@@ -1,118 +1,123 @@
 const levelMapping = {
     1: {
         default: {
-            wordLength: [0, 4],
-            frequency: [10, 90000],
+            wordLength: {min: 0, max: 4},
+            frequency: {min: 10, max: 90000},
         },
-        occultist: {
-            wordLength: [3, 6],
-            frequency: [1, 100],
+        masochist: {
+            wordLength: {min: 3, max: 6},
+            frequency: {min: 1, max: 100},
         },
     },
     2: {
         default: {
-            wordLength: [0, 5],
-            frequency: [10, 90000],
+            wordLength: {min: 3, max: 5},
+            frequency: {min: 10, max: 90000},
         },
-        occultist: {
-            wordLength: [4, 7],
-            frequency: [1, 100],
+        masochist: {
+            wordLength: {min: 4, max: 7},
+            frequency: {min: 1, max: 100},
         },
     },
     3: {
         default: {
-            wordLength: [3, 7],
-            frequency: [10, 90000],
+            wordLength: {min: 4, max: 7},
+            frequency: {min: 10, max: 90000},
         },
-        occultist: {
-            wordLength: [5, 8],
-            frequency: [1, 100],
+        masochist: {
+            wordLength: {min: 5, max: 8},
+            frequency: {min: 1, max: 100},
         },
     },
     4: {
         default: {
-            wordLength: [4, 8],
-            frequency: [10, 90000],
+            wordLength: {min: 4, max: 8},
+            frequency: {min: 10, max: 90000},
         },
-        occultist: {
-            wordLength: [6, 10],
-            frequency: [1, 100],
+        masochist: {
+            wordLength: {min: 6, max: 10},
+            frequency: {min: 1, max: 100},
         },
     },
     5: {
         default: {
-            wordLength: [5, 10],
-            frequency: [1, 90000],
+            wordLength: {min: 5, max: 10},
+            frequency: {min: 1, max: 90000},
         },
-        occultist: {
-            wordLength: [7, 11],
-            frequency: [1, 100],
+        masochist: {
+            wordLength: {min: 7, max: 11},
+            frequency: {min: 1, max: 100},
         },
     },
     6: {
         default: {
-            wordLength: [6, 11],
-            frequency: [10, 90000],
+            wordLength: {min: 6, max: 11},
+            frequency: {min: 1, max: 90000},
         },
-        occultist: {
-            wordLength: [8, 12],
-            frequency: [1, 100],
+        masochist: {
+            wordLength: {min: 8, max: 12},
+            frequency: {min: 1, max: 100},
         },
     },
     7: {
         default: {
-            wordLength: [7, 12],
-            frequency: 90000,
+            wordLength: {min: 7, max: 12},
+            frequency: {min: 1, max: 500},
         },
-        occultist: {
-            wordLength: [9, 13],
-            frequency: [0, 50],
+        masochist: {
+            wordLength: {min: 9, max: 13},
+            frequency: {min: 0, max: 50},
         },
     },
     8: {
         default: {
-            wordLength: [7, 13],
-            frequency: [10, 500],
+            wordLength: {min: 7, max: 13},
+            frequency: {min: 1, max: 500},
         },
-        occultist: {
-            wordLength: [9, 14],
-            frequency: [0, 50],
+        masochist: {
+            wordLength: {min: 9, max: 14},
+            frequency: {min: 0, max: 50},
         },
     },
     9: {
         default: {
-            wordLength: [7, 14],
-            frequency: [10, 500],
+            wordLength: {min: 7, max: 14},
+            frequency: {min: 1, max: 100},
         },
-        occultist: {
-            wordLength: [9, 15],
-            frequency: [0, 10],
+        masochist: {
+            wordLength: {min: 9, max: 15},
+            frequency: {min: 0, max: 10},
         },
     },
     10: {
         default: {
-            wordLength: [7, 15],
-            frequency: [1, 100],
+            wordLength: {min: 7, max: 15},
+            frequency: {min: 1, max: 100},
         },
-        occultist: {
-            wordLength: [10, 25],
-            frequency: [0, 1],
+        masochist: {
+            wordLength: {min: 10, max: 20},
+            frequency: {min: 0, max: 1},
         },
     },
 };
 
 export default {
-    filterWordsOnRule(wordDatas, level, isOccultist, wordCount) {
-        const ruleName = isOccultist ? 'occultist' : 'default';
+    filterWordsOnRule(wordDatas, level, ismasochist, wordCount) {
+        const ruleName = ismasochist ? 'masochist' : 'default';
         const currentLevel = level > 10 ? 10 : level;
         const rule = levelMapping[currentLevel][ruleName];
         let filteredWords = wordDatas.filter((wordData) => {
             return this.doesWordRespectsRules(wordData, rule);
         });
         if (filteredWords.length < wordCount) {
-            console.log('not enough words');
+            filteredWords = filteredWords.filter((wordData) => {
+                return this.doesWordRespectsLengths(wordData.word.length, rule) && !filteredWords.includes(wordData);
+            });
+        }
+        if (filteredWords.length < wordCount) {
             const remainingWords = wordCount - filteredWords.length;
-            if (isOccultist) {
+            wordDatas.sort(this.frequencyComparison);
+            if (ismasochist) {
                 filteredWords.push(...wordDatas.slice(0, remainingWords));
             } else {
                 filteredWords.push(...wordDatas.slice(-remainingWords));
@@ -125,10 +130,13 @@ export default {
         const wordFreqData = wordData.tags[wordData.tags.length - 1];
         const wordFreq = wordFreqData.substr(0, 2) === 'f:' ? parseFloat(wordFreqData.substr(2)) : 0;
         const wordLength = wordData.word.length;
-        return wordLength >= rule.wordLength[0] &&
-            wordLength <= rule.wordLength[1] &&
-            wordFreq >= rule.frequency[0] &&
-            wordFreq <= rule.frequency[1];
+        return this.doesWordRespectsLengths(wordLength, rule) &&
+            wordFreq >= rule.frequency.min &&
+            wordFreq <= rule.frequency.max;
+    },
+
+    doesWordRespectsLengths(wordLength, rule) {
+        return wordLength >= rule.wordLength.min && wordLength <= rule.wordLength.max;
     },
 
     frequencyComparison(a, b) {

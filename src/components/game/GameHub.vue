@@ -7,7 +7,7 @@
             :isSnail="isSnail"
             :isEconomist="isEconomist"
             :isResilient="isResilient"
-            :isOccultist="isOccultist"
+            :isMasochist="isMasochist"
             :timeAccount="timeAccount"
             :previousScore="previousScore"
             @nextLevel="nextLevel"
@@ -19,7 +19,7 @@
             :isSnail="isSnail"
             :isEconomist="isEconomist"
             :isResilient="isResilient"
-            :isOccultist="isOccultist"
+            :isMasochist="isMasochist"
             :gameScore="endGameScore"
             :nemesisLetter="nemesisLetter"
             :stuckWord="stuckWord"
@@ -40,7 +40,7 @@ export default {
         'transition-screen-component': transitionScreenComponent,
     },
 
-    props: ['words', 'level', 'levelWordsCount', 'wordsPerMinute', 'isSnail', 'isEconomist', 'isResilient', 'isOccultist'],
+    props: ['words', 'level', 'levelWordsCount', 'wordsPerMinute', 'isSnail', 'isEconomist', 'isResilient', 'isMasochist'],
 
     data() {
         return {

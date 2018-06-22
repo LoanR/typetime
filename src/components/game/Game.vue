@@ -20,7 +20,7 @@ import scoreCalculator from '../../js/scoreCalculator.js';
 export default {
     name: 'Game',
 
-    props: ['words', 'level', 'wordsPerMinute', 'isSnail', 'isEconomist', 'isResilient', 'isOccultist', 'timeAccount', 'previousScore'],
+    props: ['words', 'level', 'wordsPerMinute', 'isSnail', 'isEconomist', 'isResilient', 'isMasochist', 'timeAccount', 'previousScore'],
 
     data() {
         return {
@@ -47,12 +47,12 @@ export default {
                 const currentLetterElement = this.$refs.letterToType[this.letterToTypeIndex];
                 if (this.wordToTypeLetters[this.letterToTypeIndex] === this.entry) {
                     this.letterCombo += 1;
-                    this.levelScore += scoreCalculator.getLetterScore(this.entry, this.letterCombo, this.level, this.isSnail, this.isOccultist);
+                    this.levelScore += scoreCalculator.getLetterScore(this.entry, this.letterCombo, this.level, this.isSnail, this.isMasochist);
                     this.stylizeWithClass(currentLetterElement, false, 'letter-error');
                     this.stylizeWithClass(currentLetterElement, true, 'letter-found');
                     this.nextLetterToFind();
                 } else {
-                    this.levelScore -= scoreCalculator.getLetterScore(this.entry, this.letterCombo, this.level, this.isSnail, this.isOccultist);
+                    this.levelScore -= scoreCalculator.getLetterScore(this.entry, this.letterCombo, this.level, this.isSnail, this.isMasochist);
                     this.letterCombo = 0;
                     this.stylizeWithClass(currentLetterElement, true, 'letter-error');
                 }
