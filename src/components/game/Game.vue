@@ -28,7 +28,7 @@ export default {
             letterToTypeIndex: 0,
             entry: '',
             previousEntry: '',
-            levelCountdown: 0,
+            wordCountDown: 0,
             interval: null,
             canStillPlay: true,
             hundrethSecondMinute: 6000,
@@ -62,7 +62,7 @@ export default {
                         this.stylizeWithClass(span, false, 'letter-found');
                     }
                     if (!this.isEconomist && !this.isSnail) {
-                        this.levelScore += parseInt((this.levelCountdown / 10).toFixed());
+                        this.levelScore += parseInt((this.wordCountDown / 10).toFixed());
                     }
                     this.letterToTypeIndex = 0;
                     if (this.wordToTypeIndex < this.words.length - 1) {
@@ -72,7 +72,7 @@ export default {
                         this.$emit('nextLevel', {
                             isResilient: this.isResilient,
                             isEconomist: this.isEconomist,
-                            timeAccount: this.levelCountdown,
+                            timeAccount: this.wordCountDown,
                             levelScore: this.levelScore,
                         });
                         this.wordToTypeIndex = 0;
@@ -102,15 +102,16 @@ export default {
         },
 
         modifyCountdownDisplay() {
-            if (this.levelCountdown > 0) {
-                this.levelCountdown -= 1;
+            if (this.wordCountDown > 0) {
+                this.wordCountDown -= 1;
             } else {
                 this.timeExceeded();
             }
         },
 
         launchNewCountdown() {
-            this.levelCountdown = this.isEconomist ? (this.allotedTime + this.levelCountdown) : this.allotedTime;
+            let countDown = this.isEconomist ? (this.allotedTime + this.wordCountDown) : this.allotedTime;
+            this.wordCountDown = countDown > 1200 ? 1200 : parseInt(countDown.toFixed());
             this.interval = window.setInterval(this.modifyCountdownDisplay, 10);
         },
 
@@ -119,7 +120,7 @@ export default {
         },
 
         timeExceeded() {
-            this.levelCountdown = 0;
+            this.wordCountDown = 0;
             this.canStillPlay = false;
             this.clearCountdown();
             this.$emit('gameOver', {
@@ -156,7 +157,7 @@ export default {
         },
 
         countdownDisplay() {
-            return (this.levelCountdown / 100).toFixed(2);
+            return (this.wordCountDown / 100).toFixed(2);
         },
     },
 
@@ -164,7 +165,7 @@ export default {
         this.$refs.gameInput.focus();
         this.stylizeWithClass(this.$refs.letterToType[this.letterToTypeIndex], true, 'letter-to-type');
         this.launchNewCountdown();
-        this.levelCountdown += this.timeAccount;
+        this.wordCountDown += this.timeAccount;
         this.levelScore += this.previousScore;
     },
 };

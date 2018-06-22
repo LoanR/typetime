@@ -222,9 +222,19 @@ export default {
             const filteredData = filterAgainstRules ? wordSelectionRules.filterWordsOnRule(jsonResponse, this.gameLevel, this.isMasochist(), wordCount) : jsonResponse;
             for (let i = 1; i <= wordCount; i++) {
                 const wordData = filteredData.splice(random.randomNum(filteredData.length, 0), 1)[0];
-                selectedWords.push(wordData.word);
+                selectedWords.push(this.mayMutateCase(wordData.word));
             }
             return selectedWords;
+        },
+
+        mayMutateCase(word) {
+            const rand = random.randomNum(3, 0);
+            console.log(rand);
+            console.log(!rand);
+            if (!rand && ((this.isMasochist() && this.gameLevel >= 3) || this.gameLevel >= 5)) {
+                return word.charAt(0).toUpperCase() + word.slice(1);
+            }
+            return word;
         },
 
         async nextLevel() {
@@ -323,7 +333,7 @@ export default {
             const toggledDifficulty = this.difficulties.find(dif => dif.label === toggledDifficultyLabel);
             toggledDifficulty.isChecked = !toggledDifficulty.isChecked;
             if (toggledDifficultyLabel === 'snail') {
-                this.wordsPerMinute = this.wordsPerMinute === 30 ? 10 : 30;
+                this.wordsPerMinute = this.wordsPerMinute === 30 ? 15 : 30;
             }
         },
 
