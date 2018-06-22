@@ -1,8 +1,8 @@
 <template>
     <div class="switch-category">
         <div class="switch-container">
-            <checkbox-component v-for="sw in switches"
-                :key="sw.label"
+            <checkbox-component v-for="(sw, i) in switches"
+                :key="sw.label + i"
                 :label="sw.label"
                 :isChecked="sw.isChecked"
                 :desc="sw.description"
@@ -38,8 +38,8 @@ export default {
             this.$emit('toggleCheck', modLabel);
         },
 
-        changeDesc(sw) {
-            this.desc = sw;
+        changeDesc(desc) {
+            this.desc = desc;
         },
     },
 };

@@ -13,7 +13,7 @@
             <div v-else>
                 <header>
                     <img src="../assets/logo.png">
-                    <h1>{{title}}</h1>
+                    <h1 @mouseover="resetTitle" @mouseout="restartShuffle">{{shuffledTitle}}</h1>
                 </header>
                 <div>
                     <div>
@@ -59,6 +59,7 @@ export default {
     data() {
         return {
             title: 'TypeTime',
+            shuffledTitle: 'TypeTime',
             shouldShuffleTitle: true,
             shouldSlideFromRight: true,
             timeOut: null,
@@ -80,10 +81,10 @@ export default {
     methods: {
         overwriteTitle() {
             clearTimeout(this.timeOut);
-            this.title = this.shuffleTitle();
-            this.timeOut = window.setTimeout(() => {
-                this.overwriteTitle();
-            }, random.randomNum(3000, 200));
+            if (this.shouldShuffleTitle) {
+                this.shuffledTitle = this.shuffleTitle();
+                this.timeOut = window.setTimeout(this.overwriteTitle, random.randomNum(3000, 200));
+            }
         },
 
         shuffleTitle() {
@@ -95,6 +96,16 @@ export default {
             const secondLetter = titleCopy.splice(secondLetterIndice, 1, firstLetter)[0];
             titleCopy.splice(firstLetterIndice, 1, secondLetter).join('');
             return titleCopy.join('');
+        },
+
+        resetTitle() {
+            this.shouldShuffleTitle = false;
+            this.shuffledTitle = this.title;
+        },
+
+        restartShuffle() {
+            this.shouldShuffleTitle = true;
+            this.overwriteTitle();
         },
 
         toggleModifiers(toggledModifierLabel) {
