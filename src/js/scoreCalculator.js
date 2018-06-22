@@ -92,16 +92,16 @@ const letterComboMapping = {
 };
 
 export default {
-    getLetterScore(letter, letterCombo, level, isSnail, isResilient, isMasochist) {
-        const combo = this.getCurrentCombo(letterCombo, isSnail, isResilient, isMasochist);
-        const finalMultiplier = isResilient ? combo + (level - 1) * 2 : combo + level - 1;
-        if (letter.toLowerCase() === letter) {
-            return letterScoreMapping[letter] ? letterScoreMapping[letter] * finalMultiplier : 1 * finalMultiplier;
-        }
-        return letterScoreMapping[letter] ? (letterScoreMapping[letter] + 1) * finalMultiplier : 1 * finalMultiplier;
+    getLetterScoreMapping() {
+        return letterScoreMapping;
     },
 
-    getCurrentCombo(letterCombo, isSnail, isMasochist) {
+    getFinalMultiplier(letterCombo, isSnail, isMasochist, isResilient, level) {
+        const combo = this._getCurrentCombo(letterCombo, isSnail, isResilient, isMasochist);
+        return isResilient ? combo + (level - 1) * 2 : combo + level - 1;
+    },
+
+    _getCurrentCombo(letterCombo, isSnail, isMasochist) {
         const mappingKey = Object.keys(letterComboMapping).reduce((prev, current) => {
             return letterCombo > current ? current : prev;
         });

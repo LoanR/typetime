@@ -10,6 +10,7 @@
             :isMasochist="isMasochist"
             :timeAccount="timeAccount"
             :previousScore="previousScore"
+            :previousLetterCombo="previousLetterCombo"
             @nextLevel="nextLevel"
             @gameOver="gameOver">
         </game-component>
@@ -50,6 +51,7 @@ export default {
             waitingTime: null,
             timeAccount: 0,
             previousScore: 0,
+            previousLetterCombo: 0,
             endGameScore: null,
             nemesisLetter: '',
             stuckWord: '',
@@ -60,6 +62,7 @@ export default {
         nextLevel(payload) {
             this.isGameLaunched = false;
             this.previousScore = payload.levelScore;
+            this.previousLetterCombo = payload.letterCombo;
             if (payload.isEconomist) {
                 this.timeAccount = payload.timeAccount;
             }
