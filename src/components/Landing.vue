@@ -65,7 +65,7 @@ export default {
             firstTimeOut: 3000,
             wantsToPlay: false,
             startContent: 'start',
-            selectedModifiers: [],
+            selectedModifiers: gameTuning.getEmptyMods(),
             modifiers: gameTuning.getModifiers(),
             difficulties: gameTuning.getDifficulties(),
             wordsPerMinute: 30,
@@ -263,7 +263,7 @@ export default {
                 );
             });
             for (let i = 0; i < 4; i++) {
-                this.selectedModifiers.push(this.modifiers.splice(random.randomNum(this.modifiers.length, 0), 1)[0]);
+                this.selectedModifiers.splice(i, 1, this.modifiers.splice(random.randomNum(this.modifiers.length, 0), 1)[0]);
             }
         },
 

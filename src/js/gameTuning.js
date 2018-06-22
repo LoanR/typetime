@@ -1,3 +1,22 @@
+const emptyMods = [
+    {
+        label: '',
+        isChecked: false,
+    },
+    {
+        label: '',
+        isChecked: false,
+    },
+    {
+        label: '',
+        isChecked: false,
+    },
+    {
+        label: '',
+        isChecked: false,
+    },
+];
+
 const modifiers = [
     {
         label: 'lexical',
@@ -74,6 +93,10 @@ const difficulties = [
 ];
 
 export default {
+    getEmptyMods() {
+        return emptyMods;
+    },
+
     getModifiers() {
         return modifiers;
     },
