@@ -36,6 +36,7 @@ export default {
             letterCombo: 0,
             combo: 1,
             scoreChange: 0,
+            errorStyle: null,
         };
     },
 
@@ -45,6 +46,7 @@ export default {
         },
 
         compareInputToExpected() {
+            window.clearTimeout(this.errorStyle);
             if (this.entry.length) {
                 const currentLetterElement = this.$refs.letterToType[this.letterToTypeIndex];
                 if (this.wordToTypeLetters[this.letterToTypeIndex] === this.entry) {
@@ -55,11 +57,12 @@ export default {
                     this.stylizeWithClass(currentLetterElement, true, 'letter-found');
                     this.nextLetterToFind();
                 } else {
+                    this.stylizeWithClass(currentLetterElement, true, 'letter-error');
+                    this.errorStyle = window.setTimeout(this.stylizeWithClass, 100, currentLetterElement, false, 'letter-error');
                     this.scoreChange = -this.getLetterScore(this.entry, this.letterCombo, this.level, this.isSnail, this.isResilient, this.isMasochist);
                     this.levelScore += this.scoreChange;
                     this.letterCombo = 0;
                     this.combo = scoreCalculator.getFinalMultiplier(this.letterCombo, this.isSnail, this.isMasochist, this.isResilient, this.level);
-                    this.stylizeWithClass(currentLetterElement, true, 'letter-error');
                 }
                 if (this.letterToTypeIndex === this.wordToType.length) {
                     for (let span of this.$refs.letterToType) {
@@ -197,9 +200,10 @@ export default {
     @import '../../styles/common';
 
     @keyframes splat {
-        0% {font-size: calc(#{$big-font-size} + 0.3rem);}
-        40% {font-size: calc(#{$big-font-size} - 0.1rem);}
-        80% {font-size: $big-font-size;}
+        0% {font-size: $big-font-size; color: $warning-color;}
+        30% {font-size: calc(#{$big-font-size} + 0.3rem); color: $warning-color;}
+        80% {font-size: calc(#{$big-font-size} - 0.1rem); color: $warning-color;}
+        100% {font-size: $big-font-size; color: $contrast-color;}
     }
 
     .game-window {

@@ -23,12 +23,12 @@ export default {
     },
 
     watch: {
-        '$route' (to, from) {
-            const toDepth = to.meta.depth
-            const fromDepth = from.meta.depth
-            this.shouldSlideFromRight = toDepth > fromDepth ? true : false;
-        }
-    }
+        '$route'(to, from) {
+            const toDepth = to.meta.depth;
+            const fromDepth = from.meta.depth;
+            this.shouldSlideFromRight = toDepth > fromDepth;
+        },
+    },
 };
 </script>
 
