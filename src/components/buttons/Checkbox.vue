@@ -1,6 +1,6 @@
 <template>
-    <div data-truc="truc">
-        <input type="checkbox" name=""
+    <div>
+        <input type="checkbox"
             :id="label"
             :checked="isChecked"
             v-on:change="toggleCheck">

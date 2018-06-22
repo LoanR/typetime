@@ -1,7 +1,9 @@
 <template>
-    <button class="button-style" @click.prevent="$emit('bigButtonClick')">
-        <span>{{content}}</span>
-    </button>
+    <div>
+        <button class="button-style" @click.prevent="$emit('bigButtonClick')">
+            <span>{{content}}</span>
+        </button>
+    </div>
 </template>
 
 <script>
@@ -16,11 +18,21 @@ export default {
     @import '../../styles/common';
     @import '../../styles/buttons';
 
-    .button-style {
-        padding: 2rem 5rem;
+    div {
+        display: flex;
+        align-items: center;
+        justify-content: center;
 
-        span {
-            font-size: $base-font-size;
+        .button-style {
+            width: 12rem;
+            height: 5rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            span {
+                font-size: $base-font-size;
+            }
         }
     }
 </style>

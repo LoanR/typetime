@@ -10,7 +10,7 @@
                 @changeDesc="changeDesc">
             </checkbox-component>
         </div>
-        <p>
+        <p class="description">
             {{desc}}
         </p>
     </div>
@@ -57,6 +57,11 @@ export default {
         .switch-container {
             display: flex;
             justify-content: center;
+        }
+
+        .description {
+            height: 4rem;
+            font-size: $small-font-size;
         }
     }
 </style>
