@@ -1,31 +1,33 @@
 <template>
     <div>
-        <game-component v-if="playLevel"
-            :words="words"
-            :level="level"
-            :wordsPerMinute="wordsPerMinute"
-            :isSnail="isSnail"
-            :isEconomist="isEconomist"
-            :isResilient="isResilient"
-            :isMasochist="isMasochist"
-            :timeAccount="timeAccount"
-            :previousScore="previousScore"
-            :previousLetterCombo="previousLetterCombo"
-            @nextLevel="nextLevel"
-            @gameOver="gameOver">
-        </game-component>
-        <transition-screen-component v-else
-            :isGameLaunched="isGameLaunched"
-            :level="level"
-            :isSnail="isSnail"
-            :isEconomist="isEconomist"
-            :isResilient="isResilient"
-            :isMasochist="isMasochist"
-            :gameScore="endGameScore"
-            :nemesisLetter="nemesisLetter"
-            :stuckWord="stuckWord"
-            @rematch="rematch">
-        </transition-screen-component>
+        <transition name="fade-out">
+            <game-component v-if="playLevel"
+                :words="words"
+                :level="level"
+                :wordsPerMinute="wordsPerMinute"
+                :isSnail="isSnail"
+                :isEconomist="isEconomist"
+                :isResilient="isResilient"
+                :isMasochist="isMasochist"
+                :timeAccount="timeAccount"
+                :previousScore="previousScore"
+                :previousLetterCombo="previousLetterCombo"
+                @nextLevel="nextLevel"
+                @gameOver="gameOver">
+            </game-component>
+            <transition-screen-component v-else
+                :isGameLaunched="isGameLaunched"
+                :level="level"
+                :isSnail="isSnail"
+                :isEconomist="isEconomist"
+                :isResilient="isResilient"
+                :isMasochist="isMasochist"
+                :gameScore="endGameScore"
+                :nemesisLetter="nemesisLetter"
+                :stuckWord="stuckWord"
+                @rematch="rematch">
+            </transition-screen-component>
+        </transition>
     </div>
 </template>
 
@@ -114,5 +116,21 @@ export default {
     div {
         width: 100%;
         height: 100%;
+        position: relative;
+        overflow: hidden;
+        &>* {
+            position: absolute;
+            top: 0px;
+        }
+    }
+
+    .fade-out-leave-active {
+        transition: all 0.15s ease-out;
+    }
+    .fade-out-leave-to {
+        opacity: 0;
+    }
+    .fade-out-leave {
+        opacity: 1;
     }
 </style>

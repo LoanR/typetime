@@ -1,42 +1,43 @@
 <template>
-    <section>
-        <game-hub-component v-if="wantsToPlay"
-            :words="wordsToType"
-            :level="gameLevel"
-            :levelWordsCount="wordsToTypeCount"
-            :wordsPerMinute="wordsPerMinute"
-            :isSnail="isSnail()"
-            :isEconomist="isEconomist()"
-            :isResilient="isResilient()"
-            :isMasochist="isMasochist()"
-            @nextLevel="nextLevel"
-            @rematch="restartGame">
-        </game-hub-component>
-        <div v-else>
-            <header>
-                <img src="../assets/logo.png">
-                <h1>{{title}}</h1>
-            </header>
-            <div>
+    <section class="slide-container">
+        <transition :name="slideTransition">
+            <game-hub-component v-if="wantsToPlay"
+                :words="wordsToType"
+                :level="gameLevel"
+                :levelWordsCount="wordsToTypeCount"
+                :wordsPerMinute="wordsPerMinute"
+                :isSnail="isSnail()"
+                :isEconomist="isEconomist()"
+                :isResilient="isResilient()"
+                :isMasochist="isMasochist()"
+                @nextLevel="nextLevel"
+                @rematch="restartGame">
+            </game-hub-component>
+            <div v-else>
+                <header>
+                    <img src="../assets/logo.png">
+                    <h1>{{title}}</h1>
+                </header>
                 <div>
-                    <button-component :content="startContent" @bigButtonClick="launchGame"></button-component>
+                    <div>
+                        <button-component :content="startContent" @bigButtonClick="launchGame"></button-component>
+                    </div>
+                    <div>
+                        <checkboxes-component
+                            :switches="selectedModifiers"
+                            @toggleCheck="toggleModifiers">
+                        </checkboxes-component>
+                        <checkboxes-component
+                            :switches="difficulties"
+                            @toggleCheck="toggleDifficulties">
+                        </checkboxes-component>
+                    </div>
                 </div>
-                <div>
-                    <checkboxes-component
-                        :switches="selectedModifiers"
-                        @toggleCheck="toggleModifiers">
-                    </checkboxes-component>
-                    <checkboxes-component
-                        :switches="difficulties"
-                        @toggleCheck="toggleDifficulties">
-                    </checkboxes-component>
-                </div>
+                <nav>
+                    <router-link v-bind:to="'/about'">About</router-link>
+                </nav>
             </div>
-            <nav>
-                <router-link v-bind:to="'/about'">About</router-link>
-            </nav>
-        </div>
-
+        </transition>
     </section>
 </template>
 
@@ -62,6 +63,7 @@ export default {
         return {
             title: 'TypeTime',
             shouldShuffleTitle: true,
+            shouldSlideFromRight: true,
             timeOut: null,
             firstTimeOut: 3000,
             wantsToPlay: false,
@@ -120,6 +122,7 @@ export default {
 
         async launchGame() {
             try {
+                this.shouldSlideFromRight = true;
                 this.wantsToPlay = true;
                 const query = this.getUrlQuery();
                 this.wordsToType = await this.requestWords(this.startingWordsToTypeCount, query[0], query[1], query[2]);
@@ -292,6 +295,7 @@ export default {
         },
 
         restartGame() {
+            this.shouldSlideFromRight = false;
             this.wantsToPlay = false;
         },
     },
@@ -299,6 +303,10 @@ export default {
     computed: {
         wordsToTypeCount() {
             return this.startingWordsToTypeCount + this.gameLevel - 1;
+        },
+
+        slideTransition() {
+            return this.shouldSlideFromRight ? 'slide-fade-right' : 'slide-fade-left';
         },
     },
 
@@ -315,6 +323,7 @@ export default {
 
 <style lang="scss" scoped>
     @import '../styles/common';
+    @import '../styles/slides';
 
     header {
         height: 200px;
@@ -333,6 +342,12 @@ export default {
         width: 100%;
         height: 100%;
         text-align: center;
+
+        &>div {
+            width: 100%;
+            height: 100%;
+
+        }
     }
 
     h1 {
@@ -353,5 +368,4 @@ export default {
         display: flex;
         justify-content: center;
     }
-
 </style>
