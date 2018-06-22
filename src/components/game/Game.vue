@@ -15,16 +15,21 @@
 
 <script>
 import scoreCalculator from '../../js/scoreCalculator.js';
+import gameTuning from '../../js/gameTuning.js';
 
 export default {
     name: 'Game',
 
-    props: ['words', 'level', 'wordsPerMinute', 'isSnail', 'isEconomist', 'isResilient', 'isMasochist', 'timeAccount', 'previousScore', 'previousLetterCombo'],
+    props: ['words', 'level', 'wordsPerMinute', 'difficulties', 'timeAccount', 'previousScore', 'previousLetterCombo'],
 
     data() {
         return {
             wordToTypeIndex: 0,
             letterToTypeIndex: 0,
+            isSnail: gameTuning.isSnail(this.difficulties),
+            isEconomist: gameTuning.isEconomist(this.difficulties),
+            isResilient: gameTuning.isResilient(this.difficulties),
+            isMasochist: gameTuning.isMasochist(this.difficulties),
             entry: '',
             previousEntry: '',
             wordCountDown: 0,
@@ -89,8 +94,6 @@ export default {
                         this.stylizeWithClass(this.$refs.comboIndicator, false, 'score-bonus');
                         this.stylizeWithClass(this.$refs.scoreIndicator, false, 'score-malus');
                         this.$emit('nextLevel', {
-                            isResilient: this.isResilient,
-                            isEconomist: this.isEconomist,
                             timeAccount: this.wordCountDown,
                             levelScore: this.levelScore,
                             letterCombo: this.letterCombo,

@@ -6,10 +6,7 @@
                 :level="gameLevel"
                 :levelWordsCount="wordsToTypeCount"
                 :wordsPerMinute="wordsPerMinute"
-                :isSnail="isSnail()"
-                :isEconomist="isEconomist()"
-                :isResilient="isResilient()"
-                :isMasochist="isMasochist()"
+                :difficulties="difficulties"
                 @nextLevel="nextLevel"
                 @rematch="restartGame">
             </game-hub-component>
@@ -167,7 +164,7 @@ export default {
 
         selectWords(jsonResponse, wordCount, filterAgainstRules = true) {
             let selectedWords = [];
-            const filteredData = filterAgainstRules ? wordSelectionRules.filterWordsOnRule(jsonResponse, this.gameLevel, this.isMasochist(), wordCount) : jsonResponse;
+            const filteredData = filterAgainstRules ? wordSelectionRules.filterWordsOnRule(jsonResponse, this.gameLevel, gameTuning.isMasochist(this.difficulties), wordCount) : jsonResponse;
             for (let i = 1; i <= wordCount; i++) {
                 const wordData = filteredData.splice(random.randomNum(filteredData.length, 0), 1)[0];
                 selectedWords.push(this.mayMutateCase(wordData.word));
@@ -177,7 +174,7 @@ export default {
 
         mayMutateCase(word) {
             const rand = random.randomNum(3, 0);
-            if (!rand && ((this.isMasochist() && this.gameLevel >= 3) || this.gameLevel >= 5)) {
+            if (!rand && ((gameTuning.isMasochist(this.difficulties) && this.gameLevel >= 3) || this.gameLevel >= 5)) {
                 return word.charAt(0).toUpperCase() + word.slice(1);
             }
             return word;
@@ -276,22 +273,6 @@ export default {
             if (toggledDifficultyLabel === 'snail') {
                 this.wordsPerMinute = this.wordsPerMinute === 30 ? 10 : 30;
             }
-        },
-
-        isSnail() {
-            return this.difficulties.find(dif => dif.label === 'snail').isChecked;
-        },
-
-        isEconomist() {
-            return this.difficulties.find(dif => dif.label === 'economist').isChecked;
-        },
-
-        isResilient() {
-            return this.difficulties.find(dif => dif.label === 'resilient').isChecked;
-        },
-
-        isMasochist() {
-            return this.difficulties.find(dif => dif.label === 'masochist').isChecked;
         },
 
         restartGame() {

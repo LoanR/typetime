@@ -5,10 +5,7 @@
                 :words="words"
                 :level="level"
                 :wordsPerMinute="wordsPerMinute"
-                :isSnail="isSnail"
-                :isEconomist="isEconomist"
-                :isResilient="isResilient"
-                :isMasochist="isMasochist"
+                :difficulties="difficulties"
                 :timeAccount="timeAccount"
                 :previousScore="previousScore"
                 :previousLetterCombo="previousLetterCombo"
@@ -18,10 +15,7 @@
             <transition-screen-component v-else
                 :isGameLaunched="isGameLaunched"
                 :level="level"
-                :isSnail="isSnail"
-                :isEconomist="isEconomist"
-                :isResilient="isResilient"
-                :isMasochist="isMasochist"
+                :difficulties="difficulties"
                 :gameScore="endGameScore"
                 :nemesisLetter="nemesisLetter"
                 :stuckWord="stuckWord"
@@ -32,6 +26,8 @@
 </template>
 
 <script>
+import gameTuning from '../../js/gameTuning.js';
+
 import gameComponent from './Game.vue';
 import transitionScreenComponent from './TransitionScreen.vue';
 
@@ -43,7 +39,7 @@ export default {
         'transition-screen-component': transitionScreenComponent,
     },
 
-    props: ['words', 'level', 'levelWordsCount', 'wordsPerMinute', 'isSnail', 'isEconomist', 'isResilient', 'isMasochist'],
+    props: ['words', 'level', 'levelWordsCount', 'wordsPerMinute', 'difficulties'],
 
     data() {
         return {
@@ -65,10 +61,10 @@ export default {
             this.isGameLaunched = false;
             this.previousScore = payload.levelScore;
             this.previousLetterCombo = payload.letterCombo;
-            if (payload.isEconomist) {
+            if (gameTuning.isEconomist(this.difficulties)) {
                 this.timeAccount = payload.timeAccount;
             }
-            if (payload.isResilient) {
+            if (gameTuning.isResilient(this.difficulties)) {
                 this.playLevel = true;
                 this.$emit('nextLevel');
             } else {

@@ -81,4 +81,20 @@ export default {
     getDifficulties() {
         return difficulties;
     },
+
+    isSnail(difficulties) {
+        return difficulties.find(dif => dif.label === 'snail').isChecked;
+    },
+
+    isEconomist(difficulties) {
+        return difficulties.find(dif => dif.label === 'economist').isChecked;
+    },
+
+    isResilient(difficulties) {
+        return difficulties.find(dif => dif.label === 'resilient').isChecked;
+    },
+
+    isMasochist(difficulties) {
+        return difficulties.find(dif => dif.label === 'masochist').isChecked;
+    },
 };

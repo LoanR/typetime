@@ -24,7 +24,7 @@ import buttonComponent from '../buttons/Button.vue';
 export default {
     name: 'TransitionScreen',
 
-    props: ['isGameLaunched', 'level', 'isSnail', 'isEconomist', 'isResilient', 'isMasochist', 'gameScore', 'nemesisLetter', 'stuckWord'],
+    props: ['isGameLaunched', 'level', 'difficulties', 'gameScore', 'nemesisLetter', 'stuckWord'],
 
     components: {
         'button-component': buttonComponent,
@@ -42,6 +42,8 @@ export default {
                 'This phrase in really long, so I\'m sure you w\'ont be able to read it because of the long time it could take. In fact, you could even loos you\'re concentration and I surely don\'t want to do that you know.',
             ],
             buttonContent: 'rematch',
+            snail: this.isSnail,
+
         };
     },
 
@@ -72,17 +74,23 @@ export default {
         },
 
         endGameScoreMessage() {
-            let scoreMessage = 'You could have done better, but a total of ' + this.gameScore + ' points is not that bad!';
+            let scoreMessage = 'You could have done better, but ' + this.difficultyDescription + ' you made a total of ' + this.gameScore + ' points. It is not that bad!';
             if (this.gameScore < 0) {
-                scoreMessage = 'Do you know your keyboard? I mean you now have a debt of ' + this.gameScore + ' points. I\'m disappointed.';
+                scoreMessage = 'Do you know your keyboard? I mean ' + this.difficultyDescription + ' you now have a debt of ' + this.gameScore + ' points. I\'m disappointed.';
             } else if (this.gameScore === 0) {
-                scoreMessage = 'Did you type anything? Well, you made 0 points, that\'s not really time efficient...';
+                scoreMessage = 'Did you type anything? Well, ' + this.difficultyDescription + ' you made 0 points, that\'s not really time efficient...';
             } else if (this.gameScore < 400) {
-                scoreMessage = 'You where not truly good, but ' + this.gameScore + ' points is at least something...';
+                scoreMessage = 'You where not truly good, but ' + this.difficultyDescription + ' you made ' + this.gameScore + ' points. It is at least something...';
             } else if (this.gameScore > 2000) {
-                scoreMessage = 'You\'re a beast! ' + this.gameScore + ' points! Bravo!';
+                scoreMessage = 'You\'re a beast, ' + this.difficultyDescription + ' you made ' + this.gameScore + ' points! Bravo!';
             }
             return scoreMessage;
+        },
+
+        difficultyDescription() {
+            let checkedDifficulties = this.difficulties.filter(d => d.isChecked);
+            checkedDifficulties.sort((d1, d2) => d1.stringOrder - d2.stringOrder);
+            return checkedDifficulties.length ? ('as a ' + checkedDifficulties.map(d => d.label).join(' ') + ',') : '';
         },
     },
 };
