@@ -9,7 +9,7 @@
         <div v-else>
             <p>{{endGameScoreMessage}}</p>
             <p>
-                You got stuck on the letter "{{nemesisLetter}}" of the word "{{stuckWord}}" on level {{level}}.
+                You were not fast enough to type the letter "{{nemesisLetter}}" of the word "{{stuckWord}}" on level {{level}}.
             </p>
             <button-component :content="buttonContent" @bigButtonClick="returnHome"></button-component>
         </div>
