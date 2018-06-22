@@ -1,3 +1,22 @@
+const emptyMods = [
+    {
+        label: '',
+        isChecked: false,
+    },
+    {
+        label: '',
+        isChecked: false,
+    },
+    {
+        label: '',
+        isChecked: false,
+    },
+    {
+        label: '',
+        isChecked: false,
+    },
+];
+
 const modifiers = [
     {
         label: 'lexical',
@@ -74,11 +93,31 @@ const difficulties = [
 ];
 
 export default {
+    getEmptyMods() {
+        return emptyMods;
+    },
+
     getModifiers() {
         return modifiers;
     },
 
     getDifficulties() {
         return difficulties;
+    },
+
+    isSnail(difficulties) {
+        return difficulties.find(dif => dif.label === 'snail').isChecked;
+    },
+
+    isEconomist(difficulties) {
+        return difficulties.find(dif => dif.label === 'economist').isChecked;
+    },
+
+    isResilient(difficulties) {
+        return difficulties.find(dif => dif.label === 'resilient').isChecked;
+    },
+
+    isMasochist(difficulties) {
+        return difficulties.find(dif => dif.label === 'masochist').isChecked;
     },
 };

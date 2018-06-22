@@ -5,8 +5,7 @@
         </p>
         <p>{{countdownDisplay}}</p>
         <p>Level {{level}}</p>
-        <div><span>{{combo}}</span> - - <span>{{scoreChange}}</span></div>
-        <p>Score: {{levelScore}}</p>
+        <p><span class="score-default" ref="comboIndicator">{{combo}}</span><span>Score: {{levelScore}}</span><span class="score-default" ref="scoreIndicator">{{scoreChange}}</span></p>
         <div>
             <span v-for="i in wordToTypeIndex" :key="i">•</span>
         </div>
@@ -16,16 +15,21 @@
 
 <script>
 import scoreCalculator from '../../js/scoreCalculator.js';
+import gameTuning from '../../js/gameTuning.js';
 
 export default {
     name: 'Game',
 
-    props: ['words', 'level', 'wordsPerMinute', 'isSnail', 'isEconomist', 'isResilient', 'isMasochist', 'timeAccount', 'previousScore', 'previousLetterCombo'],
+    props: ['words', 'level', 'wordsPerMinute', 'difficulties', 'timeAccount', 'previousScore', 'previousLetterCombo'],
 
     data() {
         return {
             wordToTypeIndex: 0,
             letterToTypeIndex: 0,
+            isSnail: gameTuning.isSnail(this.difficulties),
+            isEconomist: gameTuning.isEconomist(this.difficulties),
+            isResilient: gameTuning.isResilient(this.difficulties),
+            isMasochist: gameTuning.isMasochist(this.difficulties),
             entry: '',
             previousEntry: '',
             wordCountDown: 0,
@@ -36,6 +40,10 @@ export default {
             letterCombo: 0,
             combo: 1,
             scoreChange: 0,
+            errorStyle: null,
+            scoreIndicatorStyle: null,
+            comboIndicatorStyle: null,
+            comboIndicatorStyle2: null,
         };
     },
 
@@ -50,20 +58,23 @@ export default {
                 if (this.wordToTypeLetters[this.letterToTypeIndex] === this.entry) {
                     this.letterCombo += 1;
                     this.scoreChange = this.getLetterScore(this.entry, this.letterCombo, this.level, this.isSnail, this.isResilient, this.isMasochist);
-                    this.levelScore += this.scoreChange;
-                    this.stylizeWithClass(currentLetterElement, false, 'letter-error');
                     this.stylizeWithClass(currentLetterElement, true, 'letter-found');
+                    this.levelScore += this.scoreChange;
                     this.nextLetterToFind();
                 } else {
+                    this.stylizeWithClass(currentLetterElement, true, 'letter-error');
+                    this.errorStyle = window.setTimeout(this.stylizeWithClass, 100, currentLetterElement, false, 'letter-error');
+                    this.stylizeWithClass(this.$refs.scoreIndicator, true, 'score-malus');
+                    this.scoreIndicatorStyle = window.setTimeout(this.stylizeWithClass, 300, this.$refs.scoreIndicator, false, 'score-malus');
                     this.scoreChange = -this.getLetterScore(this.entry, this.letterCombo, this.level, this.isSnail, this.isResilient, this.isMasochist);
                     this.levelScore += this.scoreChange;
+                    this.stylizeWithClass(this.$refs.comboIndicator, true, 'score-malus');
                     this.letterCombo = 0;
                     this.combo = scoreCalculator.getFinalMultiplier(this.letterCombo, this.isSnail, this.isMasochist, this.isResilient, this.level);
-                    this.stylizeWithClass(currentLetterElement, true, 'letter-error');
+                    this.comboIndicatorStyle = window.setTimeout(this.stylizeWithClass, 300, this.$refs.comboIndicator, false, 'score-malus');
                 }
                 if (this.letterToTypeIndex === this.wordToType.length) {
                     for (let span of this.$refs.letterToType) {
-                        this.stylizeWithClass(span, false, 'letter-error');
                         this.stylizeWithClass(span, false, 'letter-found');
                     }
                     let timeScore = 0;
@@ -79,13 +90,18 @@ export default {
                         this.clearCountdown();
                         this.wordToTypeIndex += 1;
                     } else {
+                        this.stylizeWithClass(this.$refs.comboIndicator, false, 'score-malus');
+                        this.stylizeWithClass(this.$refs.comboIndicator, false, 'score-bonus');
+                        this.stylizeWithClass(this.$refs.scoreIndicator, false, 'score-malus');
                         this.$emit('nextLevel', {
-                            isResilient: this.isResilient,
-                            isEconomist: this.isEconomist,
                             timeAccount: this.wordCountDown,
                             levelScore: this.levelScore,
                             letterCombo: this.letterCombo,
                         });
+                        window.clearTimeout(this.errorStyle);
+                        window.clearTimeout(this.scoreIndicatorStyle);
+                        window.clearTimeout(this.comboIndicatorStyle);
+                        window.clearTimeout(this.comboIndicatorStyle2);
                         this.wordToTypeIndex = 0;
                     }
                     this.setNewWordEnv(this.$refs.letterToType[this.letterToTypeIndex], true, 'letter-to-type');
@@ -95,7 +111,12 @@ export default {
         },
 
         getLetterScore(letter, letterCombo, level, isSnail, isResilient, isMasochist) {
+            const tempCombo = this.combo;
             this.combo = scoreCalculator.getFinalMultiplier(letterCombo, isSnail, isMasochist, isResilient, level);
+            if (this.combo > tempCombo) {
+                this.stylizeWithClass(this.$refs.comboIndicator, true, 'score-bonus');
+                this.comboIndicatorStyle2 = window.setTimeout(this.stylizeWithClass, 300, this.$refs.comboIndicator, false, 'score-bonus');
+            }
             const lsMapping = scoreCalculator.getLetterScoreMapping();
             if (letter.toLowerCase() === letter) {
                 return lsMapping[letter] ? lsMapping[letter] * this.combo : 1 * this.combo;
@@ -197,9 +218,10 @@ export default {
     @import '../../styles/common';
 
     @keyframes splat {
-        0% {font-size: calc(#{$big-font-size} + 0.3rem);}
-        40% {font-size: calc(#{$big-font-size} - 0.1rem);}
-        80% {font-size: $big-font-size;}
+        0% {font-size: $big-font-size; color: $warning-color;}
+        30% {font-size: calc(#{$big-font-size} + 0.3rem); color: $warning-color;}
+        80% {font-size: calc(#{$big-font-size} - 0.1rem); color: $warning-color;}
+        100% {font-size: $big-font-size; color: $contrast-color;}
     }
 
     .game-window {
@@ -235,11 +257,10 @@ export default {
 
             .letter-found {
                 color: $light-base-color;
-                transition: all 0.2s cubic-bezier(0.5,0,0,1);;
+                transition: all 0.2s cubic-bezier(0.5,0,0,1);
             }
 
             .letter-error {
-                color: $warning-color;
                 animation: splat 0.2s 1;
             }
         }
@@ -247,6 +268,21 @@ export default {
         input {
             position: absolute;
             top: -50px;
+        }
+
+        .score-default {
+            transition: color 0.2s cubic-bezier(0.5,0,0,1);
+        }
+
+        .score-malus {
+            color: $warning-color;
+            transition: none;
+        }
+
+        .score-bonus {
+            color: $brand-color;
+            font-size: calc(#{$base-font-size} + 0.3rem);
+            transition: none;
         }
     }
 </style>

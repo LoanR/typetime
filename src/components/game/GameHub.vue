@@ -1,35 +1,33 @@
 <template>
     <div>
-        <game-component v-if="playLevel"
-            :words="words"
-            :level="level"
-            :wordsPerMinute="wordsPerMinute"
-            :isSnail="isSnail"
-            :isEconomist="isEconomist"
-            :isResilient="isResilient"
-            :isMasochist="isMasochist"
-            :timeAccount="timeAccount"
-            :previousScore="previousScore"
-            :previousLetterCombo="previousLetterCombo"
-            @nextLevel="nextLevel"
-            @gameOver="gameOver">
-        </game-component>
-        <transition-screen-component v-else
-            :isGameLaunched="isGameLaunched"
-            :level="level"
-            :isSnail="isSnail"
-            :isEconomist="isEconomist"
-            :isResilient="isResilient"
-            :isMasochist="isMasochist"
-            :gameScore="endGameScore"
-            :nemesisLetter="nemesisLetter"
-            :stuckWord="stuckWord"
-            @rematch="rematch">
-        </transition-screen-component>
+        <transition name="fade-out">
+            <game-component v-if="playLevel"
+                :words="words"
+                :level="level"
+                :wordsPerMinute="wordsPerMinute"
+                :difficulties="difficulties"
+                :timeAccount="timeAccount"
+                :previousScore="previousScore"
+                :previousLetterCombo="previousLetterCombo"
+                @nextLevel="nextLevel"
+                @gameOver="gameOver">
+            </game-component>
+            <transition-screen-component v-else
+                :isGameLaunched="isGameLaunched"
+                :level="level"
+                :difficulties="difficulties"
+                :gameScore="endGameScore"
+                :nemesisLetter="nemesisLetter"
+                :stuckWord="stuckWord"
+                @rematch="rematch">
+            </transition-screen-component>
+        </transition>
     </div>
 </template>
 
 <script>
+import gameTuning from '../../js/gameTuning.js';
+
 import gameComponent from './Game.vue';
 import transitionScreenComponent from './TransitionScreen.vue';
 
@@ -41,7 +39,7 @@ export default {
         'transition-screen-component': transitionScreenComponent,
     },
 
-    props: ['words', 'level', 'levelWordsCount', 'wordsPerMinute', 'isSnail', 'isEconomist', 'isResilient', 'isMasochist'],
+    props: ['words', 'level', 'levelWordsCount', 'wordsPerMinute', 'difficulties'],
 
     data() {
         return {
@@ -63,10 +61,10 @@ export default {
             this.isGameLaunched = false;
             this.previousScore = payload.levelScore;
             this.previousLetterCombo = payload.letterCombo;
-            if (payload.isEconomist) {
+            if (gameTuning.isEconomist(this.difficulties)) {
                 this.timeAccount = payload.timeAccount;
             }
-            if (payload.isResilient) {
+            if (gameTuning.isResilient(this.difficulties)) {
                 this.playLevel = true;
                 this.$emit('nextLevel');
             } else {
@@ -114,5 +112,21 @@ export default {
     div {
         width: 100%;
         height: 100%;
+        position: relative;
+        overflow: hidden;
+        &>* {
+            position: absolute;
+            top: 0px;
+        }
+    }
+
+    .fade-out-leave-active {
+        transition: all 0.15s ease-out;
+    }
+    .fade-out-leave-to {
+        opacity: 0;
+    }
+    .fade-out-leave {
+        opacity: 1;
     }
 </style>

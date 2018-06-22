@@ -1,42 +1,40 @@
 <template>
-    <section>
-        <game-hub-component v-if="wantsToPlay"
-            :words="wordsToType"
-            :level="gameLevel"
-            :levelWordsCount="wordsToTypeCount"
-            :wordsPerMinute="wordsPerMinute"
-            :isSnail="isSnail()"
-            :isEconomist="isEconomist()"
-            :isResilient="isResilient()"
-            :isMasochist="isMasochist()"
-            @nextLevel="nextLevel"
-            @rematch="restartGame">
-        </game-hub-component>
-        <div v-else>
-            <header>
-                <img src="../assets/logo.png">
-                <h1>{{title}}</h1>
-            </header>
-            <div>
+    <section class="slide-container">
+        <transition :name="slideTransition">
+            <game-hub-component v-if="wantsToPlay"
+                :words="wordsToType"
+                :level="gameLevel"
+                :levelWordsCount="wordsToTypeCount"
+                :wordsPerMinute="wordsPerMinute"
+                :difficulties="difficulties"
+                @nextLevel="nextLevel"
+                @rematch="restartGame">
+            </game-hub-component>
+            <div v-else>
+                <header>
+                    <img src="../assets/logo.png">
+                    <h1 @mouseover="resetTitle" @mouseout="restartShuffle">{{shuffledTitle}}</h1>
+                </header>
                 <div>
-                    <button-component :content="startContent" @bigButtonClick="launchGame"></button-component>
+                    <div>
+                        <button-component :content="startContent" @bigButtonClick="launchGame"></button-component>
+                    </div>
+                    <div>
+                        <checkboxes-component
+                            :switches="selectedModifiers"
+                            @toggleCheck="toggleModifiers">
+                        </checkboxes-component>
+                        <checkboxes-component
+                            :switches="difficulties"
+                            @toggleCheck="toggleDifficulties">
+                        </checkboxes-component>
+                    </div>
                 </div>
-                <div>
-                    <checkboxes-component
-                        :switches="selectedModifiers"
-                        @toggleCheck="toggleModifiers">
-                    </checkboxes-component>
-                    <checkboxes-component
-                        :switches="difficulties"
-                        @toggleCheck="toggleDifficulties">
-                    </checkboxes-component>
-                </div>
+                <nav>
+                    <router-link v-bind:to="'/about'">About</router-link>
+                </nav>
             </div>
-            <nav>
-                <router-link v-bind:to="'/about'">About</router-link>
-            </nav>
-        </div>
-
+        </transition>
     </section>
 </template>
 
@@ -61,12 +59,14 @@ export default {
     data() {
         return {
             title: 'TypeTime',
+            shuffledTitle: 'TypeTime',
             shouldShuffleTitle: true,
+            shouldSlideFromRight: true,
             timeOut: null,
             firstTimeOut: 3000,
             wantsToPlay: false,
             startContent: 'start',
-            selectedModifiers: [],
+            selectedModifiers: gameTuning.getEmptyMods(),
             modifiers: gameTuning.getModifiers(),
             difficulties: gameTuning.getDifficulties(),
             wordsPerMinute: 30,
@@ -81,10 +81,10 @@ export default {
     methods: {
         overwriteTitle() {
             clearTimeout(this.timeOut);
-            this.title = this.shuffleTitle();
-            this.timeOut = window.setTimeout(() => {
-                this.overwriteTitle();
-            }, random.randomNum(3000, 200));
+            if (this.shouldShuffleTitle) {
+                this.shuffledTitle = this.shuffleTitle();
+                this.timeOut = window.setTimeout(this.overwriteTitle, random.randomNum(3000, 200));
+            }
         },
 
         shuffleTitle() {
@@ -96,6 +96,16 @@ export default {
             const secondLetter = titleCopy.splice(secondLetterIndice, 1, firstLetter)[0];
             titleCopy.splice(firstLetterIndice, 1, secondLetter).join('');
             return titleCopy.join('');
+        },
+
+        resetTitle() {
+            this.shouldShuffleTitle = false;
+            this.shuffledTitle = this.title;
+        },
+
+        restartShuffle() {
+            this.shouldShuffleTitle = true;
+            this.overwriteTitle();
         },
 
         toggleModifiers(toggledModifierLabel) {
@@ -120,6 +130,7 @@ export default {
 
         async launchGame() {
             try {
+                this.shouldSlideFromRight = true;
                 this.wantsToPlay = true;
                 const query = this.getUrlQuery();
                 this.wordsToType = await this.requestWords(this.startingWordsToTypeCount, query[0], query[1], query[2]);
@@ -164,7 +175,7 @@ export default {
 
         selectWords(jsonResponse, wordCount, filterAgainstRules = true) {
             let selectedWords = [];
-            const filteredData = filterAgainstRules ? wordSelectionRules.filterWordsOnRule(jsonResponse, this.gameLevel, this.isMasochist(), wordCount) : jsonResponse;
+            const filteredData = filterAgainstRules ? wordSelectionRules.filterWordsOnRule(jsonResponse, this.gameLevel, gameTuning.isMasochist(this.difficulties), wordCount) : jsonResponse;
             for (let i = 1; i <= wordCount; i++) {
                 const wordData = filteredData.splice(random.randomNum(filteredData.length, 0), 1)[0];
                 selectedWords.push(this.mayMutateCase(wordData.word));
@@ -174,7 +185,7 @@ export default {
 
         mayMutateCase(word) {
             const rand = random.randomNum(3, 0);
-            if (!rand && ((this.isMasochist() && this.gameLevel >= 3) || this.gameLevel >= 5)) {
+            if (!rand && ((gameTuning.isMasochist(this.difficulties) && this.gameLevel >= 3) || this.gameLevel >= 5)) {
                 return word.charAt(0).toUpperCase() + word.slice(1);
             }
             return word;
@@ -263,7 +274,7 @@ export default {
                 );
             });
             for (let i = 0; i < 4; i++) {
-                this.selectedModifiers.push(this.modifiers.splice(random.randomNum(this.modifiers.length, 0), 1)[0]);
+                this.selectedModifiers.splice(i, 1, this.modifiers.splice(random.randomNum(this.modifiers.length, 0), 1)[0]);
             }
         },
 
@@ -275,23 +286,8 @@ export default {
             }
         },
 
-        isSnail() {
-            return this.difficulties.find(dif => dif.label === 'snail').isChecked;
-        },
-
-        isEconomist() {
-            return this.difficulties.find(dif => dif.label === 'economist').isChecked;
-        },
-
-        isResilient() {
-            return this.difficulties.find(dif => dif.label === 'resilient').isChecked;
-        },
-
-        isMasochist() {
-            return this.difficulties.find(dif => dif.label === 'masochist').isChecked;
-        },
-
         restartGame() {
+            this.shouldSlideFromRight = false;
             this.wantsToPlay = false;
         },
     },
@@ -299,6 +295,10 @@ export default {
     computed: {
         wordsToTypeCount() {
             return this.startingWordsToTypeCount + this.gameLevel - 1;
+        },
+
+        slideTransition() {
+            return this.shouldSlideFromRight ? 'slide-fade-right' : 'slide-fade-left';
         },
     },
 
@@ -315,6 +315,7 @@ export default {
 
 <style lang="scss" scoped>
     @import '../styles/common';
+    @import '../styles/slides';
 
     header {
         height: 200px;
@@ -333,6 +334,12 @@ export default {
         width: 100%;
         height: 100%;
         text-align: center;
+
+        &>div {
+            width: 100%;
+            height: 100%;
+
+        }
     }
 
     h1 {
@@ -353,5 +360,4 @@ export default {
         display: flex;
         justify-content: center;
     }
-
 </style>

@@ -1,0 +1,31 @@
+.slide-container {
+    position: relative;
+    overflow-x: hidden;
+    &>* {
+        position: absolute;
+    }
+}
+
+.slide-fade-right-enter-active, .slide-fade-right-leave-active, .slide-fade-left-enter-active, .slide-fade-left-leave-active {
+    transition: all 0.5s cubic-bezier(.8,-0.01,.2,1);
+}
+.slide-fade-enter-to {
+    transform: translate(0, 0);
+    opacity: 1;
+}
+.slide-fade-right-enter {
+    transform: translate(50%, 0);
+    opacity: 0;
+}
+.slide-fade-right-leave-to {
+    transform: translate(-50%, 0);
+    opacity: 0;
+}
+.slide-fade-left-enter {
+    transform: translate(-50%, 0);
+    opacity: 0;
+}
+.slide-fade-left-leave-to {
+    transform: translate(50%, 0);
+    opacity: 0;
+}
