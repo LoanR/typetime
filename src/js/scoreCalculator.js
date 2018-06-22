@@ -67,49 +67,49 @@ const letterComboMapping = {
     0: {
         default: 1,
         snail: 1,
-        occultist: 1,
+        masochist: 1,
     },
     10: {
         default: 2,
         snail: 1,
-        occultist: 3,
+        masochist: 3,
     },
     30: {
         default: 4,
         snail: 2,
-        occultist: 6,
+        masochist: 6,
     },
     60: {
         default: 8,
         snail: 4,
-        occultist: 12,
+        masochist: 12,
     },
     100: {
         default: 16,
         snail: 8,
-        occultist: 24,
+        masochist: 24,
     },
 };
 
 export default {
-    getLetterScore(letter, letterCombo, level, isSnail, isOccultist) {
-        const combo = this.getCurrentCombo(letterCombo, isSnail, isOccultist);
-        if (letter.toLowerCase() === letter) {
-            return letterScoreMapping[letter] ? letterScoreMapping[letter] * (combo + level - 1) : 1 * (combo + level - 1);
-        }
-        return letterScoreMapping[letter] ? (letterScoreMapping[letter] + 1) * (combo + level - 1) : 1 * (combo + level - 1);
+    getLetterScoreMapping() {
+        return letterScoreMapping;
     },
 
-    getCurrentCombo(letterCombo, isSnail, isOccultist) {
+    getFinalMultiplier(letterCombo, isSnail, isMasochist, isResilient, level) {
+        const combo = this._getCurrentCombo(letterCombo, isSnail, isResilient, isMasochist);
+        return isResilient ? combo + (level - 1) * 2 : combo + level - 1;
+    },
+
+    _getCurrentCombo(letterCombo, isSnail, isMasochist) {
         const mappingKey = Object.keys(letterComboMapping).reduce((prev, current) => {
             return letterCombo > current ? current : prev;
         });
-        console.log(mappingKey);
         let comboDifficulty = 'default';
-        if (isSnail && !isOccultist) {
+        if (isSnail && !isMasochist) {
             comboDifficulty = 'snail';
-        } else if (isOccultist && !isSnail) {
-            comboDifficulty = 'occultist';
+        } else if (isMasochist && !isSnail) {
+            comboDifficulty = 'masochist';
         }
         return letterComboMapping[mappingKey][comboDifficulty];
     },

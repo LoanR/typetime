@@ -4,7 +4,7 @@
             :id="label"
             :checked="isChecked"
             v-on:change="toggleCheck">
-        <label :for="label" class="button-style"><span>{{label}}</span></label>
+        <label :for="label" class="button-style" @mouseover="itemHover" @mouseout="itemOut"><span>{{label}}</span></label>
     </div>
 </template>
 
@@ -12,11 +12,19 @@
 export default {
     name: 'Checkbox',
 
-    props: ['label', 'modifier', 'isChecked'],
+    props: ['label', 'modifier', 'isChecked', 'desc'],
 
     methods: {
         toggleCheck() {
             this.$emit('toggleCheck', this.label);
+        },
+
+        itemHover() {
+            this.$emit('changeDesc', this.desc);
+        },
+
+        itemOut() {
+            this.$emit('changeDesc', '');
         },
     },
 };
@@ -36,7 +44,7 @@ export default {
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 5rem 1rem;
+        margin: 1rem 1rem;
 
         span {
             font-size: $small-font-size;

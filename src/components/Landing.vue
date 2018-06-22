@@ -8,7 +8,7 @@
             :isSnail="isSnail()"
             :isEconomist="isEconomist()"
             :isResilient="isResilient()"
-            :isOccultist="isOccultist()"
+            :isMasochist="isMasochist()"
             @nextLevel="nextLevel"
             @rematch="restartGame">
         </game-hub-component>
@@ -17,15 +17,21 @@
                 <img src="../assets/logo.png">
                 <h1>{{title}}</h1>
             </header>
-            <button-component :content="startContent" @bigButtonClick="launchGame"></button-component>
-            <checkboxes-component
-                :modifiers="selectedModifiers"
-                @toggleCheck="toggleModifiers">
-            </checkboxes-component>
-            <checkboxes-component
-                :modifiers="difficulties"
-                @toggleCheck="toggleDifficulties">
-            </checkboxes-component>
+            <div>
+                <div>
+                    <button-component :content="startContent" @bigButtonClick="launchGame"></button-component>
+                </div>
+                <div>
+                    <checkboxes-component
+                        :switches="selectedModifiers"
+                        @toggleCheck="toggleModifiers">
+                    </checkboxes-component>
+                    <checkboxes-component
+                        :switches="difficulties"
+                        @toggleCheck="toggleDifficulties">
+                    </checkboxes-component>
+                </div>
+            </div>
             <nav>
                 <router-link v-bind:to="'/about'">About</router-link>
             </nav>
@@ -36,6 +42,7 @@
 
 <script>
 import random from '../js/random.js';
+import gameTuning from '../js/gameTuning.js';
 import wordSelectionRules from '../js/wordSelectionRules.js';
 
 import buttonComponent from './buttons/Button.vue';
@@ -60,70 +67,8 @@ export default {
             wantsToPlay: false,
             startContent: 'start',
             selectedModifiers: [],
-            modifiers: [
-                {
-                    label: 'lexical',
-                    param: 'rel_trg=',
-                    value: '',
-                    option: '',
-                    isChecked: false,
-                    modCluster: 'parameter',
-                },
-                {
-                    label: 'semantic',
-                    param: 'ml=',
-                    value: '',
-                    option: '',
-                    isChecked: false,
-                    modCluster: 'parameter',
-                },
-                {
-                    label: 'phonetic',
-                    param: 'sl=',
-                    value: '',
-                    option: '',
-                    isChecked: false,
-                    modCluster: 'parameter',
-                },
-                {
-                    label: 'rhyme',
-                    param: 'rel_rhy=',
-                    value: '',
-                    option: '',
-                    isChecked: false,
-                    modCluster: 'parameter',
-                },
-                {
-                    label: 'español',
-                    param: 'ml=',
-                    value: 'ahora',
-                    option: '&v=es',
-                    isChecked: false,
-                    modCluster: 'all',
-                },
-            ],
-            difficulties: [
-                {
-                    label: 'snail',
-                    isChecked: false,
-                    stringOrder: 3,
-                },
-                {
-                    label: 'economist',
-                    isChecked: false,
-                    stringOrder: 1,
-                },
-                {
-                    label: 'resilient',
-                    isChecked: false,
-                    stringOrder: 0,
-                },
-                {
-                    label: 'occultist',
-                    isChecked: false,
-                    stringOrder: 2,
-                },
-            ],
+            modifiers: gameTuning.getModifiers(),
+            difficulties: gameTuning.getDifficulties(),
             wordsPerMinute: 30,
             wordsToType: [],
             nextWordsToType: [],
@@ -219,12 +164,20 @@ export default {
 
         selectWords(jsonResponse, wordCount, filterAgainstRules = true) {
             let selectedWords = [];
-            const filteredData = filterAgainstRules ? wordSelectionRules.filterWordsOnRule(jsonResponse, this.gameLevel, this.isOccultist(), wordCount) : jsonResponse;
+            const filteredData = filterAgainstRules ? wordSelectionRules.filterWordsOnRule(jsonResponse, this.gameLevel, this.isMasochist(), wordCount) : jsonResponse;
             for (let i = 1; i <= wordCount; i++) {
                 const wordData = filteredData.splice(random.randomNum(filteredData.length, 0), 1)[0];
-                selectedWords.push(wordData.word);
+                selectedWords.push(this.mayMutateCase(wordData.word));
             }
             return selectedWords;
+        },
+
+        mayMutateCase(word) {
+            const rand = random.randomNum(3, 0);
+            if (!rand && ((this.isMasochist() && this.gameLevel >= 3) || this.gameLevel >= 5)) {
+                return word.charAt(0).toUpperCase() + word.slice(1);
+            }
+            return word;
         },
 
         async nextLevel() {
@@ -256,21 +209,6 @@ export default {
             return [param, value, option];
         },
 
-        thematiseGame() {
-            if (this.nextWordsToType.length) {
-                return this.cleanQueryValue(this.nextWordsToType[this.nextWordsToType.length - 1]);
-            } else if (this.wordsToType.length) {
-                return this.cleanQueryValue(this.wordsToType[this.wordsToType.length - 1]);
-            }
-            return null;
-        },
-
-        cleanQueryValue(string) {
-            const trimmedStr = string.trim();
-            const firstSpaceId = trimmedStr.indexOf(' ');
-            return firstSpaceId !== -1 ? trimmedStr.substring(0, firstSpaceId) : trimmedStr;
-        },
-
         getParamFromMods(mods) {
             const m = mods.filter(mod => mod.param !== '');
             if (m.length === 1) {
@@ -292,12 +230,25 @@ export default {
             }
         },
 
+        thematiseGame() {
+            if (this.nextWordsToType.length) {
+                return this.nextWordsToType[this.nextWordsToType.length - 1];
+            } else if (this.wordsToType.length) {
+                return this.wordsToType[this.wordsToType.length - 1];
+            }
+            return null;
+        },
+
         async setModifiers() {
-            let mods = [this.cleanQueryValue((await this.requestWords(1, 'ml=', 'toujours', '&max=50', false))[0])];
-            mods.push(this.cleanQueryValue((await this.requestWords(1, 'ml=', 'voiture', '&max=50', false))[0]));
-            mods.push(this.cleanQueryValue((await this.requestWords(1, 'ml=', 'people', '&max=50', false))[0]));
-            mods.push(this.cleanQueryValue((await this.requestWords(1, 'ml=', 'places', '&max=50', false))[0]));
-            mods.push(this.cleanQueryValue((await this.requestWords(1, 'ml=', 'because', '&max=50', false))[0]));
+            const accentValues = ['*é*', '*è*', '*ê*', '*ë*', '*â*', '*ï*', '*ô*', '*û*'];
+            const rareAccentValues = ['*ä*', '*á*', '*å*', '*ë*', '*â*', '*í*', '*ö*', '*ó*', '*ü*', '*ú*'];
+            let mods = [(await this.requestWords(1, 'ml=', 'toujours', '&max=50', false))[0]];
+            mods.push((await this.requestWords(1, 'ml=', 'voiture', '&max=50', false))[0]);
+            mods.push((await this.requestWords(1, 'ml=', 'people', '&max=50', false))[0]);
+            mods.push((await this.requestWords(1, 'ml=', 'places', '&max=50', false))[0]);
+            mods.push((await this.requestWords(1, 'ml=', 'because', '&max=50', false))[0]);
+            mods.push((await this.requestWords(1, 'sp=', accentValues[random.randomNum(accentValues.length, 0)], '&max=50', false))[0]);
+            mods.push((await this.requestWords(1, 'sp=', rareAccentValues[random.randomNum(rareAccentValues.length, 0)], '&max=50', false))[0]);
             mods.forEach(mod => {
                 this.modifiers.push(
                     {
@@ -307,6 +258,7 @@ export default {
                         option: '',
                         isChecked: false,
                         modCluster: 'word',
+                        description: 'Suggest the game to search for words around "' + mod + '".',
                     }
                 );
             });
@@ -323,17 +275,6 @@ export default {
             }
         },
 
-        isAnEspagnolRun() {
-            const checkedMods = this.selectedModifiers.filter(mod => !!mod.isChecked);
-            if (checkedMods.length) {
-                const m = checkedMods.find(mod => mod.label === 'español');
-                if (m) {
-                    return m.param + m.value + m.option;
-                }
-            }
-            return false;
-        },
-
         isSnail() {
             return this.difficulties.find(dif => dif.label === 'snail').isChecked;
         },
@@ -346,8 +287,8 @@ export default {
             return this.difficulties.find(dif => dif.label === 'resilient').isChecked;
         },
 
-        isOccultist() {
-            return this.difficulties.find(dif => dif.label === 'occultist').isChecked;
+        isMasochist() {
+            return this.difficulties.find(dif => dif.label === 'masochist').isChecked;
         },
 
         restartGame() {
