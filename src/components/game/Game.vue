@@ -5,7 +5,7 @@
         </p>
         <p>{{countdownDisplay}}</p>
         <p>Level {{level}}</p>
-        <div><span>{{combo}}</span>   -   <span>???</span>   -   <span>points</span></div>
+        <div><span>{{combo}}</span> - - <span>{{scoreChange}}</span></div>
         <p>Score: {{levelScore}}</p>
         <div>
             <span v-for="i in wordToTypeIndex" :key="i">•</span>
@@ -35,6 +35,7 @@ export default {
             levelScore: 0,
             letterCombo: 0,
             combo: 1,
+            scoreChange: 0,
         };
     },
 
@@ -48,12 +49,14 @@ export default {
                 const currentLetterElement = this.$refs.letterToType[this.letterToTypeIndex];
                 if (this.wordToTypeLetters[this.letterToTypeIndex] === this.entry) {
                     this.letterCombo += 1;
-                    this.levelScore += this.getLetterScore(this.entry, this.letterCombo, this.level, this.isSnail, this.isResilient, this.isMasochist);
+                    this.scoreChange = this.getLetterScore(this.entry, this.letterCombo, this.level, this.isSnail, this.isResilient, this.isMasochist);
+                    this.levelScore += this.scoreChange;
                     this.stylizeWithClass(currentLetterElement, false, 'letter-error');
                     this.stylizeWithClass(currentLetterElement, true, 'letter-found');
                     this.nextLetterToFind();
                 } else {
-                    this.levelScore -= this.getLetterScore(this.entry, this.letterCombo, this.level, this.isSnail, this.isResilient, this.isMasochist);
+                    this.scoreChange = -this.getLetterScore(this.entry, this.letterCombo, this.level, this.isSnail, this.isResilient, this.isMasochist);
+                    this.levelScore += this.scoreChange;
                     this.letterCombo = 0;
                     this.combo = scoreCalculator.getFinalMultiplier(this.letterCombo, this.isSnail, this.isMasochist, this.isResilient, this.level);
                     this.stylizeWithClass(currentLetterElement, true, 'letter-error');
@@ -63,11 +66,14 @@ export default {
                         this.stylizeWithClass(span, false, 'letter-error');
                         this.stylizeWithClass(span, false, 'letter-found');
                     }
+                    let timeScore = 0;
                     if (!this.isEconomist && !this.isSnail) {
-                        this.levelScore += parseInt((this.wordCountDown / 10).toFixed());
+                        timeScore = parseInt((this.wordCountDown / 10).toFixed()) * this.combo;
                     } else if (this.isSnail) {
-                        this.levelScore += parseInt((this.wordCountDown / 20).toFixed());
+                        timeScore = parseInt((this.wordCountDown / 300).toFixed()) * this.combo;
                     }
+                    this.scoreChange += timeScore;
+                    this.levelScore += timeScore;
                     this.letterToTypeIndex = 0;
                     if (this.wordToTypeIndex < this.words.length - 1) {
                         this.clearCountdown();
@@ -125,7 +131,7 @@ export default {
 
         launchNewCountdown() {
             let countDown = this.isEconomist ? (this.allotedTime + this.wordCountDown) : this.allotedTime;
-            this.wordCountDown = countDown > 1200 ? 1200 : parseInt(countDown.toFixed());
+            this.wordCountDown = countDown > 3000 ? 3000 : parseInt(countDown.toFixed());
             this.interval = window.setInterval(this.modifyCountdownDisplay, 10);
         },
 
@@ -180,7 +186,7 @@ export default {
         this.stylizeWithClass(this.$refs.letterToType[this.letterToTypeIndex], true, 'letter-to-type');
         this.launchNewCountdown();
         this.wordCountDown += this.timeAccount;
-        this.levelScore += this.previousScore;
+        this.levelScore = this.previousScore;
         this.letterCombo = this.previousLetterCombo;
         this.combo = scoreCalculator.getFinalMultiplier(this.letterCombo, this.isSnail, this.isMasochist, this.isResilient, this.level);
     },

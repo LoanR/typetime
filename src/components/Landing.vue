@@ -239,12 +239,6 @@ export default {
             return null;
         },
 
-        // cleanQueryValue(string) {
-        //     const trimmedStr = string.trim();
-        //     const firstSpaceId = trimmedStr.indexOf(' ');
-        //     return firstSpaceId !== -1 ? trimmedStr.substring(0, firstSpaceId) : trimmedStr;
-        // },
-
         async setModifiers() {
             const accentValues = ['*é*', '*è*', '*ê*', '*ë*', '*â*', '*ï*', '*ô*', '*û*'];
             const rareAccentValues = ['*ä*', '*á*', '*å*', '*ë*', '*â*', '*í*', '*ö*', '*ó*', '*ü*', '*ú*'];
@@ -277,7 +271,7 @@ export default {
             const toggledDifficulty = this.difficulties.find(dif => dif.label === toggledDifficultyLabel);
             toggledDifficulty.isChecked = !toggledDifficulty.isChecked;
             if (toggledDifficultyLabel === 'snail') {
-                this.wordsPerMinute = this.wordsPerMinute === 30 ? 15 : 30;
+                this.wordsPerMinute = this.wordsPerMinute === 30 ? 10 : 30;
             }
         },
 
