@@ -104,7 +104,6 @@ export default {
         const mappingKey = Object.keys(letterComboMapping).reduce((prev, current) => {
             return letterCombo > current ? current : prev;
         });
-        console.log(mappingKey);
         let comboDifficulty = 'default';
         if (isSnail && !isOccultist) {
             comboDifficulty = 'snail';

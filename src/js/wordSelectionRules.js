@@ -110,6 +110,7 @@ export default {
             return this.doesWordRespectsRules(wordData, rule);
         });
         if (filteredWords.length < wordCount) {
+            console.log('not enough words');
             const remainingWords = wordCount - filteredWords.length;
             if (isOccultist) {
                 filteredWords.push(...wordDatas.slice(0, remainingWords));

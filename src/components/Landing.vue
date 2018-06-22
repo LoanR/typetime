@@ -256,21 +256,6 @@ export default {
             return [param, value, option];
         },
 
-        thematiseGame() {
-            if (this.nextWordsToType.length) {
-                return this.cleanQueryValue(this.nextWordsToType[this.nextWordsToType.length - 1]);
-            } else if (this.wordsToType.length) {
-                return this.cleanQueryValue(this.wordsToType[this.wordsToType.length - 1]);
-            }
-            return null;
-        },
-
-        cleanQueryValue(string) {
-            const trimmedStr = string.trim();
-            const firstSpaceId = trimmedStr.indexOf(' ');
-            return firstSpaceId !== -1 ? trimmedStr.substring(0, firstSpaceId) : trimmedStr;
-        },
-
         getParamFromMods(mods) {
             const m = mods.filter(mod => mod.param !== '');
             if (m.length === 1) {
@@ -292,12 +277,31 @@ export default {
             }
         },
 
+        thematiseGame() {
+            if (this.nextWordsToType.length) {
+                return this.nextWordsToType[this.nextWordsToType.length - 1];
+            } else if (this.wordsToType.length) {
+                return this.wordsToType[this.wordsToType.length - 1];
+            }
+            return null;
+        },
+
+        // cleanQueryValue(string) {
+        //     const trimmedStr = string.trim();
+        //     const firstSpaceId = trimmedStr.indexOf(' ');
+        //     return firstSpaceId !== -1 ? trimmedStr.substring(0, firstSpaceId) : trimmedStr;
+        // },
+
         async setModifiers() {
-            let mods = [this.cleanQueryValue((await this.requestWords(1, 'ml=', 'toujours', '&max=50', false))[0])];
-            mods.push(this.cleanQueryValue((await this.requestWords(1, 'ml=', 'voiture', '&max=50', false))[0]));
-            mods.push(this.cleanQueryValue((await this.requestWords(1, 'ml=', 'people', '&max=50', false))[0]));
-            mods.push(this.cleanQueryValue((await this.requestWords(1, 'ml=', 'places', '&max=50', false))[0]));
-            mods.push(this.cleanQueryValue((await this.requestWords(1, 'ml=', 'because', '&max=50', false))[0]));
+            const accentValues = ['*é*', '*è*', '*ê*', '*ë*', '*â*', '*ï*', '*ô*', '*û*'];
+            const rareAccentValues = ['*ä*', '*á*', '*å*', '*ë*', '*â*', '*í*', '*ö*', '*ó*', '*ü*', '*ú*'];
+            let mods = [(await this.requestWords(1, 'ml=', 'toujours', '&max=50', false))[0]];
+            mods.push((await this.requestWords(1, 'ml=', 'voiture', '&max=50', false))[0]);
+            mods.push((await this.requestWords(1, 'ml=', 'people', '&max=50', false))[0]);
+            mods.push((await this.requestWords(1, 'ml=', 'places', '&max=50', false))[0]);
+            mods.push((await this.requestWords(1, 'ml=', 'because', '&max=50', false))[0]);
+            mods.push((await this.requestWords(1, 'sp=', accentValues[random.randomNum(accentValues.length, 0)], '&max=50', false))[0]);
+            mods.push((await this.requestWords(1, 'sp=', rareAccentValues[random.randomNum(rareAccentValues.length, 0)], '&max=50', false))[0]);
             mods.forEach(mod => {
                 this.modifiers.push(
                     {
@@ -321,17 +325,6 @@ export default {
             if (toggledDifficultyLabel === 'snail') {
                 this.wordsPerMinute = this.wordsPerMinute === 30 ? 10 : 30;
             }
-        },
-
-        isAnEspagnolRun() {
-            const checkedMods = this.selectedModifiers.filter(mod => !!mod.isChecked);
-            if (checkedMods.length) {
-                const m = checkedMods.find(mod => mod.label === 'español');
-                if (m) {
-                    return m.param + m.value + m.option;
-                }
-            }
-            return false;
         },
 
         isSnail() {
