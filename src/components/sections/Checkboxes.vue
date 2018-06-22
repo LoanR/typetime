@@ -1,11 +1,18 @@
 <template>
-    <div class="modifier-container">
-        <checkbox-component v-for="mod in modifiers"
-            :key="mod.label"
-            :label="mod.label"
-            :isChecked="mod.isChecked"
-            @toggleCheck="toggleCheck">
-        </checkbox-component>
+    <div class="switch-category">
+        <div class="switch-container">
+            <checkbox-component v-for="sw in switches"
+                :key="sw.label"
+                :label="sw.label"
+                :isChecked="sw.isChecked"
+                :desc="sw.description"
+                @toggleCheck="toggleCheck"
+                @changeDesc="changeDesc">
+            </checkbox-component>
+        </div>
+        <p>
+            {{desc}}
+        </p>
     </div>
 </template>
 
@@ -18,11 +25,21 @@ export default {
         'checkbox-component': checkboxComponent,
     },
 
-    props: ['modifiers'],
+    props: ['switches'],
+
+    data() {
+        return {
+            desc: '',
+        };
+    },
 
     methods: {
         toggleCheck(modLabel) {
             this.$emit('toggleCheck', modLabel);
+        },
+
+        changeDesc(sw) {
+            this.desc = sw;
         },
     },
 };
@@ -31,8 +48,15 @@ export default {
 <style lang="scss" scoped>
     @import '../../styles/common';
 
-    .modifier-container {
+    .switch-category {
         display: flex;
+        align-items: center;
         justify-content: center;
+        flex-direction: column;
+
+        .switch-container {
+            display: flex;
+            justify-content: center;
+        }
     }
 </style>

@@ -17,15 +17,21 @@
                 <img src="../assets/logo.png">
                 <h1>{{title}}</h1>
             </header>
-            <button-component :content="startContent" @bigButtonClick="launchGame"></button-component>
-            <checkboxes-component
-                :modifiers="selectedModifiers"
-                @toggleCheck="toggleModifiers">
-            </checkboxes-component>
-            <checkboxes-component
-                :modifiers="difficulties"
-                @toggleCheck="toggleDifficulties">
-            </checkboxes-component>
+            <div>
+                <div>
+                    <button-component :content="startContent" @bigButtonClick="launchGame"></button-component>
+                </div>
+                <div>
+                    <checkboxes-component
+                        :switches="selectedModifiers"
+                        @toggleCheck="toggleModifiers">
+                    </checkboxes-component>
+                    <checkboxes-component
+                        :switches="difficulties"
+                        @toggleCheck="toggleDifficulties">
+                    </checkboxes-component>
+                </div>
+            </div>
             <nav>
                 <router-link v-bind:to="'/about'">About</router-link>
             </nav>
@@ -36,6 +42,7 @@
 
 <script>
 import random from '../js/random.js';
+import gameTuning from '../js/gameTuning.js';
 import wordSelectionRules from '../js/wordSelectionRules.js';
 
 import buttonComponent from './buttons/Button.vue';
@@ -60,70 +67,8 @@ export default {
             wantsToPlay: false,
             startContent: 'start',
             selectedModifiers: [],
-            modifiers: [
-                {
-                    label: 'lexical',
-                    param: 'rel_trg=',
-                    value: '',
-                    option: '',
-                    isChecked: false,
-                    modCluster: 'parameter',
-                },
-                {
-                    label: 'semantic',
-                    param: 'ml=',
-                    value: '',
-                    option: '',
-                    isChecked: false,
-                    modCluster: 'parameter',
-                },
-                {
-                    label: 'phonetic',
-                    param: 'sl=',
-                    value: '',
-                    option: '',
-                    isChecked: false,
-                    modCluster: 'parameter',
-                },
-                {
-                    label: 'rhyme',
-                    param: 'rel_rhy=',
-                    value: '',
-                    option: '',
-                    isChecked: false,
-                    modCluster: 'parameter',
-                },
-                {
-                    label: 'español',
-                    param: 'ml=',
-                    value: 'ahora',
-                    option: '&v=es',
-                    isChecked: false,
-                    modCluster: 'all',
-                },
-            ],
-            difficulties: [
-                {
-                    label: 'snail',
-                    isChecked: false,
-                    stringOrder: 3,
-                },
-                {
-                    label: 'economist',
-                    isChecked: false,
-                    stringOrder: 2,
-                },
-                {
-                    label: 'resilient',
-                    isChecked: false,
-                    stringOrder: 0,
-                },
-                {
-                    label: 'masochist',
-                    isChecked: false,
-                    stringOrder: 1,
-                },
-            ],
+            modifiers: gameTuning.getModifiers(),
+            difficulties: gameTuning.getDifficulties(),
             wordsPerMinute: 30,
             wordsToType: [],
             nextWordsToType: [],
@@ -229,8 +174,6 @@ export default {
 
         mayMutateCase(word) {
             const rand = random.randomNum(3, 0);
-            console.log(rand);
-            console.log(!rand);
             if (!rand && ((this.isMasochist() && this.gameLevel >= 3) || this.gameLevel >= 5)) {
                 return word.charAt(0).toUpperCase() + word.slice(1);
             }
@@ -321,6 +264,7 @@ export default {
                         option: '',
                         isChecked: false,
                         modCluster: 'word',
+                        description: 'Suggest the game to search for words around "' + mod + '".',
                     }
                 );
             });

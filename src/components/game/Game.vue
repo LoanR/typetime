@@ -47,12 +47,12 @@ export default {
                 const currentLetterElement = this.$refs.letterToType[this.letterToTypeIndex];
                 if (this.wordToTypeLetters[this.letterToTypeIndex] === this.entry) {
                     this.letterCombo += 1;
-                    this.levelScore += scoreCalculator.getLetterScore(this.entry, this.letterCombo, this.level, this.isSnail, this.isMasochist);
+                    this.levelScore += scoreCalculator.getLetterScore(this.entry, this.letterCombo, this.level, this.isSnail, this.isResilient, this.isMasochist);
                     this.stylizeWithClass(currentLetterElement, false, 'letter-error');
                     this.stylizeWithClass(currentLetterElement, true, 'letter-found');
                     this.nextLetterToFind();
                 } else {
-                    this.levelScore -= scoreCalculator.getLetterScore(this.entry, this.letterCombo, this.level, this.isSnail, this.isMasochist);
+                    this.levelScore -= scoreCalculator.getLetterScore(this.entry, this.letterCombo, this.level, this.isSnail, this.isResilient, this.isMasochist);
                     this.letterCombo = 0;
                     this.stylizeWithClass(currentLetterElement, true, 'letter-error');
                 }
@@ -63,6 +63,8 @@ export default {
                     }
                     if (!this.isEconomist && !this.isSnail) {
                         this.levelScore += parseInt((this.wordCountDown / 10).toFixed());
+                    } else if (this.isSnail) {
+                        this.levelScore += parseInt((this.wordCountDown / 20).toFixed());
                     }
                     this.letterToTypeIndex = 0;
                     if (this.wordToTypeIndex < this.words.length - 1) {
