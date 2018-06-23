@@ -1,5 +1,5 @@
 export default {
-    randomNum(range, start) {
+    randomNum(range, start = 0) {
         return Math.floor(Math.random() * range) + start;
     },
 };

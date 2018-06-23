@@ -16,6 +16,7 @@
 <script>
 import scoreCalculator from '../../js/scoreCalculator.js';
 import gameTuning from '../../js/gameTuning.js';
+import random from '../../js/random.js';
 
 export default {
     name: 'Game',
@@ -34,6 +35,7 @@ export default {
             previousEntry: '',
             wordCountDown: 0,
             interval: null,
+            showPreparation: false,
             canStillPlay: true,
             hundrethSecondMinute: 6000,
             levelScore: 0,
@@ -44,6 +46,45 @@ export default {
             scoreIndicatorStyle: null,
             comboIndicatorStyle: null,
             comboIndicatorStyle2: null,
+            loseSound: [
+                new Audio(require('../../assets/sounds/powerdown.wav')),
+                new Audio(require('../../assets/sounds/mk64_loser.mp3')),
+                new Audio(require('../../assets/sounds/tetrislose.mp3')),
+                new Audio(require('../../assets/sounds/mario1down.mp3')),
+                new Audio(require('../../assets/sounds/mariogameover.mp3')),
+                new Audio(require('../../assets/sounds/yoshiowow.mp3')),
+            ],
+            wordSound: [
+                new Audio(require('../../assets/sounds/mariocoin.mp3')),
+                new Audio(require('../../assets/sounds/completion.wav')),
+                new Audio(require('../../assets/sounds/ding.wav')),
+                new Audio(require('../../assets/sounds/crashselect.mp3')),
+                new Audio(require('../../assets/sounds/sonicring.mp3')),
+                new Audio(require('../../assets/sounds/mario1up.mp3')),
+            ],
+            errorSound: [
+                new Audio(require('../../assets/sounds/fireball.wav')),
+                new Audio(require('../../assets/sounds/denied.wav')),
+                new Audio(require('../../assets/sounds/kirby_powerdown.wav')),
+                new Audio(require('../../assets/sounds/moderatehit.wav')),
+                new Audio(require('../../assets/sounds/moderatehit2.wav')),
+                new Audio(require('../../assets/sounds/shellhit.wav')),
+                new Audio(require('../../assets/sounds/stronghit.mp3')),
+                new Audio(require('../../assets/sounds/basso.mp3')),
+                new Audio(require('../../assets/sounds/frog.mp3')),
+                new Audio(require('../../assets/sounds/funk.mp3')),
+                new Audio(require('../../assets/sounds/susomi.mp3')),
+            ],
+            levelSound: [
+                new Audio(require('../../assets/sounds/powerup.wav')),
+                new Audio(require('../../assets/sounds/sprout.wav')),
+                new Audio(require('../../assets/sounds/yoshiyoshi.wav')),
+                new Audio(require('../../assets/sounds/tetrisclear.mp3')),
+                new Audio(require('../../assets/sounds/pkbattlewin.mp3')),
+                new Audio(require('../../assets/sounds/zeldaitem.mp3')),
+                new Audio(require('../../assets/sounds/mariopowerup.mp3')),
+                new Audio(require('../../assets/sounds/mariowarp.mp3')),
+            ],
         };
     },
 
@@ -62,6 +103,7 @@ export default {
                     this.levelScore += this.scoreChange;
                     this.nextLetterToFind();
                 } else {
+                    this.errorSound[random.randomNum(this.errorSound.length)].play();
                     this.stylizeWithClass(currentLetterElement, true, 'letter-error');
                     this.errorStyle = window.setTimeout(this.stylizeWithClass, 100, currentLetterElement, false, 'letter-error');
                     this.stylizeWithClass(this.$refs.scoreIndicator, true, 'score-malus');
@@ -81,15 +123,20 @@ export default {
                     if (!this.isEconomist && !this.isSnail) {
                         timeScore = parseInt((this.wordCountDown / 10).toFixed()) * this.combo;
                     } else if (this.isSnail) {
-                        timeScore = parseInt((this.wordCountDown / 300).toFixed()) * this.combo;
+                        timeScore = parseInt((this.wordCountDown / 3000).toFixed()) * this.combo;
                     }
                     this.scoreChange += timeScore;
                     this.levelScore += timeScore;
                     this.letterToTypeIndex = 0;
                     if (this.wordToTypeIndex < this.words.length - 1) {
+                        this.wordSound[random.randomNum(this.wordSound.length)].play();
                         this.clearCountdown();
                         this.wordToTypeIndex += 1;
                     } else {
+                        if (!this.isResilient) {
+                            this.showPreparation = true;
+                        }
+                        this.levelSound[random.randomNum(this.levelSound.length)].play();
                         this.stylizeWithClass(this.$refs.comboIndicator, false, 'score-malus');
                         this.stylizeWithClass(this.$refs.comboIndicator, false, 'score-bonus');
                         this.stylizeWithClass(this.$refs.scoreIndicator, false, 'score-malus');
@@ -125,10 +172,12 @@ export default {
         },
 
         stylizeWithClass(element, shouldAdd, styleClass) {
-            if (shouldAdd) {
-                element.classList.add(styleClass);
-            } else {
-                element.classList.remove(styleClass);
+            if (element) {
+                if (shouldAdd) {
+                    element.classList.add(styleClass);
+                } else {
+                    element.classList.remove(styleClass);
+                }
             }
         },
 
@@ -146,7 +195,11 @@ export default {
             if (this.wordCountDown > 0) {
                 this.wordCountDown -= 1;
             } else {
-                this.timeExceeded();
+                if (this.canStillPlay && !this.showPreparation) {
+                    this.timeExceeded();
+                } else if (this.showPreparation) {
+                    this.clearCountdown();
+                }
             }
         },
 
@@ -161,6 +214,7 @@ export default {
         },
 
         timeExceeded() {
+            this.loseSound[random.randomNum(this.loseSound.length)].play();
             this.wordCountDown = 0;
             this.canStillPlay = false;
             this.clearCountdown();
@@ -210,6 +264,7 @@ export default {
         this.levelScore = this.previousScore;
         this.letterCombo = this.previousLetterCombo;
         this.combo = scoreCalculator.getFinalMultiplier(this.letterCombo, this.isSnail, this.isMasochist, this.isResilient, this.level);
+        this.showPreparation = false;
     },
 };
 </script>

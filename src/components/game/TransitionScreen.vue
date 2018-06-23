@@ -43,7 +43,10 @@ export default {
             ],
             buttonContent: 'rematch',
             snail: this.isSnail,
-
+            startSounds: [
+                new Audio(require('../../assets/sounds/mk_startrace.mp3')),
+                new Audio(require('../../assets/sounds/pkbattle.mp3')),
+            ],
         };
     },
 
@@ -92,6 +95,12 @@ export default {
             checkedDifficulties.sort((d1, d2) => d1.stringOrder - d2.stringOrder);
             return checkedDifficulties.length ? ('as a ' + checkedDifficulties.map(d => d.label).join(' ') + ',') : '';
         },
+    },
+
+    mounted() {
+        if (this.isGameLaunched) {
+            this.startSounds[random.randomNum(this.startSounds.length)].play();
+        }
     },
 };
 </script>
