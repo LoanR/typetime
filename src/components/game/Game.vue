@@ -53,6 +53,7 @@ export default {
                 new Audio(require('@/assets/sounds/mario1down.mp3')),
                 new Audio(require('@/assets/sounds/mariogameover.mp3')),
                 new Audio(require('@/assets/sounds/yoshiowow.mp3')),
+                new Audio(require('@/assets/sounds/pacmandies.mp3')),
             ],
             wordSound: [
                 new Audio(require('@/assets/sounds/mariocoin.mp3')),
@@ -64,7 +65,6 @@ export default {
             ],
             errorSound: [
                 new Audio(require('@/assets/sounds/denied.wav')),
-                new Audio(require('@/assets/sounds/fireb.wav')),
                 new Audio(require('@/assets/sounds/kirby_powerdown.wav')),
                 new Audio(require('@/assets/sounds/moderatehit.wav')),
                 new Audio(require('@/assets/sounds/moderatehit2.wav')),

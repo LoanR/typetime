@@ -63,6 +63,7 @@ export default {
             startSounds: [
                 new Audio(require('../../assets/sounds/mk_startrace.mp3')),
                 new Audio(require('../../assets/sounds/pkbattle.mp3')),
+                new Audio(require('../../assets/sounds/pacmanintro.mp3')),
             ],
         };
     },
@@ -109,7 +110,7 @@ export default {
 
         socialMessage() {
             const intro = this.difficultyDescription ? 'As a "' + this.difficultyDescription + '" ' : '';
-            return intro + 'I made a score of ' + this.gameScore + ' on Typetime. This game made my day. Now, come fight me!';
+            return intro + 'I made a score of ' + this.gameScore + ' points on Typetime. This game made my day. Now, come fight me!';
         },
 
         difficultyDescription() {
