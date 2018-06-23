@@ -50,7 +50,7 @@ module.exports = {
     // Paths
     assetsRoot: path.resolve(__dirname, '../docs'),
     assetsSubDirectory: 'static',
-    assetsPublicPath: '/Typetime-front/',
+    assetsPublicPath: '/',
 
     /**
      * Source Maps
