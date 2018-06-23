@@ -9,7 +9,7 @@
         <div>
             <span v-for="i in wordToTypeIndex" :key="i">•</span>
         </div>
-        <input :disabled="!canStillPlay" type="text" name="" ref="gameInput" @blur="reFocus" @input="compareInputToExpected" v-model="entry">
+        <input :disabled="!canStillPlay" type="text" name="" ref="gameInput" @input="compareInputToExpected" v-model="entry">
     </div>
 </template>
 
