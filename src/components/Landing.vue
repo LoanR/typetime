@@ -75,6 +75,11 @@ export default {
             startingWordsToTypeCount: 5,
             gameLevel: 1,
             apiEndpoint: 'https://api.datamuse.com/words?',
+            keySounds: [
+                new Audio(require('@/assets/sounds/key1.mp3')),
+                new Audio(require('@/assets/sounds/key2.mp3')),
+                new Audio(require('@/assets/sounds/key3.mp3')),
+            ],
         };
     },
 
@@ -83,6 +88,7 @@ export default {
             clearTimeout(this.timeOut);
             if (this.shouldShuffleTitle) {
                 this.shuffledTitle = this.shuffleTitle();
+                this.keySounds[random.randomNum(this.keySounds.length)].play();
                 this.timeOut = window.setTimeout(this.overwriteTitleCycle, random.randomNum(3000, 200));
             }
         },
