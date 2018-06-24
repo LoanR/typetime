@@ -22,6 +22,7 @@ export default {
         display: flex;
         align-items: center;
         justify-content: center;
+        padding: 0.5rem 1rem 2rem;
 
         .button-style {
             width: 12rem;

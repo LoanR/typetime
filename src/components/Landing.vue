@@ -10,22 +10,24 @@
                 @nextLevel="nextLevel"
                 @rematch="restartGame">
             </game-hub-component>
-            <div v-else>
+            <div class="landing-container" v-else>
                 <header>
                     <img src="../assets/logo.png">
                     <h1 @mouseover="resetTitle" @mouseout="restartShuffle">{{shuffledTitle}}</h1>
                 </header>
-                <div>
+                <div class="interactions">
                     <div>
                         <button-component :content="startContent" @bigButtonClick="launchGame"></button-component>
                     </div>
-                    <div>
+                    <div class="mod-diff-container">
                         <checkboxes-component
                             :switches="selectedModifiers"
+                            :titleCategory="modTitle"
                             @toggleCheck="toggleModifiers">
                         </checkboxes-component>
                         <checkboxes-component
                             :switches="difficulties"
+                            :titleCategory="diffTitle"
                             @toggleCheck="toggleDifficulties">
                         </checkboxes-component>
                     </div>
@@ -66,6 +68,8 @@ export default {
             firstTimeOut: 3000,
             wantsToPlay: false,
             startContent: 'start',
+            modTitle: 'Modifiers',
+            diffTitle: 'Difficulties',
             selectedModifiers: gameTuning.getEmptyMods(),
             modifiers: gameTuning.getModifiers(),
             difficulties: gameTuning.getDifficulties(),
@@ -356,20 +360,7 @@ export default {
     @import '../styles/common';
     @import '../styles/slides';
 
-    header {
-        height: 200px;
-        position: relative;
-        padding: 50px 0;
-        h1 {
-            margin: 0;
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-        }
-    }
-
-    section {
+    .slide-container {
         width: 100%;
         height: 100%;
         text-align: center;
@@ -377,26 +368,28 @@ export default {
         &>div {
             width: 100%;
             height: 100%;
-
         }
-    }
 
-    h1 {
-        font-weight: $bold-weight;
-        font-size: $big-font-size;
-    }
+        .landing-container {
 
-    ul {
-        list-style-type: none;
-        padding: 0;
-    }
-    li {
-        display: inline-block;
-        margin: 0 10px;
-    }
+            header {
+                height: 200px;
+                position: relative;
+                padding: 2rem;
+                h1 {
+                    font-weight: $bold-weight;
+                    font-size: $big-font-size;
+                    margin: 0;
+                    position: absolute;
+                    left: 50%;
+                    top: 50%;
+                    transform: translate(-50%, -50%);
+                }
+            }
 
-    .modifier-container {
-        display: flex;
-        justify-content: center;
+            nav {
+                padding: 0.5rem 1rem 2rem;
+            }
+        }
     }
 </style>

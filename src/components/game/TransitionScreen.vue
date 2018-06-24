@@ -4,31 +4,33 @@
             <div class="half-left-circle spinner" data-anim="base left"></div>
             <div class="half-right-circle spinner" data-anim="base right"></div>
         </div>
-        <p>{{message}}</p>
-        <p v-if="!isEndGame">Level {{level}}</p>
-        <div v-else>
-            <p>{{endGameScoreMessage}}</p>
-            <p>
-                You were not fast enough to type the letter "{{nemesisLetter}}" of the word "{{stuckWord}}" on level {{level}}.
-            </p>
-            <button-component :content="buttonContent" @bigButtonClick="returnHome"></button-component>
-            <social-sharing
-                url="https://loanr.github.io/Typetime-front/"
-                :title="socialMessage"
-                description="What a funny game!"
-                quote=""
-                hashtags="typing,nofilter,waw"
-                twitter-user=""
-                inline-template>
-                <div>
-                    <network network="facebook">
-                        <i class="fa fa-facebook"></i> Facebook
-                    </network>
-                    <network network="twitter">
-                        <i class="fa fa-twitter"></i> Twitter
-                    </network>
-                </div>
-            </social-sharing>
+        <div class="messages-container">
+            <p>{{message}}</p>
+            <p v-if="!isEndGame">Level {{level}}</p>
+            <div v-else>
+                <p>{{endGameScoreMessage}}</p>
+                <p>
+                    You were not fast enough to type the letter "{{nemesisLetter}}" of the word "{{stuckWord}}" on level {{level}}.
+                </p>
+                <button-component :content="buttonContent" @bigButtonClick="returnHome"></button-component>
+                <social-sharing
+                    url="https://loanr.github.io/Typetime-front/"
+                    :title="socialMessage"
+                    description="What a funny game!"
+                    quote=""
+                    hashtags="typing,nofilter,waw"
+                    twitter-user=""
+                    inline-template>
+                    <div class="socials">
+                        <network network="facebook">
+                            <i class="fa fa-facebook"></i>
+                        </network>
+                        <network network="twitter">
+                            <i class="fa fa-twitter"></i>
+                        </network>
+                    </div>
+                </social-sharing>
+            </div>
         </div>
     </div>
 </template>
@@ -157,6 +159,7 @@ export default {
             animation-iteration-count: 1;
             animation-fill-mode: forwards;
             animation-timing-function: linear;
+            z-index: -1;
         }
 
         .circle-spinner {
@@ -187,6 +190,15 @@ export default {
             .half-right-circle {
                 animation-duration: 0.8s;
                 animation-name: right-spin;
+            }
+        }
+
+        .messages-container {
+            max-width: 400px;
+
+            .socials {
+                display: flex;
+                justify-content: space-evenly;
             }
         }
     }
