@@ -147,7 +147,8 @@ export default {
                 this.wordsToType = await this.requestWords(this.startingWordsToTypeCount, query[0], query[1], query[2]);
                 this.requestNextWordsNoWait(this.wordsToTypeCount + 1);
             } catch (err) {
-                window.alert(err);
+                this.restartGame();
+                window.alert('We\'ve encountered an error, try to launch a new party...');
             }
         },
 
@@ -185,7 +186,10 @@ export default {
                 return response.json();
             }).then(unformattedData => {
                 this.nextWordsToType = this.selectWords(unformattedData, Math.min(wordCount, unformattedData.length));
-            }).catch((err) => window.alert(err));
+            }).catch(() => {
+                this.restartGame();
+                window.alert('We\'ve encountered an error, try to launch a new party...');
+            });
         },
 
         selectWords(jsonResponse, wordCount, filterAgainstRules = true) {

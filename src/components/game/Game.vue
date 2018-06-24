@@ -278,7 +278,7 @@ export default {
     mounted() {
         this.$refs.gameInput.focus();
         this.stylizeWithClass(this.$refs.letterToType[this.letterToTypeIndex], true, 'letter-to-type');
-        // this.launchNewCountdown();
+        this.launchNewCountdown();
         this.wordCountDown += this.timeAccount;
         this.levelScore = this.previousScore;
         this.letterCombo = this.previousLetterCombo;
@@ -343,7 +343,7 @@ export default {
                 left: 0;
                 bottom: -0.6rem;
                 background-color: $light-base-color;
-                animation: cursor-pulse 0.7s linear infinite;
+                animation: cursor-pulse 1s linear infinite;
             }
 
             .letter-found {
