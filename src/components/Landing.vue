@@ -79,11 +79,11 @@ export default {
     },
 
     methods: {
-        overwriteTitle() {
+        overwriteTitleCycle() {
             clearTimeout(this.timeOut);
             if (this.shouldShuffleTitle) {
                 this.shuffledTitle = this.shuffleTitle();
-                this.timeOut = window.setTimeout(this.overwriteTitle, random.randomNum(3000, 200));
+                this.timeOut = window.setTimeout(this.overwriteTitleCycle, random.randomNum(3000, 200));
             }
         },
 
@@ -105,7 +105,7 @@ export default {
 
         restartShuffle() {
             this.shouldShuffleTitle = true;
-            this.overwriteTitle();
+            this.overwriteTitleCycle();
         },
 
         toggleModifiers(toggledModifierLabel) {
@@ -130,6 +130,7 @@ export default {
 
         async launchGame() {
             try {
+                this.shouldShuffleTitle = false;
                 this.shouldSlideFromRight = true;
                 this.wantsToPlay = true;
                 const query = this.getUrlQuery();
@@ -152,7 +153,11 @@ export default {
                         }
                     }
                     const response = await fetch(this.apiEndpoint + queryParameter + queryValue + option + '&md=f');
-                    unformattedData.push(...await response.json());
+                    if (i > 1) {
+                        unformattedData.unshift(...await response.json());
+                    } else {
+                        unformattedData.push(...await response.json());
+                    }
                     i += 1;
                 }
                 return this.selectWords(unformattedData, wordCount, filterAgainstRules);
@@ -196,7 +201,7 @@ export default {
             while (this.nextWordsToType.length < this.wordsToTypeCount) {
                 const remainingWordCount = this.wordsToTypeCount - this.nextWordsToType.length;
                 const query = this.getUrlQuery();
-                this.nextWordsToType.push(...await this.requestWords(remainingWordCount, query[0], query[1], query[2]));
+                this.nextWordsToType.unshift(...await this.requestWords(remainingWordCount, query[0], query[1], query[2]));
             }
             this.wordsToType = this.nextWordsToType;
             this.requestNextWordsNoWait(this.wordsToTypeCount + 1);
@@ -250,18 +255,31 @@ export default {
             return null;
         },
 
-        async setModifiers() {
+        async selectModifiers() {
+            this.modifiers.push(...await this.getNewModifiers());
+            for (let i = 0; i < 4; i++) {
+                this.selectedModifiers.splice(i, 1, this.modifiers.splice(random.randomNum(this.modifiers.length, 0), 1)[0]);
+            }
+        },
+
+        async getNewModifiers() {
             const accentValues = ['*é*', '*è*', '*ê*', '*ë*', '*â*', '*ï*', '*ô*', '*û*'];
             const rareAccentValues = ['*ä*', '*á*', '*å*', '*ë*', '*â*', '*í*', '*ö*', '*ó*', '*ü*', '*ú*'];
-            let mods = [(await this.requestWords(1, 'ml=', 'toujours', '&max=50', false))[0]];
-            mods.push((await this.requestWords(1, 'ml=', 'voiture', '&max=50', false))[0]);
-            mods.push((await this.requestWords(1, 'ml=', 'people', '&max=50', false))[0]);
-            mods.push((await this.requestWords(1, 'ml=', 'places', '&max=50', false))[0]);
-            mods.push((await this.requestWords(1, 'ml=', 'because', '&max=50', false))[0]);
-            mods.push((await this.requestWords(1, 'sp=', accentValues[random.randomNum(accentValues.length, 0)], '&max=50', false))[0]);
-            mods.push((await this.requestWords(1, 'sp=', rareAccentValues[random.randomNum(rareAccentValues.length, 0)], '&max=50', false))[0]);
-            mods.forEach(mod => {
-                this.modifiers.push(
+            const modWords = [
+                {param: 'ml=', value: 'toujours'},
+                {param: 'ml=', value: 'voiture'},
+                {param: 'ml=', value: 'people'},
+                {param: 'ml=', value: 'because'},
+                {param: 'sp=', value: accentValues[random.randomNum(accentValues.length, 0)]},
+                {param: 'sp=', value: rareAccentValues[random.randomNum(rareAccentValues.length, 0)]},
+            ];
+            let mods = [];
+            for (const modWord of modWords) {
+                mods = await this.addWordModifier(mods, modWord.param, modWord.value);
+            }
+            const modsToAdd = [];
+            for (const mod of mods) {
+                modsToAdd.push(
                     {
                         label: '"' + mod + '"',
                         param: '',
@@ -272,10 +290,17 @@ export default {
                         description: 'Suggest the game to search for words around "' + mod + '".',
                     }
                 );
-            });
-            for (let i = 0; i < 4; i++) {
-                this.selectedModifiers.splice(i, 1, this.modifiers.splice(random.randomNum(this.modifiers.length, 0), 1)[0]);
             }
+            return modsToAdd;
+        },
+
+        async addWordModifier(mods, param, value) {
+            const word = (await this.requestWords(1, param, value, '', false))[0];
+            if (mods.indexOf(word) !== -1) {
+                return null;
+            }
+            mods.push(word);
+            return mods;
         },
 
         toggleDifficulties(toggledDifficultyLabel) {
@@ -289,6 +314,14 @@ export default {
         restartGame() {
             this.shouldSlideFromRight = false;
             this.wantsToPlay = false;
+            this.shouldShuffleTitle = true;
+            this.overwriteTitleCycle();
+            this.selectedModifiers = gameTuning.getEmptyMods();
+            this.modifiers = gameTuning.getModifiers();
+            this.selectModifiers();
+            this.gameLevel = 1;
+            this.wordsToType = [];
+            this.nextWordsToType = [];
         },
     },
 
@@ -305,10 +338,10 @@ export default {
     mounted() {
         if (this.shouldShuffleTitle) {
             this.timeOut = window.setTimeout(() => {
-                this.overwriteTitle();
+                this.overwriteTitleCycle();
             }, this.firstTimeOut);
         };
-        this.setModifiers();
+        this.selectModifiers();
     },
 };
 </script>
