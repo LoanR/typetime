@@ -109,14 +109,14 @@ export default {
         },
 
         socialMessage() {
-            const intro = this.difficultyDescription ? this.difficultyDescription.charAt(0).toUpperCase() : '';
+            const intro = this.difficultyDescription ? this.difficultyDescription.charAt(0).toUpperCase() + this.difficultyDescription.slice(1) : '';
             return intro + 'I made a score of ' + this.gameScore + ' points on Typetime. This game made my day. Now, come fight me!';
         },
 
         difficultyDescription() {
             let checkedDifficulties = this.difficulties.filter(d => d.isChecked);
             checkedDifficulties.sort((d1, d2) => d1.stringOrder - d2.stringOrder);
-            return checkedDifficulties.length ? ('as a "' + checkedDifficulties.map(d => d.label).join(' ') + '",') : '';
+            return checkedDifficulties.length ? ('as ' + checkedDifficulties[0].article + ' "' + checkedDifficulties.map(d => d.label).join(' ') + '", ') : '';
         },
     },
 

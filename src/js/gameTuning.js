@@ -68,24 +68,28 @@ const modifiers = [
 const difficulties = [
     {
         label: 'snail',
+        article: 'a',
         isChecked: false,
         stringOrder: 3,
         description: 'Need more time to type a word? This also mean smaller score combo...',
     },
     {
         label: 'economist',
+        article: 'an',
         isChecked: false,
         stringOrder: 2,
         description: 'Keep time between each words but no time bonus score for you.',
     },
     {
         label: 'resilient',
+        article: 'a',
         isChecked: false,
         stringOrder: 0,
         description: 'No break time between each levels but a really better score multiplier...',
     },
     {
         label: 'masochist',
+        article: 'a',
         isChecked: false,
         stringOrder: 1,
         description: 'They say there is more point to do when you\'re in hell...',
