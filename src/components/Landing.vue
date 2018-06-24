@@ -12,7 +12,7 @@
             </game-hub-component>
             <div class="landing-container" v-else>
                 <header>
-                    <img src="../assets/logo.png">
+                    <img src="../assets/images/typetime_logo.svg">
                     <h1 @mouseover="resetTitle" @mouseout="restartShuffle">{{shuffledTitle}}</h1>
                 </header>
                 <div class="interactions">
@@ -380,6 +380,11 @@ export default {
                 height: 200px;
                 position: relative;
                 padding: 2rem;
+
+                img {
+                    max-width: 200px;
+                }
+
                 h1 {
                     font-weight: $bold-weight;
                     font-size: $big-font-size;
