@@ -3,11 +3,13 @@
         <p class="awaited-word">
             <span v-for="(letter, index) in wordToTypeLetters" :key="index" ref="letterToType">{{letter}}</span>
         </p>
-        <p ref="countdown">{{countdownDisplay}}</p>
-        <p>Level {{level}}</p>
-        <p><span class="score-default" ref="comboIndicator">{{combo}}</span><span>Score: {{levelScore}}</span><span class="score-default" ref="scoreIndicator">{{scoreChange}}</span></p>
-        <div>
-            <span v-for="i in wordToTypeIndex" :key="i">•</span>
+        <p class="countdown" ref="countdown">{{countdownDisplay}}</p>
+        <div class="score-related">
+            <p class="game-level">Level {{level}}</p>
+            <p class="game-score"><span class="score-default combo" ref="comboIndicator">Combo &times;{{combo}}</span><span>{{levelScore}} pts</span><span class="score-default bonus" ref="scoreIndicator">{{scoreChange}}</span></p>
+            <div class="word-indicators">
+                <span v-for="i in words.length" :key="i" ref="wordIndicator">•</span>
+            </div>
         </div>
         <input :disabled="!canStillPlay" type="text" name="" ref="gameInput" @input="compareInputToExpected" v-model="entry">
     </div>
@@ -131,9 +133,13 @@ export default {
                     this.levelScore += timeScore;
                     this.letterToTypeIndex = 0;
                     if (this.wordToTypeIndex < this.words.length - 1) {
+                        this.stylizeWithClass(this.$refs.wordIndicator[this.wordToTypeIndex], true, 'word-found');
                         this.wordSound[random.randomNum(this.wordSound.length)].play();
                         this.wordToTypeIndex += 1;
                     } else {
+                        for (let span of this.$refs.wordIndicator) {
+                            this.stylizeWithClass(span, false, 'word-found');
+                        }
                         if (!this.isResilient) {
                             this.showPreparation = true;
                         }
@@ -272,7 +278,7 @@ export default {
     mounted() {
         this.$refs.gameInput.focus();
         this.stylizeWithClass(this.$refs.letterToType[this.letterToTypeIndex], true, 'letter-to-type');
-        this.launchNewCountdown();
+        // this.launchNewCountdown();
         this.wordCountDown += this.timeAccount;
         this.levelScore = this.previousScore;
         this.letterCombo = this.previousLetterCombo;
@@ -292,9 +298,16 @@ export default {
         100% {font-size: $big-font-size; color: $contrast-color;}
     }
 
-    @keyframes pulsate {
+    @keyframes countdown-pulsate {
         0% {color: $warning-color;}
         80% {color: $contrast-color;}
+    }
+
+    @keyframes cursor-pulse {
+        0% {background-color: $light-base-color;}
+        49% {background-color: $light-base-color;}
+        50% {background-color: $base-color}
+        99% {background-color: $base-color}
     }
 
     .game-window {
@@ -316,6 +329,10 @@ export default {
                 font-size: $big-font-size;
                 color: $contrast-color;
                 position: relative;
+
+                @media all and (max-width: 500px) {
+                    font-size: 10vw;
+                }
             }
 
             .letter-to-type::after {
@@ -326,6 +343,7 @@ export default {
                 left: 0;
                 bottom: -0.6rem;
                 background-color: $light-base-color;
+                animation: cursor-pulse 0.7s linear infinite;
             }
 
             .letter-found {
@@ -338,28 +356,72 @@ export default {
             }
         }
 
+        .countdown {
+            @media all and (max-width: 500px) {
+                font-size: 4vw;
+            }
+        }
+
         .near-end {
-            animation: pulsate 0.2s linear infinite;
+            animation: countdown-pulsate 0.2s linear infinite;
+        }
+
+        .score-related {
+            color: $light-base-color;
+
+            @media all and (max-width: 500px) {
+                font-size: 4vw;
+            }
+
+            .game-level, .game-score {
+                margin: 30px;
+            }
+
+            .game-score {
+                position: relative;
+            }
+
+            .score-default {
+                transition: color 0.2s cubic-bezier(0.5,0,0,1);
+                display: inline-block;
+                position: absolute;
+
+                &.combo {
+                    left: -90px;
+                    top: -17px;
+                    transform: rotate(-4deg);
+                }
+
+                &.bonus {
+                    right: -20px;
+                    top: -20px;
+                    transform: rotate(4deg);
+                }
+            }
+
+            .word-indicators .word-found {
+                color: $contrast-color;
+            }
+
+            .score-malus {
+                color: $warning-color;
+                transition: none;
+            }
+
+            .score-bonus {
+                color: $brand-color;
+                font-size: calc(#{$base-font-size} + 0.3rem);
+                transition: none;
+
+                @media all and (max-width: 500px) {
+                    font-size: 5vw;
+                }
+            }
         }
 
         input {
             position: absolute;
             top: -50px;
-        }
-
-        .score-default {
-            transition: color 0.2s cubic-bezier(0.5,0,0,1);
-        }
-
-        .score-malus {
-            color: $warning-color;
-            transition: none;
-        }
-
-        .score-bonus {
-            color: $brand-color;
-            font-size: calc(#{$base-font-size} + 0.3rem);
-            transition: none;
         }
     }
 </style>
