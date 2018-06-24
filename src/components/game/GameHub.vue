@@ -27,6 +27,7 @@
 
 <script>
 import gameTuning from '../../js/gameTuning.js';
+import random from '../../js/random.js';
 
 import gameComponent from './Game.vue';
 import transitionScreenComponent from './TransitionScreen.vue';
@@ -53,6 +54,11 @@ export default {
             endGameScore: null,
             nemesisLetter: '',
             stuckWord: '',
+            startSignals: [
+                new Audio(require('../../assets/sounds/elevatorbell.mp3')),
+                new Audio(require('../../assets/sounds/microwavebell.mp3')),
+                new Audio(require('../../assets/sounds/hotelbell.mp3')),
+            ],
         };
     },
 
@@ -81,6 +87,7 @@ export default {
         isGameReady() {
             window.clearInterval(this.waitingTime);
             if (this.words.length === this.levelWordsCount) {
+                this.startSignals[random.randomNum(this.startSignals.length)].play();
                 this.playLevel = true;
             } else {
                 this.waitThenExecute(this.isGameReady, 500);

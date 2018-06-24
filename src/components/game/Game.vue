@@ -3,7 +3,7 @@
         <p class="awaited-word">
             <span v-for="(letter, index) in wordToTypeLetters" :key="index" ref="letterToType">{{letter}}</span>
         </p>
-        <p>{{countdownDisplay}}</p>
+        <p ref="countdown">{{countdownDisplay}}</p>
         <p>Level {{level}}</p>
         <p><span class="score-default" ref="comboIndicator">{{combo}}</span><span>Score: {{levelScore}}</span><span class="score-default" ref="scoreIndicator">{{scoreChange}}</span></p>
         <div>
@@ -46,6 +46,7 @@ export default {
             scoreIndicatorStyle: null,
             comboIndicatorStyle: null,
             comboIndicatorStyle2: null,
+            countdownEnd: new Audio(require('@/assets/sounds/countdownend.mp3')),
             loseSound: [
                 new Audio(require('@/assets/sounds/powerdown.wav')),
                 new Audio(require('@/assets/sounds/mk64_loser.mp3')),
@@ -53,22 +54,22 @@ export default {
                 new Audio(require('@/assets/sounds/mario1down.mp3')),
                 new Audio(require('@/assets/sounds/mariogameover.mp3')),
                 new Audio(require('@/assets/sounds/yoshiowow.mp3')),
+                new Audio(require('@/assets/sounds/pacmandies.mp3')),
             ],
             wordSound: [
                 new Audio(require('@/assets/sounds/mariocoin.mp3')),
-                new Audio(require('@/assets/sounds/completion.wav')),
-                new Audio(require('@/assets/sounds/ding.wav')),
+                new Audio(require('@/assets/sounds/completion.mp3')),
+                new Audio(require('@/assets/sounds/ding.mp3')),
                 new Audio(require('@/assets/sounds/crashselect.mp3')),
                 new Audio(require('@/assets/sounds/sonicring.mp3')),
                 new Audio(require('@/assets/sounds/mario1up.mp3')),
             ],
             errorSound: [
                 new Audio(require('@/assets/sounds/denied.wav')),
-                new Audio(require('@/assets/sounds/fireb.wav')),
-                new Audio(require('@/assets/sounds/kirby_powerdown.wav')),
-                new Audio(require('@/assets/sounds/moderatehit.wav')),
-                new Audio(require('@/assets/sounds/moderatehit2.wav')),
-                new Audio(require('@/assets/sounds/shellhit.wav')),
+                new Audio(require('@/assets/sounds/kirby_powerdown.mp3')),
+                new Audio(require('@/assets/sounds/moderatehit.mp3')),
+                new Audio(require('@/assets/sounds/moderatehit2.mp3')),
+                new Audio(require('@/assets/sounds/shellhit.mp3')),
                 new Audio(require('@/assets/sounds/stronghit.mp3')),
                 new Audio(require('@/assets/sounds/basso.mp3')),
                 new Audio(require('@/assets/sounds/frog.mp3')),
@@ -116,6 +117,7 @@ export default {
                     this.comboIndicatorStyle = window.setTimeout(this.stylizeWithClass, 300, this.$refs.comboIndicator, false, 'score-malus');
                 }
                 if (this.letterToTypeIndex === this.wordToType.length) {
+                    this.clearCountdown();
                     for (let span of this.$refs.letterToType) {
                         this.stylizeWithClass(span, false, 'letter-found');
                     }
@@ -130,7 +132,6 @@ export default {
                     this.letterToTypeIndex = 0;
                     if (this.wordToTypeIndex < this.words.length - 1) {
                         this.wordSound[random.randomNum(this.wordSound.length)].play();
-                        this.clearCountdown();
                         this.wordToTypeIndex += 1;
                     } else {
                         if (!this.isResilient) {
@@ -191,10 +192,17 @@ export default {
             }
         },
 
-        modifyCountdownDisplay() {
+        modifyCountdown() {
             if (this.wordCountDown > 0) {
+                if (this.wordCountDown < this.allotedTime / 2) {
+                    this.countdownEnd.play();
+                    if (!this.$refs.countdown.classList.contains('near-end')) {
+                        this.$refs.countdown.classList.add('near-end');
+                    }
+                }
                 this.wordCountDown -= 1;
             } else {
+                this.$refs.countdown.classList.remove('near-end');
                 if (this.canStillPlay && !this.showPreparation) {
                     this.timeExceeded();
                 } else if (this.showPreparation) {
@@ -204,20 +212,25 @@ export default {
         },
 
         launchNewCountdown() {
+            this.$refs.countdown.classList.remove('near-end');
             let countDown = this.isEconomist ? (this.allotedTime + this.wordCountDown) : this.allotedTime;
             this.wordCountDown = countDown > 3000 ? 3000 : parseInt(countDown.toFixed());
-            this.interval = window.setInterval(this.modifyCountdownDisplay, 10);
+            if (!this.showPreparation) {
+                this.interval = window.setInterval(this.modifyCountdown, 10);
+            };
         },
 
         clearCountdown() {
+            this.countdownEnd.pause();
+            this.countdownEnd.currentTime = 0;
             window.clearInterval(this.interval);
         },
 
         timeExceeded() {
             this.loseSound[random.randomNum(this.loseSound.length)].play();
             this.wordCountDown = 0;
-            this.canStillPlay = false;
             this.clearCountdown();
+            this.canStillPlay = false;
             this.$emit('gameOver', {
                 totalScore: parseInt(this.levelScore.toFixed()),
                 nemesisLetter: this.wordToTypeLetters[this.letterToTypeIndex],
@@ -279,6 +292,11 @@ export default {
         100% {font-size: $big-font-size; color: $contrast-color;}
     }
 
+    @keyframes pulsate {
+        0% {color: $warning-color;}
+        80% {color: $contrast-color;}
+    }
+
     .game-window {
         position: relative;
         overflow: hidden;
@@ -318,6 +336,10 @@ export default {
             .letter-error {
                 animation: splat 0.2s 1;
             }
+        }
+
+        .near-end {
+            animation: pulsate 0.2s linear infinite;
         }
 
         input {

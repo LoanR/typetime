@@ -118,9 +118,9 @@ export default {
             const remainingWords = wordCount - filteredWords.length;
             wordDatas.sort(this.frequencyComparison);
             if (ismasochist) {
-                filteredWords.push(...wordDatas.slice(0, remainingWords));
+                filteredWords.unshift(...wordDatas.slice(0, remainingWords));
             } else {
-                filteredWords.push(...wordDatas.slice(-remainingWords));
+                filteredWords.unshift(...wordDatas.slice(-remainingWords));
             }
         }
         return filteredWords;
