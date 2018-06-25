@@ -1,5 +1,6 @@
 # Typetime
 > Touch typing game
+
 [Typetime](https://loanr.github.io/Typetime-front/)
 
 ## Project
@@ -9,8 +10,8 @@ On the first level 5 words needs to be type at a ratio of 30 words per minute.
 Each level needs one additional word typed and the ratio is also raised by one per minute. The complexity of words is also raised on each new level.
 An error should be notified to the player and if the countdown reaches 0.00, it's game over.
 
-##Realisation
-This game is a Vuejs front-only project.
+## Realisation
+This game is a Vuejs front-only project with SCSS stylesheets.
 Not many pages are required so it's a kinda single page app.
 It's deployed on GitHub Pages so paths and Webpack have been configured this way.
 The word selection is done through requests on the [Datamuse API](http://www.datamuse.com/api/) which is a great ressource for generating lists of linked words.
@@ -30,4 +31,5 @@ The idea was to follow the configuration - interpretation schema but my problem 
 
 ## Instruction
 Well, nothing in particular, just choose your game type on the landing screen and play! And above all, have fun!
+
 [Typetime](https://loanr.github.io/Typetime-front/)
