@@ -100,68 +100,88 @@ export default {
             if (this.entry.length) {
                 const currentLetterElement = this.$refs.letterToType[this.letterToTypeIndex];
                 if (this.wordToTypeLetters[this.letterToTypeIndex] === this.entry) {
-                    this.letterCombo += 1;
-                    this.scoreChange = this.getLetterScore(this.entry, this.letterCombo, this.level, this.isSnail, this.isResilient, this.isMasochist);
-                    this.stylizeWithClass(currentLetterElement, true, 'letter-found');
-                    this.levelScore += this.scoreChange;
-                    this.nextLetterToFind();
+                    this.letterTypedCorrect(currentLetterElement);
                 } else {
-                    this.errorSound[random.randomNum(this.errorSound.length)].play();
-                    this.stylizeWithClass(currentLetterElement, true, 'letter-error');
-                    this.errorStyle = window.setTimeout(this.stylizeWithClass, 100, currentLetterElement, false, 'letter-error');
-                    this.stylizeWithClass(this.$refs.scoreIndicator, true, 'score-malus');
-                    this.scoreIndicatorStyle = window.setTimeout(this.stylizeWithClass, 300, this.$refs.scoreIndicator, false, 'score-malus');
-                    this.scoreChange = -this.getLetterScore(this.entry, this.letterCombo, this.level, this.isSnail, this.isResilient, this.isMasochist);
-                    this.levelScore += this.scoreChange;
-                    this.stylizeWithClass(this.$refs.comboIndicator, true, 'score-malus');
-                    this.letterCombo = 0;
-                    this.combo = scoreCalculator.getFinalMultiplier(this.letterCombo, this.isSnail, this.isMasochist, this.isResilient, this.level);
-                    this.comboIndicatorStyle = window.setTimeout(this.stylizeWithClass, 300, this.$refs.comboIndicator, false, 'score-malus');
+                    this.letterTypedIncorrect(currentLetterElement);
                 }
                 if (this.letterToTypeIndex === this.wordToType.length) {
-                    this.clearCountdown();
-                    for (let span of this.$refs.letterToType) {
-                        this.stylizeWithClass(span, false, 'letter-found');
-                    }
-                    let timeScore = 0;
-                    if (!this.isEconomist && !this.isSnail) {
-                        timeScore = parseInt((this.wordCountDown / 10).toFixed()) * this.combo;
-                    } else if (this.isSnail) {
-                        timeScore = parseInt((this.wordCountDown / 3000).toFixed()) * this.combo;
-                    }
-                    this.scoreChange += timeScore;
-                    this.levelScore += timeScore;
-                    this.letterToTypeIndex = 0;
-                    if (this.wordToTypeIndex < this.words.length - 1) {
-                        this.stylizeWithClass(this.$refs.wordIndicator[this.wordToTypeIndex], true, 'word-found');
-                        this.wordSound[random.randomNum(this.wordSound.length)].play();
-                        this.wordToTypeIndex += 1;
-                    } else {
-                        for (let span of this.$refs.wordIndicator) {
-                            this.stylizeWithClass(span, false, 'word-found');
-                        }
-                        if (!this.isResilient) {
-                            this.showPreparation = true;
-                        }
-                        this.levelSound[random.randomNum(this.levelSound.length)].play();
-                        this.stylizeWithClass(this.$refs.comboIndicator, false, 'score-malus');
-                        this.stylizeWithClass(this.$refs.comboIndicator, false, 'score-bonus');
-                        this.stylizeWithClass(this.$refs.scoreIndicator, false, 'score-malus');
-                        this.$emit('nextLevel', {
-                            timeAccount: this.wordCountDown,
-                            levelScore: this.levelScore,
-                            letterCombo: this.letterCombo,
-                        });
-                        window.clearTimeout(this.errorStyle);
-                        window.clearTimeout(this.scoreIndicatorStyle);
-                        window.clearTimeout(this.comboIndicatorStyle);
-                        window.clearTimeout(this.comboIndicatorStyle2);
-                        this.wordToTypeIndex = 0;
-                    }
-                    this.setNewWordEnv(this.$refs.letterToType[this.letterToTypeIndex], true, 'letter-to-type');
+                    this.wordCompleted();
                 }
             }
             this.entry = '';
+        },
+
+        letterTypedCorrect(letterElement) {
+            this.letterCombo += 1;
+            this.scoreChange = this.getLetterScore(this.entry, this.letterCombo, this.level, this.isSnail, this.isResilient, this.isMasochist);
+            this.stylizeWithClass(letterElement, true, 'letter-found');
+            this.levelScore += this.scoreChange;
+            this.nextLetterToFind();
+        },
+
+        letterTypedIncorrect(letterElement) {
+            this.errorSound[random.randomNum(this.errorSound.length)].play();
+            this.stylizeWithClass(letterElement, true, 'letter-error');
+            this.errorStyle = window.setTimeout(this.stylizeWithClass, 100, letterElement, false, 'letter-error');
+            this.stylizeWithClass(this.$refs.scoreIndicator, true, 'score-malus');
+            this.scoreIndicatorStyle = window.setTimeout(this.stylizeWithClass, 300, this.$refs.scoreIndicator, false, 'score-malus');
+            this.scoreChange = -this.getLetterScore(this.entry, this.letterCombo, this.level, this.isSnail, this.isResilient, this.isMasochist);
+            this.levelScore += this.scoreChange;
+            this.stylizeWithClass(this.$refs.comboIndicator, true, 'score-malus');
+            this.letterCombo = 0;
+            this.combo = scoreCalculator.getFinalMultiplier(this.letterCombo, this.isSnail, this.isMasochist, this.isResilient, this.level);
+            this.comboIndicatorStyle = window.setTimeout(this.stylizeWithClass, 300, this.$refs.comboIndicator, false, 'score-malus');
+        },
+
+        wordCompleted() {
+            this.clearCountdown();
+            for (let span of this.$refs.letterToType) {
+                this.stylizeWithClass(span, false, 'letter-found');
+            }
+            let timeScore = 0;
+            if (!this.isEconomist && !this.isSnail) {
+                timeScore = parseInt((this.wordCountDown / 10).toFixed()) * this.combo;
+            } else if (this.isSnail) {
+                timeScore = parseInt((this.wordCountDown / 3000).toFixed()) * this.combo;
+            }
+            this.scoreChange += timeScore;
+            this.levelScore += timeScore;
+            this.letterToTypeIndex = 0;
+            if (this.wordToTypeIndex < this.words.length - 1) {
+                this.levelWordsRemains();
+            } else {
+                this.moveToNextLevel();
+            }
+            this.setNewWordEnv(this.$refs.letterToType[this.letterToTypeIndex], true, 'letter-to-type');
+        },
+
+        levelWordsRemains() {
+            this.stylizeWithClass(this.$refs.wordIndicator[this.wordToTypeIndex], true, 'word-found');
+            this.wordSound[random.randomNum(this.wordSound.length)].play();
+            this.wordToTypeIndex += 1;
+        },
+
+        moveToNextLevel() {
+            for (let span of this.$refs.wordIndicator) {
+                this.stylizeWithClass(span, false, 'word-found');
+            }
+            if (!this.isResilient) {
+                this.showPreparation = true;
+            }
+            this.levelSound[random.randomNum(this.levelSound.length)].play();
+            this.stylizeWithClass(this.$refs.comboIndicator, false, 'score-malus');
+            this.stylizeWithClass(this.$refs.comboIndicator, false, 'score-bonus');
+            this.stylizeWithClass(this.$refs.scoreIndicator, false, 'score-malus');
+            this.$emit('nextLevel', {
+                timeAccount: this.wordCountDown,
+                levelScore: this.levelScore,
+                letterCombo: this.letterCombo,
+            });
+            window.clearTimeout(this.errorStyle);
+            window.clearTimeout(this.scoreIndicatorStyle);
+            window.clearTimeout(this.comboIndicatorStyle);
+            window.clearTimeout(this.comboIndicatorStyle2);
+            this.wordToTypeIndex = 0;
         },
 
         getLetterScore(letter, letterCombo, level, isSnail, isResilient, isMasochist) {
