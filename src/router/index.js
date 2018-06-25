@@ -7,8 +7,8 @@ Vue.use(Router);
 
 const routes = [
     {path: '/', component: Landing, meta: {depth: 0}},
-    {path: '/Typetime-front', component: Landing, meta: {depth: 0}}, // gh-pages landing special case
-    {path: '/about', component: About, meta: {depth: -1}},
+    {path: '/Typetime-front', component: Landing, meta: {depth: 0}}, // gh-pages special cases
+    {path: '/Typetime-front/about', component: About, meta: {depth: -1}},
 ];
 
 export default new Router({

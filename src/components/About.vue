@@ -23,7 +23,7 @@
             </p>
         </div>
         <nav>
-            <router-link v-bind:to="'/'">Home</router-link>
+            <router-link v-bind:to="'/Typetime-front'">Home</router-link>
         </nav>
     </div>
 </template>
