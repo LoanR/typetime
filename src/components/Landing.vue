@@ -33,7 +33,7 @@
                     </div>
                 </div>
                 <nav>
-                    <router-link v-bind:to="'/about'">About</router-link>
+                    <router-link v-bind:to="'/about'" v-on:click.native="resetTitle">About</router-link>
                 </nav>
             </div>
         </transition>
