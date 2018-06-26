@@ -79,6 +79,7 @@ export default {
             startingWordsToTypeCount: 5,
             gameLevel: 1,
             apiEndpoint: 'https://api.datamuse.com/words?',
+            frequencyParameter: '&md=f',
             keySounds: [
                 new Audio(require('@/assets/sounds/key1.mp3')),
                 new Audio(require('@/assets/sounds/key2.mp3')),
@@ -148,7 +149,7 @@ export default {
                 this.requestNextWordsNoWait(this.wordsToTypeCount + 1);
             } catch (err) {
                 this.restartGame();
-                window.alert('We\'ve encountered an error, try to launch a new party...');
+                window.alert('We couldn\'t find enough words to type, please launch a new game...');
             }
         },
 
@@ -163,7 +164,7 @@ export default {
                             queryValue = 'effect';
                         }
                     }
-                    const response = await fetch(this.apiEndpoint + queryParameter + queryValue + option + '&md=f');
+                    const response = await fetch(this.apiEndpoint + queryParameter + queryValue + option + this.frequencyParameter);
                     if (i > 1) {
                         unformattedData.unshift(...await response.json());
                     } else {
@@ -179,16 +180,12 @@ export default {
 
         requestNextWordsNoWait(wordCount) {
             const query = this.getUrlQuery();
-            fetch(this.apiEndpoint + query[0] + query[1] + query[2] + '&md=f').then(response => {
-                if (!response.ok) {
-                    throw new Error(response.statusText);
+            fetch(this.apiEndpoint + query[0] + query[1] + query[2] + this.frequencyParameter).then(response => {
+                if (response.ok) {
+                    return response.json();
                 }
-                return response.json();
             }).then(unformattedData => {
                 this.nextWordsToType = this.selectWords(unformattedData, Math.min(wordCount, unformattedData.length));
-            }).catch(() => {
-                this.restartGame();
-                window.alert('We\'ve encountered an error, try to launch a new party...');
             });
         },
 
@@ -211,14 +208,19 @@ export default {
         },
 
         async nextLevel() {
-            this.gameLevel += 1;
-            while (this.nextWordsToType.length < this.wordsToTypeCount) {
-                const remainingWordCount = this.wordsToTypeCount - this.nextWordsToType.length;
-                const query = this.getUrlQuery();
-                this.nextWordsToType.unshift(...await this.requestWords(remainingWordCount, query[0], query[1], query[2]));
+            try {
+                this.gameLevel += 1;
+                while (this.nextWordsToType.length < this.wordsToTypeCount) {
+                    const remainingWordCount = this.wordsToTypeCount - this.nextWordsToType.length;
+                    const query = this.getUrlQuery();
+                    this.nextWordsToType.unshift(...await this.requestWords(remainingWordCount, query[0], query[1], query[2]));
+                }
+                this.wordsToType = this.nextWordsToType;
+                this.requestNextWordsNoWait(this.wordsToTypeCount + 1);
+            } catch (error) {
+                this.restartGame();
+                window.alert('We couldn\'t find enough words for the next level, please launch a new game...');
             }
-            this.wordsToType = this.nextWordsToType;
-            this.requestNextWordsNoWait(this.wordsToTypeCount + 1);
         },
 
         getUrlQuery() {
@@ -277,13 +279,13 @@ export default {
         },
 
         async getNewModifiers() {
-            const accentValues = ['*é*', '*è*', '*ê*', '*ë*', '*â*', '*ï*', '*ô*', '*û*'];
-            const rareAccentValues = ['*ä*', '*á*', '*å*', '*ë*', '*â*', '*í*', '*ö*', '*ó*', '*ü*', '*ú*'];
+            const accentValues = ['*é*', '*è*', '*ê*', '*ë*', '*â*', '*ï*'];
+            const rareAccentValues = ['*á*', '*å*', '*ë*', '*â*', '*í*', '*ö*', '*ó*', '*ü*', '*ú*'];
             const modWords = [
                 {param: 'ml=', value: 'toujours'},
                 {param: 'ml=', value: 'voiture'},
-                {param: 'ml=', value: 'people'},
-                {param: 'ml=', value: 'because'},
+                {param: 'ml=', value: 'live'},
+                {param: 'ml=', value: 'reason'},
                 {param: 'sp=', value: accentValues[random.randomNum(accentValues.length, 0)]},
                 {param: 'sp=', value: rareAccentValues[random.randomNum(rareAccentValues.length, 0)]},
             ];
@@ -309,12 +311,17 @@ export default {
         },
 
         async addWordModifier(mods, param, value) {
-            const word = (await this.requestWords(1, param, value, '', false))[0];
-            if (mods.indexOf(word) !== -1) {
-                return null;
+            try {
+                const word = (await this.requestWords(1, param, value, '', false))[0];
+                if (mods.indexOf(word) !== -1) {
+                    return null;
+                }
+                mods.push(word);
+                return mods;
+            } catch (error) {
+                this.restartGame();
+                window.alert('We couldn\'t build consistent modifiers, please launch a new game...');
             }
-            mods.push(word);
-            return mods;
         },
 
         toggleDifficulties(toggledDifficultyLabel) {
