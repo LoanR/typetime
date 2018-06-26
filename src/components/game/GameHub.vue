@@ -55,9 +55,9 @@ export default {
             nemesisLetter: '',
             stuckWord: '',
             startSignals: [
-                new Audio(require('../../assets/sounds/elevatorbell.mp3')),
-                new Audio(require('../../assets/sounds/microwavebell.mp3')),
-                new Audio(require('../../assets/sounds/hotelbell.mp3')),
+                require('@/assets/sounds/elevatorbell.mp3'),
+                require('@/assets/sounds/microwavebell.mp3'),
+                require('@/assets/sounds/hotelbell.mp3'),
             ],
         };
     },
@@ -87,7 +87,7 @@ export default {
         isGameReady() {
             window.clearInterval(this.waitingTime);
             if (this.words.length === this.levelWordsCount) {
-                this.startSignals[random.randomNum(this.startSignals.length)].play();
+                new Audio(this.startSignals[random.randomNum(this.startSignals.length)]).play();
                 this.playLevel = true;
             } else {
                 this.waitThenExecute(this.isGameReady, 500);

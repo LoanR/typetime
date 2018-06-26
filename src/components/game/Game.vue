@@ -50,43 +50,43 @@ export default {
             comboIndicatorStyle2: null,
             countdownEnd: new Audio(require('@/assets/sounds/countdownend.mp3')),
             loseSound: [
-                new Audio(require('@/assets/sounds/powerdown.wav')),
-                new Audio(require('@/assets/sounds/mk64_loser.mp3')),
-                new Audio(require('@/assets/sounds/tetrislose.mp3')),
-                new Audio(require('@/assets/sounds/mario1down.mp3')),
-                new Audio(require('@/assets/sounds/mariogameover.mp3')),
-                new Audio(require('@/assets/sounds/yoshiowow.mp3')),
-                new Audio(require('@/assets/sounds/pacmandies.mp3')),
+                require('@/assets/sounds/powerdown.wav'),
+                require('@/assets/sounds/mk64_loser.mp3'),
+                require('@/assets/sounds/tetrislose.mp3'),
+                require('@/assets/sounds/mario1down.mp3'),
+                require('@/assets/sounds/mariogameover.mp3'),
+                require('@/assets/sounds/yoshiowow.mp3'),
+                require('@/assets/sounds/pacmandies.mp3'),
             ],
             wordSound: [
-                new Audio(require('@/assets/sounds/mariocoin.mp3')),
-                new Audio(require('@/assets/sounds/completion.mp3')),
-                new Audio(require('@/assets/sounds/ding.mp3')),
-                new Audio(require('@/assets/sounds/crashselect.mp3')),
-                new Audio(require('@/assets/sounds/sonicring.mp3')),
-                new Audio(require('@/assets/sounds/mario1up.mp3')),
+                require('@/assets/sounds/mariocoin.mp3'),
+                require('@/assets/sounds/completion.mp3'),
+                require('@/assets/sounds/ding.mp3'),
+                require('@/assets/sounds/crashselect.mp3'),
+                require('@/assets/sounds/sonicring.mp3'),
+                require('@/assets/sounds/mario1up.mp3'),
             ],
             errorSound: [
-                new Audio(require('@/assets/sounds/denied.wav')),
-                new Audio(require('@/assets/sounds/kirby_powerdown.mp3')),
-                new Audio(require('@/assets/sounds/moderatehit.mp3')),
-                new Audio(require('@/assets/sounds/moderatehit2.mp3')),
-                new Audio(require('@/assets/sounds/shellhit.mp3')),
-                new Audio(require('@/assets/sounds/stronghit.mp3')),
-                new Audio(require('@/assets/sounds/basso.mp3')),
-                new Audio(require('@/assets/sounds/frog.mp3')),
-                new Audio(require('@/assets/sounds/funk.mp3')),
-                new Audio(require('@/assets/sounds/susomi.mp3')),
+                require('@/assets/sounds/denied.wav'),
+                require('@/assets/sounds/kirby_powerdown.mp3'),
+                require('@/assets/sounds/moderatehit.mp3'),
+                require('@/assets/sounds/moderatehit2.mp3'),
+                require('@/assets/sounds/shellhit.mp3'),
+                require('@/assets/sounds/stronghit.mp3'),
+                require('@/assets/sounds/basso.mp3'),
+                require('@/assets/sounds/frog.mp3'),
+                require('@/assets/sounds/funk.mp3'),
+                require('@/assets/sounds/susomi.mp3'),
             ],
             levelSound: [
-                new Audio(require('@/assets/sounds/powerup.wav')),
-                new Audio(require('@/assets/sounds/sprout.wav')),
-                new Audio(require('@/assets/sounds/yoshiyoshi.wav')),
-                new Audio(require('@/assets/sounds/tetrisclear.mp3')),
-                new Audio(require('@/assets/sounds/pkbattlewin.mp3')),
-                new Audio(require('@/assets/sounds/zeldaitem.mp3')),
-                new Audio(require('@/assets/sounds/mariopowerup.mp3')),
-                new Audio(require('@/assets/sounds/mariowarp.mp3')),
+                require('@/assets/sounds/powerup.wav'),
+                require('@/assets/sounds/sprout.wav'),
+                require('@/assets/sounds/yoshiyoshi.wav'),
+                require('@/assets/sounds/tetrisclear.mp3'),
+                require('@/assets/sounds/pkbattlewin.mp3'),
+                require('@/assets/sounds/zeldaitem.mp3'),
+                require('@/assets/sounds/mariopowerup.mp3'),
+                require('@/assets/sounds/mariowarp.mp3'),
             ],
         };
     },
@@ -120,7 +120,7 @@ export default {
         },
 
         letterTypedIncorrect(letterElement) {
-            this.errorSound[random.randomNum(this.errorSound.length)].play();
+            new Audio(this.errorSound[random.randomNum(this.errorSound.length)]).play();
             this.stylizeWithClass(letterElement, true, 'letter-error');
             this.errorStyle = window.setTimeout(this.stylizeWithClass, 100, letterElement, false, 'letter-error');
             this.stylizeWithClass(this.$refs.scoreIndicator, true, 'score-malus');
@@ -157,7 +157,7 @@ export default {
 
         levelWordsRemains() {
             this.stylizeWithClass(this.$refs.wordIndicator[this.wordToTypeIndex], true, 'word-found');
-            this.wordSound[random.randomNum(this.wordSound.length)].play();
+            new Audio(this.wordSound[random.randomNum(this.wordSound.length)]).play();
             this.wordToTypeIndex += 1;
         },
 
@@ -168,7 +168,7 @@ export default {
             if (!this.isResilient) {
                 this.showPreparation = true;
             }
-            this.levelSound[random.randomNum(this.levelSound.length)].play();
+            new Audio(this.levelSound[random.randomNum(this.levelSound.length)]).play();
             this.stylizeWithClass(this.$refs.comboIndicator, false, 'score-malus');
             this.stylizeWithClass(this.$refs.comboIndicator, false, 'score-bonus');
             this.stylizeWithClass(this.$refs.scoreIndicator, false, 'score-malus');
@@ -253,7 +253,7 @@ export default {
         },
 
         timeExceeded() {
-            this.loseSound[random.randomNum(this.loseSound.length)].play();
+            new Audio(this.loseSound[random.randomNum(this.loseSound.length)]).play();
             this.wordCountDown = 0;
             this.clearCountdown();
             this.canStillPlay = false;

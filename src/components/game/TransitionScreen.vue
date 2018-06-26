@@ -69,9 +69,9 @@ export default {
             buttonContent: 'rematch',
             snail: this.isSnail,
             startSounds: [
-                new Audio(require('../../assets/sounds/mk_startrace.mp3')),
-                new Audio(require('../../assets/sounds/pkbattle.mp3')),
-                new Audio(require('../../assets/sounds/pacmanintro.mp3')),
+                require('@/assets/sounds/mk_startrace.mp3'),
+                require('@/assets/sounds/pkbattle.mp3'),
+                require('@/assets/sounds/pacmanintro.mp3'),
             ],
         };
     },
@@ -130,7 +130,7 @@ export default {
 
     mounted() {
         if (this.isGameLaunched) {
-            this.startSounds[random.randomNum(this.startSounds.length)].play();
+            new Audio(this.startSounds[random.randomNum(this.startSounds.length)]).play();
         }
     },
 };
