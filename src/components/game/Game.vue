@@ -15,6 +15,7 @@
                 <span v-for="i in words.length" :key="i" ref="wordIndicator">•</span>
             </div>
         </div>
+        <a class="stop-link" @click="timeExceeded">stop game</a>
         <input :disabled="!canStillPlay" type="text" name="" ref="gameInput" @input="compareInputToExpected" v-model="entry" v-on:keydown.20="checkCapsKeyDown">
     </div>
 </template>
@@ -307,7 +308,7 @@ export default {
     mounted() {
         this.$refs.gameInput.focus();
         this.stylizeWithClass(this.$refs.letterToType[this.letterToTypeIndex], true, 'letter-to-type');
-        this.launchNewCountdown();
+        // this.launchNewCountdown();
         this.wordCountDown += this.timeAccount;
         this.levelScore = this.previousScore;
         this.letterCombo = this.previousLetterCombo;
@@ -469,6 +470,16 @@ export default {
                 @media all and (max-width: 500px) {
                     font-size: 5vw;
                 }
+            }
+        }
+
+        .stop-link {
+            margin: 1rem;
+            font-size: $small-font-size;
+            color: $light-base-color;
+
+            &:hover {
+                color: $contrast-color;
             }
         }
 
