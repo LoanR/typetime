@@ -1,17 +1,21 @@
 <template>
     <div class="game-window" @click="reFocus">
         <p class="awaited-word">
-            <span v-for="(letter, index) in wordToTypeLetters" :key="index" ref="letterToType">{{letter}}</span>
+            <span class="awaited-letter" v-for="(letter, index) in wordToTypeLetters" :key="index" ref="letterToType">{{letter}}</span>
+            <span class="caps-indicator" v-if="capsStatus">
+                <i class="fa fa-lock" aria-hidden="true"></i>
+                <i class="fa fa-arrow-up" aria-hidden="true"></i>
+            </span>
         </p>
         <p class="countdown" ref="countdown">{{countdownDisplay}}</p>
         <div class="score-related">
             <p class="game-level">Level {{level}}</p>
-            <p class="game-score"><span class="score-default combo" ref="comboIndicator">Combo &times;{{combo}}</span><span>{{levelScore}} pts</span><span class="score-default bonus" ref="scoreIndicator">{{scoreChange}}</span></p>
+            <p class="game-score"><span class="score-default combo" ref="comboIndicator">Combo&times;{{combo}}</span><span>{{levelScore}} pts</span><span class="score-default bonus" ref="scoreIndicator">{{scoreChange}}</span></p>
             <div class="word-indicators">
                 <span v-for="i in words.length" :key="i" ref="wordIndicator">•</span>
             </div>
         </div>
-        <input :disabled="!canStillPlay" type="text" name="" ref="gameInput" @input="compareInputToExpected" v-model="entry">
+        <input :disabled="!canStillPlay" type="text" name="" ref="gameInput" @input="compareInputToExpected" v-model="entry" v-on:keydown.20="checkCapsKeyDown">
     </div>
 </template>
 
@@ -48,6 +52,7 @@ export default {
             scoreIndicatorStyle: null,
             comboIndicatorStyle: null,
             comboIndicatorStyle2: null,
+            capsStatus: false,
             countdownEnd: new Audio(require('@/assets/sounds/countdownend.mp3')),
             loseSound: [
                 require('@/assets/sounds/powerdown.wav'),
@@ -275,6 +280,10 @@ export default {
                 this.stylizeWithClass(element, shouldAdd, styleClass);
             }
         },
+
+        checkCapsKeyDown(event) {
+            this.capsStatus = event.getModifierState('CapsLock');
+        },
     },
 
     computed: {
@@ -343,7 +352,7 @@ export default {
         .awaited-word {
             margin: 0;
 
-            span {
+            .awaited-letter {
                 font-family: $brand-font;
                 font-weight: $bold-weight;
                 font-size: $big-font-size;
@@ -352,6 +361,30 @@ export default {
 
                 @media all and (max-width: 500px) {
                     font-size: 10vw;
+                }
+            }
+
+            .caps-indicator {
+                position: relative;
+                left: 1rem;
+                width: 0;
+                height: 30px;
+                text-align: center;
+
+                i {
+                    position: absolute;
+                    bottom: 0;
+                }
+
+                i:first-child {
+                    color: $light-base-color;
+                }
+
+                i:nth-child(2) {
+                    color: $base-color;
+                    font-size: 40%;
+                    left: 3px;
+                    bottom: 3px;
                 }
             }
 
@@ -407,14 +440,14 @@ export default {
                 position: absolute;
 
                 &.combo {
-                    left: -90px;
+                    right: 100%;
                     top: -17px;
                     transform: rotate(-4deg);
                 }
 
                 &.bonus {
-                    right: -20px;
-                    top: -20px;
+                    left: 100%;
+                    top: -19px;
                     transform: rotate(4deg);
                 }
             }
