@@ -308,7 +308,7 @@ export default {
     mounted() {
         this.$refs.gameInput.focus();
         this.stylizeWithClass(this.$refs.letterToType[this.letterToTypeIndex], true, 'letter-to-type');
-        // this.launchNewCountdown();
+        this.launchNewCountdown();
         this.wordCountDown += this.timeAccount;
         this.levelScore = this.previousScore;
         this.letterCombo = this.previousLetterCombo;
