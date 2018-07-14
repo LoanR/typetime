@@ -23,7 +23,7 @@
 <script>
 import scoreCalculator from '../../js/scoreCalculator.js';
 import gameTuning from '../../js/gameTuning.js';
-import random from '../../js/random.js';
+import {randomNum} from '../../js/random.js';
 
 export default {
     name: 'Game',
@@ -126,7 +126,7 @@ export default {
         },
 
         letterTypedIncorrect(letterElement) {
-            new Audio(this.errorSound[random.randomNum(this.errorSound.length)]).play();
+            new Audio(this.errorSound[randomNum(this.errorSound.length)]).play();
             this.stylizeWithClass(letterElement, true, 'letter-error');
             this.errorStyle = window.setTimeout(this.stylizeWithClass, 100, letterElement, false, 'letter-error');
             this.stylizeWithClass(this.$refs.scoreIndicator, true, 'score-malus');
@@ -163,7 +163,7 @@ export default {
 
         levelWordsRemains() {
             this.stylizeWithClass(this.$refs.wordIndicator[this.wordToTypeIndex], true, 'word-found');
-            new Audio(this.wordSound[random.randomNum(this.wordSound.length)]).play();
+            new Audio(this.wordSound[randomNum(this.wordSound.length)]).play();
             this.wordToTypeIndex += 1;
         },
 
@@ -174,7 +174,7 @@ export default {
             if (!this.isResilient) {
                 this.showPreparation = true;
             }
-            new Audio(this.levelSound[random.randomNum(this.levelSound.length)]).play();
+            new Audio(this.levelSound[randomNum(this.levelSound.length)]).play();
             this.stylizeWithClass(this.$refs.comboIndicator, false, 'score-malus');
             this.stylizeWithClass(this.$refs.comboIndicator, false, 'score-bonus');
             this.stylizeWithClass(this.$refs.scoreIndicator, false, 'score-malus');
@@ -259,7 +259,7 @@ export default {
         },
 
         timeExceeded() {
-            new Audio(this.loseSound[random.randomNum(this.loseSound.length)]).play();
+            new Audio(this.loseSound[randomNum(this.loseSound.length)]).play();
             this.wordCountDown = 0;
             this.clearCountdown();
             this.canStillPlay = false;

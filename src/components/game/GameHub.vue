@@ -27,7 +27,7 @@
 
 <script>
 import gameTuning from '../../js/gameTuning.js';
-import random from '../../js/random.js';
+import {randomNum} from '../../js/random.js';
 
 import gameComponent from './Game.vue';
 import transitionScreenComponent from './TransitionScreen.vue';
@@ -87,7 +87,7 @@ export default {
         isGameReady() {
             window.clearInterval(this.waitingTime);
             if (this.words.length === this.levelWordsCount) {
-                new Audio(this.startSignals[random.randomNum(this.startSignals.length)]).play();
+                new Audio(this.startSignals[randomNum(this.startSignals.length)]).play();
                 this.playLevel = true;
             } else {
                 this.waitThenExecute(this.isGameReady, 500);

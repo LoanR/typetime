@@ -36,7 +36,7 @@
 </template>
 
 <script>
-import random from '../../js/random.js';
+import {randomNum} from '../../js/random.js';
 
 import buttonComponent from '../buttons/Button.vue';
 
@@ -93,7 +93,7 @@ export default {
                 message = this.gameOverMessage;
             }
             if (!this.isGameLaunched && !this.isEndGame) {
-                message = this.inGameMessages[random.randomNum(this.inGameMessages.length, 0)];
+                message = this.inGameMessages[randomNum(this.inGameMessages.length, 0)];
             }
             return message;
         },
@@ -130,7 +130,7 @@ export default {
 
     mounted() {
         if (this.isGameLaunched) {
-            new Audio(this.startSounds[random.randomNum(this.startSounds.length)]).play();
+            new Audio(this.startSounds[randomNum(this.startSounds.length)]).play();
         }
     },
 };
