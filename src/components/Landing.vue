@@ -41,7 +41,7 @@
 </template>
 
 <script>
-import random from '../js/random.js';
+import {randomNum} from '../js/random.js';
 import gameTuning from '../js/gameTuning.js';
 import wordSelectionRules from '../js/wordSelectionRules.js';
 
@@ -93,17 +93,17 @@ export default {
             clearTimeout(this.timeOut);
             if (this.shouldShuffleTitle) {
                 this.shuffledTitle = this.shuffleTitle();
-                new Audio(this.keySounds[random.randomNum(this.keySounds.length)]).play();
-                this.timeOut = window.setTimeout(this.overwriteTitleCycle, random.randomNum(3000, 200));
+                new Audio(this.keySounds[randomNum(this.keySounds.length)]).play();
+                this.timeOut = window.setTimeout(this.overwriteTitleCycle, randomNum(3000, 200));
             }
         },
 
         shuffleTitle() {
             let movableLettersIndices = [1, 2, 3, 5, 6];
             let titleCopy = this.title.split('');
-            const firstLetterIndice = movableLettersIndices.splice(random.randomNum(movableLettersIndices.length, 0), 1);
+            const firstLetterIndice = movableLettersIndices.splice(randomNum(movableLettersIndices.length, 0), 1);
             const firstLetter = this.title[firstLetterIndice];
-            const secondLetterIndice = movableLettersIndices.splice(random.randomNum(movableLettersIndices.length, 0), 1);
+            const secondLetterIndice = movableLettersIndices.splice(randomNum(movableLettersIndices.length, 0), 1);
             const secondLetter = titleCopy.splice(secondLetterIndice, 1, firstLetter)[0];
             titleCopy.splice(firstLetterIndice, 1, secondLetter).join('');
             return titleCopy.join('');
@@ -193,14 +193,14 @@ export default {
             let selectedWords = [];
             const filteredData = filterAgainstRules ? wordSelectionRules.filterWordsOnRule(jsonResponse, this.gameLevel, gameTuning.isMasochist(this.difficulties), wordCount) : jsonResponse;
             for (let i = 1; i <= wordCount; i++) {
-                const wordData = filteredData.splice(random.randomNum(filteredData.length, 0), 1)[0];
+                const wordData = filteredData.splice(randomNum(filteredData.length, 0), 1)[0];
                 selectedWords.push(this.mayMutateCase(wordData.word));
             }
             return selectedWords;
         },
 
         mayMutateCase(word) {
-            const rand = random.randomNum(3, 0);
+            const rand = randomNum(3, 0);
             if (!rand && ((gameTuning.isMasochist(this.difficulties) && this.gameLevel >= 3) || this.gameLevel >= 5)) {
                 return word.charAt(0).toUpperCase() + word.slice(1);
             }
@@ -274,7 +274,7 @@ export default {
         async selectModifiers() {
             this.modifiers.push(...await this.getNewModifiers());
             for (let i = 0; i < 4; i++) {
-                this.selectedModifiers.splice(i, 1, this.modifiers.splice(random.randomNum(this.modifiers.length, 0), 1)[0]);
+                this.selectedModifiers.splice(i, 1, this.modifiers.splice(randomNum(this.modifiers.length, 0), 1)[0]);
             }
         },
 
@@ -286,8 +286,8 @@ export default {
                 {param: 'ml=', value: 'voiture'},
                 {param: 'ml=', value: 'live'},
                 {param: 'ml=', value: 'reason'},
-                {param: 'sp=', value: accentValues[random.randomNum(accentValues.length, 0)]},
-                {param: 'sp=', value: rareAccentValues[random.randomNum(rareAccentValues.length, 0)]},
+                {param: 'sp=', value: accentValues[randomNum(accentValues.length, 0)]},
+                {param: 'sp=', value: rareAccentValues[randomNum(rareAccentValues.length, 0)]},
             ];
             let mods = [];
             for (const modWord of modWords) {

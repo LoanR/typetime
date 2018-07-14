@@ -1,4 +1,4 @@
-const emptyMods = [
+export const emptyMods = [
     {
         label: '',
         isChecked: false,
@@ -17,7 +17,7 @@ const emptyMods = [
     },
 ];
 
-const modifiers = [
+export const modifiers = [
     {
         label: 'lexical',
         param: 'rel_trg=',
@@ -65,7 +65,7 @@ const modifiers = [
     },
 ];
 
-const difficulties = [
+export const difficulties = [
     {
         label: 'snail',
         article: 'a',
