@@ -1,7 +1,7 @@
 # Typetime
 > Touch typing game
 
-[Typetime](https://loanr.github.io/Typetime-front/)
+[Typetime](https://loanr.github.io/typetime/)
 
 ## Project
 The starting idea was to create a game were the player needed to type a certain word in a allocated time.
@@ -32,4 +32,4 @@ The idea was to follow the configuration - interpretation schema but my problem 
 ## Instruction
 Well, nothing in particular, just choose your game type on the landing screen and play! And above all, have fun!
 
-[Typetime](https://loanr.github.io/Typetime-front/)
+[Typetime](https://loanr.github.io/typetime/)

@@ -16,14 +16,14 @@
                 Each game can be tuned around themes and difficulties and it will try to follow the starting instructions.
             </p>
             <p>
-                You can follow the project development on <a href="https://github.com/LoanR/Typetime-front">this page</a> or meet me on my <a href="https://github.com/LoanR">GitHub</a>!
+                You can follow the project development on <a href="https://github.com/LoanR/typetime">this page</a> or meet me on my <a href="https://github.com/LoanR">GitHub</a>!
             </p>
             <p>
                 Have fun!
             </p>
         </div>
         <nav>
-            <router-link v-bind:to="'/Typetime-front'">Home</router-link>
+            <router-link v-bind:to="'/typetime'">Home</router-link>
         </nav>
     </div>
 </template>

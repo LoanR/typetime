@@ -1,7 +1,7 @@
 {
-  "name": "typetime-front",
+  "name": "typetime",
   "version": "1.0.0",
-  "description": "Typing game front only",
+  "description": "Typing game",
   "author": "loan robert <loan.rbrt@gmail.com>",
   "private": true,
   "scripts": {

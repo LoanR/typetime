@@ -14,7 +14,7 @@
                 </p>
                 <button-component :content="buttonContent" @bigButtonClick="returnHome"></button-component>
                 <social-sharing
-                    url="https://loanr.github.io/Typetime-front/"
+                    url="https://loanr.github.io/typetime/"
                     :title="socialMessage"
                     description="What a funny game!"
                     quote=""
