@@ -2,7 +2,6 @@
     <section class="slide-container">
         <transition :name="slideTransition">
             <game-hub-component v-if="wantsToPlay"
-                :words="wordsToType"
                 :level="gameLevel"
                 :levelWordsCount="wordsToTypeCount"
                 :wordsPerMinute="wordsPerMinute"
@@ -64,8 +63,8 @@ export default {
             shuffledTitle: 'TypeTime',
             shouldShuffleTitle: true,
             shouldSlideFromRight: true,
-            timeOut: null,
-            firstTimeOut: 3000,
+            timeOut: null, // rules file
+            firstTimeOut: 3000, // rules file
             wantsToPlay: false,
             startContent: 'start',
             modTitle: 'Modifiers',
@@ -73,13 +72,13 @@ export default {
             selectedModifiers: gameTuning.getEmptyMods(),
             modifiers: gameTuning.getModifiers(),
             difficulties: gameTuning.getDifficulties(),
-            wordsPerMinute: 30,
-            wordsToType: [],
-            nextWordsToType: [],
-            startingWordsToTypeCount: 5,
-            gameLevel: 1,
-            apiEndpoint: 'https://api.datamuse.com/words?',
-            frequencyParameter: '&md=f',
+            wordsPerMinute: 30, // rules file
+            // wordsToType: [], // game run file
+            // nextWordsToType: [], // game run file
+            startingWordsToTypeCount: 5, // rules file
+            gameLevel: 1, // rules file
+            apiEndpoint: 'https://api.datamuse.com/words?', // game run file
+            frequencyParameter: '&md=f', // game run file
             keySounds: [
                 require('@/assets/sounds/key1.mp3'),
                 require('@/assets/sounds/key2.mp3'),
@@ -145,8 +144,17 @@ export default {
                 this.shouldSlideFromRight = true;
                 this.wantsToPlay = true;
                 const query = this.getUrlQuery();
-                this.wordsToType = await this.requestWords(this.startingWordsToTypeCount, query[0], query[1], query[2]);
-                this.requestNextWordsNoWait(this.wordsToTypeCount + 1);
+                // this.wordsToType = await this.requestWords(this.startingWordsToTypeCount, query[0], query[1], query[2]);
+                // this.requestNextWordsNoWait(this.wordsToTypeCount + 1);
+                this.$store.dispatch(
+                    'requestAndSetWordsToType',
+                    {
+                        wordAmount: this.startingWordsToTypeCount,
+                        queryParameter: query[0],
+                        queryValue: query[1],
+                        queryOption: query[2],
+                    },
+                );
             } catch (err) {
                 this.restartGame();
                 window.alert('We couldn\'t find enough words to type, please launch a new game...');
@@ -178,16 +186,16 @@ export default {
             }
         },
 
-        requestNextWordsNoWait(wordCount) {
-            const query = this.getUrlQuery();
-            fetch(this.apiEndpoint + query[0] + query[1] + query[2] + this.frequencyParameter).then(response => {
-                if (response.ok) {
-                    return response.json();
-                }
-            }).then(unformattedData => {
-                this.nextWordsToType = this.selectWords(unformattedData, Math.min(wordCount, unformattedData.length));
-            });
-        },
+        // requestNextWordsNoWait(wordCount) {
+        //     const query = this.getUrlQuery();
+        //     fetch(this.apiEndpoint + query[0] + query[1] + query[2] + this.frequencyParameter).then(response => {
+        //         if (response.ok) {
+        //             return response.json();
+        //         }
+        //     }).then(unformattedData => {
+        //         this.nextWordsToType = this.selectWords(unformattedData, Math.min(wordCount, unformattedData.length));
+        //     });
+        // },
 
         selectWords(jsonResponse, wordCount, filterAgainstRules = true) {
             let selectedWords = [];
@@ -210,13 +218,22 @@ export default {
         async nextLevel() {
             try {
                 this.gameLevel += 1;
-                while (this.nextWordsToType.length < this.wordsToTypeCount) {
-                    const remainingWordCount = this.wordsToTypeCount - this.nextWordsToType.length;
-                    const query = this.getUrlQuery();
-                    this.nextWordsToType.unshift(...await this.requestWords(remainingWordCount, query[0], query[1], query[2]));
-                }
-                this.wordsToType = this.nextWordsToType;
-                this.requestNextWordsNoWait(this.wordsToTypeCount + 1);
+                const query = this.getUrlQuery();
+                // while (this.nextWordsToType.length < this.wordsToTypeCount) {
+                //     const remainingWordCount = this.wordsToTypeCount - this.nextWordsToType.length;
+                //     this.nextWordsToType.unshift(...await this.requestWords(remainingWordCount, query[0], query[1], query[2]));
+                // }
+                this.$store.dispatch(
+                    'requestAndSetWordsToType',
+                    {
+                        wordAmount: this.wordsToTypeCount,
+                        queryParameter: query[0],
+                        queryValue: query[1],
+                        queryOption: query[2],
+                    },
+                );
+                // this.wordsToType = this.nextWordsToType;
+                // this.requestNextWordsNoWait(this.wordsToTypeCount + 1);
             } catch (error) {
                 this.restartGame();
                 window.alert('We couldn\'t find enough words for the next level, please launch a new game...');
@@ -263,10 +280,13 @@ export default {
         },
 
         thematiseGame() {
-            if (this.nextWordsToType.length) {
-                return this.nextWordsToType[this.nextWordsToType.length - 1];
-            } else if (this.wordsToType.length) {
-                return this.wordsToType[this.wordsToType.length - 1];
+            // if (this.nextWordsToType.length) {
+            //     return this.nextWordsToType[this.nextWordsToType.length - 1];
+            // } else if (this.wordsToType.length) {
+            //     return this.wordsToType[this.wordsToType.length - 1];
+            // }
+            if (this.$store.state.wordsRelated.wordsToType.length) {
+                return this.$store.state.wordsRelated.wordsToType[this.$store.state.wordsRelated.wordsToType.length - 1];
             }
             return null;
         },
@@ -341,8 +361,8 @@ export default {
             this.modifiers = gameTuning.getModifiers();
             this.selectModifiers();
             this.gameLevel = 1;
-            this.wordsToType = [];
-            this.nextWordsToType = [];
+            // this.wordsToType = [];
+            // this.nextWordsToType = [];
         },
     },
 

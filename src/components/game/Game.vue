@@ -12,7 +12,7 @@
             <p class="game-level">Level {{level}}</p>
             <p class="game-score"><span class="score-default combo" ref="comboIndicator">Combo&times;{{combo}}</span><span>{{levelScore}} pts</span><span class="score-default bonus" ref="scoreIndicator">{{scoreChange}}</span></p>
             <div class="word-indicators">
-                <span v-for="i in words.length" :key="i" ref="wordIndicator">•</span>
+                <span v-for="i in this.$store.state.wordsRelated.wordsToType.length" :key="i" ref="wordIndicator">•</span>
             </div>
         </div>
         <a class="stop-link" @click="timeExceeded">stop game</a>
@@ -28,16 +28,16 @@ import {randomNum} from '../../js/random.js';
 export default {
     name: 'Game',
 
-    props: ['words', 'level', 'wordsPerMinute', 'difficulties', 'timeAccount', 'previousScore', 'previousLetterCombo'],
+    props: ['level', 'wordsPerMinute', 'difficulties', 'timeAccount', 'previousScore', 'previousLetterCombo'],
 
     data() {
         return {
             wordToTypeIndex: 0,
             letterToTypeIndex: 0,
-            isSnail: gameTuning.isSnail(this.difficulties),
-            isEconomist: gameTuning.isEconomist(this.difficulties),
-            isResilient: gameTuning.isResilient(this.difficulties),
-            isMasochist: gameTuning.isMasochist(this.difficulties),
+            isSnail: gameTuning.isSnail(this.difficulties), // vuex
+            isEconomist: gameTuning.isEconomist(this.difficulties), // vuex
+            isResilient: gameTuning.isResilient(this.difficulties), // vuex
+            isMasochist: gameTuning.isMasochist(this.difficulties), // vuex
             entry: '',
             previousEntry: '',
             wordCountDown: 0,
@@ -153,7 +153,7 @@ export default {
             this.scoreChange += timeScore;
             this.levelScore += timeScore;
             this.letterToTypeIndex = 0;
-            if (this.wordToTypeIndex < this.words.length - 1) {
+            if (this.wordToTypeIndex < this.$store.state.wordsRelated.wordsToType.length - 1) {
                 this.levelWordsRemains();
             } else {
                 this.moveToNextLevel();
@@ -179,9 +179,9 @@ export default {
             this.stylizeWithClass(this.$refs.comboIndicator, false, 'score-bonus');
             this.stylizeWithClass(this.$refs.scoreIndicator, false, 'score-malus');
             this.$emit('nextLevel', {
-                timeAccount: this.wordCountDown,
-                levelScore: this.levelScore,
-                letterCombo: this.letterCombo,
+                timeAccount: this.wordCountDown, // vuex
+                levelScore: this.levelScore, // vuex
+                letterCombo: this.letterCombo, // vuex
             });
             window.clearTimeout(this.errorStyle);
             window.clearTimeout(this.scoreIndicatorStyle);
@@ -264,9 +264,9 @@ export default {
             this.clearCountdown();
             this.canStillPlay = false;
             this.$emit('gameOver', {
-                totalScore: parseInt(this.levelScore.toFixed()),
-                nemesisLetter: this.wordToTypeLetters[this.letterToTypeIndex],
-                stuckWord: this.wordToType,
+                totalScore: parseInt(this.levelScore.toFixed()), // vuex
+                nemesisLetter: this.wordToTypeLetters[this.letterToTypeIndex], // vuex
+                stuckWord: this.wordToType, // vuex
             });
         },
 
@@ -289,7 +289,7 @@ export default {
 
     computed: {
         wordToType() {
-            return this.words[this.wordToTypeIndex];
+            return this.$store.state.wordsRelated.wordsToType[this.wordToTypeIndex];
         },
 
         wordToTypeLetters() {
@@ -309,9 +309,9 @@ export default {
         this.$refs.gameInput.focus();
         this.stylizeWithClass(this.$refs.letterToType[this.letterToTypeIndex], true, 'letter-to-type');
         this.launchNewCountdown();
-        this.wordCountDown += this.timeAccount;
-        this.levelScore = this.previousScore;
-        this.letterCombo = this.previousLetterCombo;
+        this.wordCountDown += this.timeAccount; // vuex
+        this.levelScore = this.previousScore; // vuex
+        this.letterCombo = this.previousLetterCombo; // vuex
         this.combo = scoreCalculator.getFinalMultiplier(this.letterCombo, this.isSnail, this.isMasochist, this.isResilient, this.level);
         this.showPreparation = false;
     },

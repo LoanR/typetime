@@ -67,7 +67,7 @@ export default {
                 'This phrase in really long, so I\'m sure you won\'t be able to read it because of the long time it could take. In fact, you could even lose you\'re concentration and I surely don\'t want to do that you know.',
             ],
             buttonContent: 'rematch',
-            snail: this.isSnail,
+            snail: this.isSnail, // ?
             startSounds: [
                 require('@/assets/sounds/mk_startrace.mp3'),
                 require('@/assets/sounds/pkbattle.mp3'),

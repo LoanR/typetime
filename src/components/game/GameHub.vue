@@ -2,7 +2,6 @@
     <div>
         <transition name="fade-out">
             <game-component v-if="playLevel"
-                :words="words"
                 :level="level"
                 :wordsPerMinute="wordsPerMinute"
                 :difficulties="difficulties"
@@ -65,10 +64,10 @@ export default {
     methods: {
         nextLevel(payload) {
             this.isGameLaunched = false;
-            this.previousScore = payload.levelScore;
-            this.previousLetterCombo = payload.letterCombo;
+            this.previousScore = payload.levelScore; // vuex
+            this.previousLetterCombo = payload.letterCombo; // vuex
             if (gameTuning.isEconomist(this.difficulties)) {
-                this.timeAccount = payload.timeAccount;
+                this.timeAccount = payload.timeAccount; // vuex
             }
             if (gameTuning.isResilient(this.difficulties)) {
                 this.playLevel = true;
@@ -86,7 +85,7 @@ export default {
 
         isGameReady() {
             window.clearInterval(this.waitingTime);
-            if (this.words.length === this.levelWordsCount) {
+            if (this.$store.state.wordsRelated.wordsToType.length === this.levelWordsCount) {
                 new Audio(this.startSignals[randomNum(this.startSignals.length)]).play();
                 this.playLevel = true;
             } else {
@@ -96,10 +95,10 @@ export default {
 
         gameOver(payload) {
             this.isGameLaunched = false;
-            this.endGameScore = payload.totalScore;
-            this.nemesisLetter = payload.nemesisLetter;
-            this.stuckWord = payload.stuckWord;
-            this.playLevel = false;
+            this.endGameScore = payload.totalScore; // vuex
+            this.nemesisLetter = payload.nemesisLetter; // vuex
+            this.stuckWord = payload.stuckWord; // vuex
+            this.playLevel = false; // word count, letter count and other datas...
         },
 
         rematch() {
