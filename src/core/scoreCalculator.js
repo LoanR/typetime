@@ -1,4 +1,4 @@
-const letterScoreMapping = {
+const LETTER_SCORE_MAPPING = {
     ' ': 1,
     'e': 1,
     't': 1,
@@ -93,7 +93,7 @@ const letterComboMapping = {
 
 export default {
     getLetterScoreMapping() {
-        return letterScoreMapping;
+        return LETTER_SCORE_MAPPING;
     },
 
     getFinalMultiplier(letterCombo, isSnail, isMasochist, isResilient, level) {

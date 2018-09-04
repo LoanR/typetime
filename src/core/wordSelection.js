@@ -1,4 +1,6 @@
-const levelMapping = {
+import {randomNum} from './random.js';
+
+const LEVEL_MAPPING = {
     1: {
         default: {
             wordLength: {min: 0, max: 4},
@@ -102,10 +104,29 @@ const levelMapping = {
 };
 
 export default {
+    selectWords(jsonResponse, wordAmount, filterAgainstRules = true) { //
+        let selectedWords = [];
+        // const filteredData = filterAgainstRules ? wordSelectionRules.filterWordsOnRule(jsonResponse, this.gameLevel, gameTuning.isMasochist(this.difficulties), wordAmount) : jsonResponse;
+        const filteredData = jsonResponse; // waiting for vuex rules
+        for (let i = 1; i <= wordAmount; i++) {
+            const wordData = filteredData.splice(randomNum(filteredData.length, 0), 1)[0];
+            selectedWords.push(this.mayMutateCase(wordData.word)); // count here for progress bar
+        }
+        return selectedWords;
+    },
+
+    mayMutateCase(word) {
+        // const rand = randomNum(3, 0);
+        // if (!rand && ((gameTuning.isMasochist(this.difficulties) && this.gameLevel >= 3) || this.gameLevel >= 5)) { // need to be set in game rules and not here
+        //     return word.charAt(0).toUpperCase() + word.slice(1);
+        // }
+        return word;
+    },
+
     filterWordsOnRule(wordDatas, level, ismasochist, wordCount) {
         const ruleName = ismasochist ? 'masochist' : 'default';
         const currentLevel = level > 10 ? 10 : level;
-        const rule = levelMapping[currentLevel][ruleName];
+        const rule = LEVEL_MAPPING[currentLevel][ruleName];
         let filteredWords = wordDatas.filter((wordData) => {
             return this.doesWordRespectsRules(wordData, rule);
         });
@@ -146,5 +167,4 @@ export default {
         }
         return getWordFrequency(a) - getWordFrequency(b);
     },
-
 };

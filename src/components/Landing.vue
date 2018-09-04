@@ -40,9 +40,9 @@
 </template>
 
 <script>
-import {randomNum} from '../js/random.js';
-import gameTuning from '../js/gameTuning.js';
-import wordSelectionRules from '../js/wordSelectionRules.js';
+import {randomNum} from '../core/random.js';
+import gameTuning from '../core/gameTuning.js';
+import wordSelection from '../core/wordSelection.js';
 
 import buttonComponent from './buttons/Button.vue';
 import checkboxesComponent from './sections/Checkboxes.vue';
@@ -199,7 +199,7 @@ export default {
 
         selectWords(jsonResponse, wordCount, filterAgainstRules = true) {
             let selectedWords = [];
-            const filteredData = filterAgainstRules ? wordSelectionRules.filterWordsOnRule(jsonResponse, this.gameLevel, gameTuning.isMasochist(this.difficulties), wordCount) : jsonResponse;
+            const filteredData = filterAgainstRules ? wordSelection.filterWordsOnRule(jsonResponse, this.gameLevel, gameTuning.isMasochist(this.difficulties), wordCount) : jsonResponse;
             for (let i = 1; i <= wordCount; i++) {
                 const wordData = filteredData.splice(randomNum(filteredData.length, 0), 1)[0];
                 selectedWords.push(this.mayMutateCase(wordData.word));

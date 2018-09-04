@@ -21,9 +21,9 @@
 </template>
 
 <script>
-import scoreCalculator from '../../js/scoreCalculator.js';
-import gameTuning from '../../js/gameTuning.js';
-import {randomNum} from '../../js/random.js';
+import scoreCalculator from '../../core/scoreCalculator.js';
+import gameTuning from '../../core/gameTuning.js';
+import {randomNum} from '../../core/random.js';
 
 export default {
     name: 'Game',

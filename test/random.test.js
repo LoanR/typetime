@@ -1,4 +1,4 @@
-import {randomNum} from '../src/js/random.js';
+import {randomNum} from '../src/core/random.js';
 const assert = require('chai').assert;
 
 describe('randomNum function', function() {

@@ -1,4 +1,4 @@
-import {randomNum} from '../js/random.js';
+import wordSelection from '../core/wordSelection';
 
 const API_ENDPOINT = 'https://api.datamuse.com/words?';
 const FREQUENCY_PARAMETER = '&md=f';
@@ -20,7 +20,7 @@ export const wordsActions = {
             );
 
             commit('setWordsToType', {
-                selectedWords: selectWords(rawWords, payload.wordAmount),
+                selectedWords: wordSelection.selectWords(rawWords, payload.wordAmount),
             });
         } catch (error) {
             window.alert(error);
@@ -28,11 +28,14 @@ export const wordsActions = {
     },
 };
 
-async function requestWords(wordCount, queryParameter, queryValue, queryOption = '') {
+// func ensure minimum words
+// if not ensure, new request => how to test ? => mocking the request
+
+async function requestWords(wordAmount, queryParameter, queryValue, queryOption = '') { // generisize and modulize => this func doesnt only request
     try {
         let apiWords = [];
         let i = 1;
-        while (apiWords.length < wordCount) {
+        while (apiWords.length < wordAmount) {
             if (i > 1) {
                 queryParameter = 'ml=';
                 if (i > 2) {
@@ -47,23 +50,4 @@ async function requestWords(wordCount, queryParameter, queryValue, queryOption =
     } catch (error) {
         throw new Error(error);
     }
-};
-
-function selectWords(jsonResponse, wordCount, filterAgainstRules = true) {
-    let selectedWords = [];
-    // const filteredData = filterAgainstRules ? wordSelectionRules.filterWordsOnRule(jsonResponse, this.gameLevel, gameTuning.isMasochist(this.difficulties), wordCount) : jsonResponse;
-    const filteredData = jsonResponse; // waiting for vuex rules
-    for (let i = 1; i <= wordCount; i++) {
-        const wordData = filteredData.splice(randomNum(filteredData.length, 0), 1)[0];
-        selectedWords.push(mayMutateCase(wordData.word)); // count here for progress bar
-    }
-    return selectedWords;
-};
-
-function mayMutateCase(word) {
-    // const rand = randomNum(3, 0);
-    // if (!rand && ((gameTuning.isMasochist(this.difficulties) && this.gameLevel >= 3) || this.gameLevel >= 5)) { // need to be set in game rules and not here
-    //     return word.charAt(0).toUpperCase() + word.slice(1);
-    // }
-    return word;
 };

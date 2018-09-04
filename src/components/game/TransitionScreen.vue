@@ -36,7 +36,7 @@
 </template>
 
 <script>
-import {randomNum} from '../../js/random.js';
+import {randomNum} from '../../core/random.js';
 
 import buttonComponent from '../buttons/Button.vue';
 

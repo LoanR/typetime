@@ -25,8 +25,8 @@
 </template>
 
 <script>
-import gameTuning from '../../js/gameTuning.js';
-import {randomNum} from '../../js/random.js';
+import gameTuning from '../../core/gameTuning.js';
+import {randomNum} from '../../core/random.js';
 
 import gameComponent from './Game.vue';
 import transitionScreenComponent from './TransitionScreen.vue';

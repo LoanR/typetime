@@ -1,23 +1,5 @@
-import gameTuning, {_emptyMods, _modifiers, _difficulties} from '../src/js/gameTuning.js';
+import gameTuning from '../src/core/gameTuning.js';
 const assert = require('chai').assert;
-
-describe('getEmptyMods function', function() {
-    it('should return empty mods', function() {
-        assert.equal(gameTuning.getEmptyMods(), _emptyMods, 'expect empty modifiers');
-    });
-});
-
-describe('getModifiers function', function() {
-    it('should return base mods', function() {
-        assert.equal(gameTuning.getModifiers(), _modifiers, 'expect base modifiers');
-    });
-});
-
-describe('getDifficulties function', function() {
-    it('should return difficulties', function() {
-        assert.equal(gameTuning.getDifficulties(), _difficulties, 'expect difficulties');
-    });
-});
 
 describe('isSnail function', function() {
     it('should return boolean', function() {
