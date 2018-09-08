@@ -1,4 +1,4 @@
-export const _emptyMods = [
+const EMPTY_MODS = [
     {
         label: '',
         isChecked: false,
@@ -17,7 +17,7 @@ export const _emptyMods = [
     },
 ];
 
-export const _modifiers = [
+const MODIFIERS = [
     {
         label: 'lexical',
         param: 'rel_trg=',
@@ -57,7 +57,7 @@ export const _modifiers = [
     {
         label: 'español',
         param: 'ml=',
-        value: 'ahora',
+        value: 'ahora', // need more random
         option: '&v=es',
         isChecked: false,
         modCluster: 'all',
@@ -65,7 +65,7 @@ export const _modifiers = [
     },
 ];
 
-export const _difficulties = [
+const DIFFICULTIES = [
     {
         label: 'snail',
         article: 'a',
@@ -98,15 +98,15 @@ export const _difficulties = [
 
 export default {
     getEmptyMods() {
-        return _emptyMods;
+        return EMPTY_MODS;
     },
 
     getModifiers() {
-        return _modifiers;
+        return MODIFIERS;
     },
 
     getDifficulties() {
-        return _difficulties;
+        return DIFFICULTIES;
     },
 
     isSnail(difficulties) {

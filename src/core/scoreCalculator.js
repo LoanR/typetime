@@ -63,7 +63,7 @@ const LETTER_SCORE_MAPPING = {
     'ū': 6,
 };
 
-const letterComboMapping = {
+const LETTER_COMBO_MAPPING = {
     0: {
         default: 1,
         snail: 1,
@@ -102,7 +102,7 @@ export default {
     },
 
     _getCurrentCombo(letterCombo, isSnail, isMasochist) {
-        const mappingKey = Object.keys(letterComboMapping).reduce((prev, current) => {
+        const mappingKey = Object.keys(LETTER_COMBO_MAPPING).reduce((prev, current) => {
             return letterCombo > current ? current : prev;
         });
         let comboDifficulty = 'default';
@@ -111,6 +111,6 @@ export default {
         } else if (isMasochist && !isSnail) {
             comboDifficulty = 'masochist';
         }
-        return letterComboMapping[mappingKey][comboDifficulty];
+        return LETTER_COMBO_MAPPING[mappingKey][comboDifficulty];
     },
 };

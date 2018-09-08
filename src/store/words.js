@@ -5,22 +5,33 @@ const FREQUENCY_PARAMETER = '&md=f';
 
 export const wordsMutations = {
     setWordsToType(state, payload) {
-        state.wordsRelated.wordsToType = payload.selectedWords;
+        state.wordsRelated.wordsToType = payload.levelWords;
     },
 };
 
 export const wordsActions = {
     async requestAndSetWordsToType({commit}, payload) {
         try {
-            let rawWords = await requestWords(
+            let jsonWordsData = await requestWords(
                 payload.wordAmount,
                 payload.queryParameter,
                 payload.queryValue,
                 payload.queryOption,
             );
+            if (payload.filterAgainstRules) {
+                jsonWordsData = wordSelection.filterWordsOnRule(
+                    jsonWordsData,
+                    payload.gameLevel,
+                    payload.isMasochist,
+                    payload.wordAmount,
+                );
+            }
 
             commit('setWordsToType', {
-                selectedWords: wordSelection.selectWords(rawWords, payload.wordAmount),
+                levelWords: wordSelection.randomlyChangeCase(
+                    wordSelection.selectRandomWords(jsonWordsData, payload.wordAmount),
+                    payload.capitalizeProbability,
+                ),
             });
         } catch (error) {
             window.alert(error);

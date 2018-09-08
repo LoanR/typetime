@@ -149,11 +149,14 @@ export default {
                 this.$store.dispatch(
                     'requestAndSetWordsToType',
                     {
-                        wordAmount: this.startingWordsToTypeCount,
+                        wordAmount: this.wordsToTypeCount,
                         queryParameter: query[0],
                         queryValue: query[1],
                         queryOption: query[2],
-                    },
+                        gameLevel: this.gameLevel,
+                        isMasochist: gameTuning.isMasochist(this.difficulties),
+                        capitalizeProbability: wordSelection.getLevelRule(gameTuning.isMasochist(this.difficulties), this.gameLevel).capitalizeProbability,
+                    }, // all in state level rule
                 );
             } catch (err) {
                 this.restartGame();
@@ -230,7 +233,10 @@ export default {
                         queryParameter: query[0],
                         queryValue: query[1],
                         queryOption: query[2],
-                    },
+                        gameLevel: this.gameLevel,
+                        isMasochist: gameTuning.isMasochist(this.difficulties),
+                        capitalizeProbability: wordSelection.getLevelRule(gameTuning.isMasochist(this.difficulties), this.gameLevel).capitalizeProbability,
+                    }, // all in state level rule
                 );
                 // this.wordsToType = this.nextWordsToType;
                 // this.requestNextWordsNoWait(this.wordsToTypeCount + 1);
@@ -247,9 +253,9 @@ export default {
             let value = !randWordModifier ? 'care' : randWordModifier.value;
             let option = '';
             if (checkedMods.length) {
-                param = this.getParamFromMods(checkedMods) || param;
-                value = this.getValueFromMods(checkedMods) || value;
-                option = this.getOptionFromMods(checkedMods) || option;
+                param = this.getParamFromMods(checkedMods) || param; // state level rule constraint
+                value = this.getValueFromMods(checkedMods) || value; // state level rule theme
+                option = this.getOptionFromMods(checkedMods) || option; // state level rule option
             }
             const levelTheme = this.thematiseGame();
             if (levelTheme) {
@@ -279,12 +285,7 @@ export default {
             }
         },
 
-        thematiseGame() {
-            // if (this.nextWordsToType.length) {
-            //     return this.nextWordsToType[this.nextWordsToType.length - 1];
-            // } else if (this.wordsToType.length) {
-            //     return this.wordsToType[this.wordsToType.length - 1];
-            // }
+        thematiseGame() { // get theme level from state
             if (this.$store.state.wordsRelated.wordsToType.length) {
                 return this.$store.state.wordsRelated.wordsToType[this.$store.state.wordsRelated.wordsToType.length - 1];
             }
@@ -302,10 +303,10 @@ export default {
             const accentValues = ['*é*', '*è*', '*ê*', '*ë*', '*â*', '*ï*'];
             const rareAccentValues = ['*á*', '*å*', '*ë*', '*â*', '*í*', '*ö*', '*ó*', '*ü*', '*ú*'];
             const modWords = [
-                {param: 'ml=', value: 'toujours'},
-                {param: 'ml=', value: 'voiture'},
-                {param: 'ml=', value: 'live'},
-                {param: 'ml=', value: 'reason'},
+                {param: 'ml=', value: 'toujours'}, // need more random
+                {param: 'ml=', value: 'voiture'}, // need more random
+                {param: 'ml=', value: 'live'}, // need more random
+                {param: 'ml=', value: 'reason'}, // need more random
                 {param: 'sp=', value: accentValues[randomNum(accentValues.length, 0)]},
                 {param: 'sp=', value: rareAccentValues[randomNum(rareAccentValues.length, 0)]},
             ];
