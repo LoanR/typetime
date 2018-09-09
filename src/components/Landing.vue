@@ -63,8 +63,8 @@ export default {
             shuffledTitle: 'TypeTime',
             shouldShuffleTitle: true,
             shouldSlideFromRight: true,
-            timeOut: null, // rules file
-            firstTimeOut: 3000, // rules file
+            timeOut: null, // rules conf file
+            firstTimeOut: 3000, // rules conf file
             wantsToPlay: false,
             startContent: 'start',
             modTitle: 'Modifiers',
@@ -72,10 +72,10 @@ export default {
             selectedModifiers: gameTuning.getEmptyMods(),
             modifiers: gameTuning.getModifiers(),
             difficulties: gameTuning.getDifficulties(),
-            wordsPerMinute: 30, // rules file
+            wordsPerMinute: 30, // rules conf file
             // wordsToType: [], // game run file
             // nextWordsToType: [], // game run file
-            startingWordsToTypeCount: 5, // rules file
+            startingWordsToTypeCount: 5, // rules conf file
             gameLevel: 1, // rules file
             apiEndpoint: 'https://api.datamuse.com/words?', // game run file
             frequencyParameter: '&md=f', // game run file

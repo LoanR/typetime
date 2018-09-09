@@ -124,4 +124,5 @@ export default {
     isMasochist(difficulties) {
         return difficulties.find(dif => dif.label === 'masochist').isChecked;
     },
+    // resposibility to create other modifiers ?
 };

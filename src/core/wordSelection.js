@@ -1,5 +1,7 @@
 import {randomNum} from './random.js';
 
+// globale de correspondance settings et rule key
+
 const LEVEL_MAPPING = {
     1: {
         default: {

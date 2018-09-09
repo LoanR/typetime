@@ -1,6 +1,6 @@
 import wordSelection from '../core/wordSelection';
 
-const API_ENDPOINT = 'https://api.datamuse.com/words?';
+const API_ENDPOINT = 'https://api.datamuse.com/words?'; // in store or in conf file ?
 const FREQUENCY_PARAMETER = '&md=f';
 
 export const wordsMutations = {
