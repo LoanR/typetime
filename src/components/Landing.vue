@@ -166,7 +166,7 @@ export default {
             });
             const selectedModWords = await Promise.all(pSelectedModWords);
             this.modifiers.push(...gameTuning.buildNewModifiers(selectedModWords));
-            this.selectedModifiers = random.selectRandomEntities(4, this.modifiers);
+            this.selectedModifiers = random.spliceRandomEntities(4, this.modifiers); // magic
             this.$store.commit('setWordsContext', {
                 wordsContext: gameTuning.getWordsContext(this.modifiers, this.selectedModifiers),
             });
@@ -174,7 +174,7 @@ export default {
 
         async addWordModifier(param, value) {
             try {
-                return random.selectRandomEntities(1, wordSelection.cleanDataWords(await requestDataWords(1, param, value, '', false)))[0];
+                return random.selectRandomEntity(wordSelection.cleanDataWords(await requestDataWords(1, param, value, '', false)));
             } catch (error) {
                 this.restartGame();
                 window.alert('We couldn\'t build consistent modifiers, please launch a new game...');

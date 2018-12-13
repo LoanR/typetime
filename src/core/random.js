@@ -7,7 +7,11 @@ export default {
         return Math.floor(Math.random() * range) + start;
     },
 
-    selectRandomEntities(qty, range) {
+    selectRandomEntity(range) {
+        return range[this.randomNum(range.length)];
+    },
+
+    spliceRandomEntities(qty, range) {
         if (qty >= range.length) {
             return range;
         }

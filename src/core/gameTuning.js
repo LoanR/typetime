@@ -170,8 +170,8 @@ export default {
             {param: 'ml=', value: 'voiture'}, // need more random conf
             {param: 'ml=', value: 'live'}, // need more random conf
             {param: 'ml=', value: 'reason'}, // need more random conf
-            {param: 'sp=', value: random.selectRandomEntities(1, accentValues)[0]},
-            {param: 'sp=', value: random.selectRandomEntities(1, rareAccentValues)[0]},
+            {param: 'sp=', value: random.selectRandomEntity(accentValues)},
+            {param: 'sp=', value: random.selectRandomEntity(rareAccentValues)},
         ];
         return modWords;
     },

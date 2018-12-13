@@ -54,7 +54,7 @@ async function requestAndSelectWords(levelRules, wordsContext, wordsSelectionRul
             wordsContext.wordsTheme,
             wordsContext.wordsOption,
         );
-        if (filterAgainstRules) {
+        if (filterAgainstRules) { // words are always filtered, yes?
             dataWords = wordSelection.filterWordsOnRule(
                 dataWords,
                 levelRules,
@@ -62,7 +62,7 @@ async function requestAndSelectWords(levelRules, wordsContext, wordsSelectionRul
             );
         }
 
-        const randomSelectedDataWords = random.selectRandomEntities(levelRules.wordAmount, dataWords);
+        const randomSelectedDataWords = random.spliceRandomEntities(levelRules.wordAmount, dataWords);
 
         const words = wordSelection.cleanDataWords(randomSelectedDataWords);
 

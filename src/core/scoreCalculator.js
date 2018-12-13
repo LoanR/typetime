@@ -113,4 +113,12 @@ export default {
         }
         return LETTER_COMBO_MAPPING[mappingKey][comboDifficulty];
     },
+
+    getLetterScore(combo, letter) {
+        const lsMapping = this.getLetterScoreMapping();
+        if (letter.toLowerCase() === letter) {
+            return lsMapping[letter] ? lsMapping[letter] * combo : 1 * combo;
+        }
+        return lsMapping[letter] ? (lsMapping[letter] + 1) * combo : 1 * combo;
+    },
 };

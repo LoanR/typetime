@@ -23,9 +23,7 @@
 <script>
 import scoreCalculator from '../../core/scoreCalculator.js';
 import wordSelection from '@/core/wordSelection.js';
-// import gameTuning from '../../core/gameTuning.js';
 import random from '../../core/random.js';
-// import {searchForWordsToType, searchForNextWordsToType} from '@/mixins/wordSetter.js';
 
 export default {
     name: 'Game',
@@ -38,7 +36,7 @@ export default {
             letterToTypeIndex: 0,
             entry: '',
             previousEntry: '',
-            wordCountDown: 10000,
+            wordCountDown: 0,
             interval: null,
             showPreparation: false,
             canStillPlay: true,
@@ -46,12 +44,12 @@ export default {
             combo: 1,
             scoreChange: 0,
             errorStyle: null,
-            scoreIndicatorStyle: null,
-            comboIndicatorStyle: null,
-            comboIndicatorStyle2: null,
+            scoreIndicatorStyleTimer: null,
+            comboIndicatorMalusStyleTimer: null,
+            comboIndicatorBonusStyleTimer: null,
             capsStatus: false,
             countdownEnd: new Audio(require('@/assets/sounds/countdownend.mp3')),
-            loseSound: [
+            loseSounds: [
                 require('@/assets/sounds/powerdown.wav'),
                 require('@/assets/sounds/mk64_loser.mp3'),
                 require('@/assets/sounds/tetrislose.mp3'),
@@ -60,7 +58,7 @@ export default {
                 require('@/assets/sounds/yoshiowow.mp3'),
                 require('@/assets/sounds/pacmandies.mp3'),
             ],
-            wordSound: [
+            wordSounds: [
                 require('@/assets/sounds/mariocoin.mp3'),
                 require('@/assets/sounds/completion.mp3'),
                 require('@/assets/sounds/ding.mp3'),
@@ -68,7 +66,7 @@ export default {
                 require('@/assets/sounds/sonicring.mp3'),
                 require('@/assets/sounds/mario1up.mp3'),
             ],
-            errorSound: [
+            errorSounds: [
                 require('@/assets/sounds/denied.wav'),
                 require('@/assets/sounds/kirby_powerdown.mp3'),
                 require('@/assets/sounds/moderatehit.mp3'),
@@ -80,7 +78,7 @@ export default {
                 require('@/assets/sounds/funk.mp3'),
                 require('@/assets/sounds/susomi.mp3'),
             ],
-            levelSound: [
+            levelSounds: [
                 require('@/assets/sounds/powerup.wav'),
                 require('@/assets/sounds/sprout.wav'),
                 require('@/assets/sounds/yoshiyoshi.wav'),
@@ -114,31 +112,31 @@ export default {
         },
 
         letterTypedCorrect(letterElement) {
-            // this.$store.commit('incrementLetterCombo'); // bad idea, too much ressources
             this.letterCombo += 1;
-            this.scoreChange = this.getLetterScore(this.entry, this.letterCombo, this.currentLevel, this.isSnail, this.isResilient, this.isMasochist);
+            const previousCombo = this.combo;
+            this.combo = scoreCalculator.getFinalMultiplier(this.letterCombo, this.isSnail, this.isMasochist, this.isResilient, this.currentLevel);
+            if (this.combo > previousCombo) {
+                this.stylizeWithClass(this.$refs.comboIndicator, true, 'score-bonus');
+                this.comboIndicatorBonusStyleTimer = window.setTimeout(this.stylizeWithClass, 300, this.$refs.comboIndicator, false, 'score-bonus');
+            }
+            this.scoreChange = scoreCalculator.getLetterScore(this.combo, this.entry);
             this.gameScore += this.scoreChange;
             this.stylizeWithClass(letterElement, true, 'letter-found');
-            // this.$store.commit('addScore', {scoreToAdd: this.scoreChange});  // bad idea, too much ressources
-            // this.levelScore += this.scoreChange;
             this.nextLetterToFind();
         },
 
         letterTypedIncorrect(letterElement) {
-            new Audio(this.errorSound[random.randomNum(this.errorSound.length)]).play();
+            new Audio(random.selectRandomEntity(this.errorSounds)).play();
             this.stylizeWithClass(letterElement, true, 'letter-error');
             this.errorStyle = window.setTimeout(this.stylizeWithClass, 100, letterElement, false, 'letter-error');
             this.stylizeWithClass(this.$refs.scoreIndicator, true, 'score-malus');
-            this.scoreIndicatorStyle = window.setTimeout(this.stylizeWithClass, 300, this.$refs.scoreIndicator, false, 'score-malus');
-            this.scoreChange = -this.getLetterScore(this.entry, this.letterCombo, this.currentLevel, this.isSnail, this.isResilient, this.isMasochist);
+            this.scoreIndicatorStyleTimer = window.setTimeout(this.stylizeWithClass, 300, this.$refs.scoreIndicator, false, 'score-malus');
+            this.scoreChange = -scoreCalculator.getLetterScore(this.combo, this.entry);
             this.gameScore += this.scoreChange;
-            // this.$store.commit('addScore', {scoreToAdd: this.scoreChange}); // bad idea, too much ressources
-            // this.levelScore += this.scoreChange;
             this.stylizeWithClass(this.$refs.comboIndicator, true, 'score-malus');
-            // this.$store.commit('resetLetterCombo'); // bad idea, too much ressources
             this.letterCombo = 0;
             this.combo = scoreCalculator.getFinalMultiplier(this.letterCombo, this.isSnail, this.isMasochist, this.isResilient, this.currentLevel);
-            this.comboIndicatorStyle = window.setTimeout(this.stylizeWithClass, 300, this.$refs.comboIndicator, false, 'score-malus');
+            this.comboIndicatorMalusStyleTimer = window.setTimeout(this.stylizeWithClass, 300, this.$refs.comboIndicator, false, 'score-malus');
         },
 
         wordCompleted() {
@@ -157,8 +155,6 @@ export default {
             }
             this.scoreChange += timeScore;
             this.gameScore += this.scoreChange;
-            // this.$store.commit('addScore', {scoreToAdd: this.scoreChange});  // bad idea, too much ressources
-            // this.levelScore += timeScore;
             this.letterToTypeIndex = 0;
             if (this.wordToTypeIndex < this.$store.state.wordsRelated.wordsToType.length - 1) {
                 this.levelWordsRemains();
@@ -173,13 +169,13 @@ export default {
 
         levelWordsRemains() {
             this.stylizeWithClass(this.$refs.wordIndicator[this.wordToTypeIndex], true, 'word-found');
-            new Audio(this.wordSound[random.randomNum(this.wordSound.length)]).play();
+            new Audio(random.selectRandomEntity(this.wordSounds)).play();
             this.wordToTypeIndex += 1;
         },
 
         prepareNextLevel() {
             this.$store.commit('setWordsThemeContext', {wordsTheme: this.$store.state.wordsRelated.wordsToType[this.$store.state.wordsRelated.wordsToType.length - 1]});
-            const nextLevelRules = wordSelection.getLevelRule(this.isMasochist, this.$store.state.rules.levelRules.currentLevel + 1);
+            const nextLevelRules = wordSelection.getLevelRule(this.isMasochist, this.currentLevel + 1);
             this.$store.dispatch(
                 'requestAndSetNextWordsToType',
                 {
@@ -187,25 +183,17 @@ export default {
                     levelRules: nextLevelRules,
                     filterAgainstRules: true,
                     wordsSelectionRules: this.$store.state.rules.wordsSelectionRules,
-                    // wordAmount: this.wordsToTypeCount,
-                    // wordsConstraint: this.$store.state.wordsContext.wordsConstraint,
-                    // wordsTheme: this.$store.state.wordsContext.wordsTheme,
-                    // wordsOption: this.$store.state.wordsContext.wordsOption,
-                    // gameLevel: this.gameLevel,
-                    // isMasochist: gameTuning.isMasochist(this.difficulties),
-                    // capitalizeProbability: wordSelection.getLevelRule(gameTuning.isMasochist(this.difficulties), this.gameLevel).capitalizeProbability,
-                }, // all in state level rule
+                },
             );
         },
 
         moveToNextLevel() {
             this.$store.commit('setNewLevelWords');
-            new Audio(this.levelSound[random.randomNum(this.levelSound.length)]).play();
+            new Audio(random.selectRandomEntity(this.levelSounds)).play();
             for (let span of this.$refs.wordIndicator) {
                 this.stylizeWithClass(span, false, 'word-found');
             }
             if (!this.isResilient) {
-                console.log('transition');
                 this.$store.commit('setScore', {newScore: this.gameScore});
                 this.$store.commit('setLetterCombo', {newLetterCombo: this.letterCombo});
                 this.showPreparation = true;
@@ -214,27 +202,13 @@ export default {
             this.stylizeWithClass(this.$refs.comboIndicator, false, 'score-bonus');
             this.stylizeWithClass(this.$refs.scoreIndicator, false, 'score-malus');
             this.$store.commit('incrementLevel');
-            this.$store.commit('setWordsSelectionRules', {wordsSelectionRules: wordSelection.getLevelRule(this.isMasochist, this.$store.state.rules.levelRules.currentLevel)});
+            this.$store.commit('setWordsSelectionRules', {wordsSelectionRules: wordSelection.getLevelRule(this.isMasochist, this.currentLevel)});
             this.$emit('nextLevel');
             window.clearTimeout(this.errorStyle);
-            window.clearTimeout(this.scoreIndicatorStyle);
-            window.clearTimeout(this.comboIndicatorStyle);
-            window.clearTimeout(this.comboIndicatorStyle2);
+            window.clearTimeout(this.scoreIndicatorStyleTimer);
+            window.clearTimeout(this.comboIndicatorMalusStyleTimer);
+            window.clearTimeout(this.comboIndicatorBonusStyleTimer);
             this.wordToTypeIndex = 0;
-        },
-
-        getLetterScore(letter, letterCombo, currentLevel, isSnail, isResilient, isMasochist) {
-            const tempCombo = this.combo;
-            this.combo = scoreCalculator.getFinalMultiplier(letterCombo, isSnail, isMasochist, isResilient, currentLevel);
-            if (this.combo > tempCombo) {
-                this.stylizeWithClass(this.$refs.comboIndicator, true, 'score-bonus');
-                this.comboIndicatorStyle2 = window.setTimeout(this.stylizeWithClass, 300, this.$refs.comboIndicator, false, 'score-bonus');
-            }
-            const lsMapping = scoreCalculator.getLetterScoreMapping();
-            if (letter.toLowerCase() === letter) {
-                return lsMapping[letter] ? lsMapping[letter] * this.combo : 1 * this.combo;
-            }
-            return lsMapping[letter] ? (lsMapping[letter] + 1) * this.combo : 1 * this.combo;
         },
 
         stylizeWithClass(element, shouldAdd, styleClass) {
@@ -278,7 +252,6 @@ export default {
 
         launchNewCountdown() {
             this.$refs.countdown.classList.remove('near-end');
-            // let countDown = this.isEconomist ? (this.allotedWordBaseTime + this.savedWordTime) : this.allotedWordBaseTime;
             let countDown = this.allotedWordBaseTime + this.savedWordTime;
             this.wordCountDown = countDown > 3000 ? 3000 : parseInt(countDown.toFixed());
             if (!this.showPreparation) {
@@ -293,15 +266,14 @@ export default {
         },
 
         timeExceeded() {
-            new Audio(this.loseSound[random.randomNum(this.loseSound.length)]).play();
+            new Audio(random.selectRandomEntity(this.loseSounds)).play();
             this.$store.commit('setScore', {newScore: this.gameScore});
             this.wordCountDown = 0;
             this.clearCountdown();
             this.canStillPlay = false;
             this.$emit('gameOver', {
-                totalScore: this.gamescore, // vuex
-                nemesisLetter: this.wordToTypeLetters[this.letterToTypeIndex], // vuex
-                stuckWord: this.wordToType, // vuex
+                nemesisLetter: this.wordToTypeLetters[this.letterToTypeIndex],
+                stuckWord: this.wordToType,
             });
         },
 
@@ -372,10 +344,6 @@ export default {
         this.$refs.gameInput.focus();
         this.stylizeWithClass(this.$refs.letterToType[this.letterToTypeIndex], true, 'letter-to-type');
         this.launchNewCountdown();
-        // this.wordCountDown += this.timeAccount; // vuex
-        // this.levelScore = this.previousScore; // vuex
-        // this.levelScore = 0;
-        // this.letterCombo = this.previousLetterCombo; // vuex
         this.combo = scoreCalculator.getFinalMultiplier(this.letterCombo, this.isSnail, this.isMasochist, this.isResilient, this.currentLevel);
         this.showPreparation = false;
     },
