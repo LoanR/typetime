@@ -23,7 +23,11 @@ export const gameMutations = {
         state.rules.levelRules.savedWordTime = payload.savedWordTime;
     },
 
-    togglePlay(state) {
-        state.currentlyPlaying = !state.currentlyPlaying;
+    startGame(state) {
+        state.currentlyPlaying = true;
+    },
+
+    stopGame(state) {
+        state.currentlyPlaying = false;
     },
 };

@@ -129,8 +129,6 @@ export default {
     getLevelRule(isMasochist, level) { // temporary func while waiting for level rule state
         // const ruleName = isMasochist ? 'masochist' : 'default';
         // const currentLevel = level > 10 ? 10 : level;
-        console.log('is maso ?');
-        console.log(isMasochist);
         let rule = WORD_SELECTION_MAPPING[level > 10 ? 10 : level][isMasochist ? 'masochist' : 'default']; // magic string
         rule.wordAmount = 4 + level; // magic base amount number => need global in conf
         return rule;
@@ -154,7 +152,7 @@ export default {
         });
     },
 
-    filterWordsOnRule(dataWords, levelRules, wordsSelectionRules, gameDifficulties) {
+    filterWordsOnRule(dataWords, levelRules, wordsSelectionRules) {
         // const ruleName = isMasochist ? 'masochist' : 'default';
         // const currentLevel = level > 10 ? 10 : level;
         // const rule = WORD_SELECTION_MAPPING[currentLevel][ruleName];

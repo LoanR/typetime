@@ -19,7 +19,12 @@ export const wordsMutations = {
 export const wordsActions = {
     async requestAndSetWordsToType({commit}, payload) {
         try {
-            const words = await requestAndSelectWords(payload);
+            const words = await requestAndSelectWords(
+                payload.levelRules,
+                payload.wordsContext,
+                payload.wordsSelectionRules,
+                payload.filterAgainstRules,
+            );
             commit('setWordsToType', {levelWords: words});
         } catch (error) {
             throw new Error(error);
@@ -28,7 +33,12 @@ export const wordsActions = {
 
     async requestAndSetNextWordsToType({commit}, payload) {
         try {
-            const words = await requestAndSelectWords(payload);
+            const words = await requestAndSelectWords(
+                payload.levelRules,
+                payload.wordsContext,
+                payload.wordsSelectionRules,
+                payload.filterAgainstRules,
+            );
             commit('setNextWordsToType', {nextLevelWords: words});
         } catch (error) {
             throw new Error(error);
@@ -36,28 +46,27 @@ export const wordsActions = {
     },
 };
 
-async function requestAndSelectWords(payload) {
+async function requestAndSelectWords(levelRules, wordsContext, wordsSelectionRules, filterAgainstRules) {
     try {
         let dataWords = await requestDataWords(
-            payload.levelRules.wordAmount,
-            payload.wordsContext.wordsConstraint,
-            payload.wordsContext.wordsTheme,
-            payload.wordsContext.wordsOption,
+            levelRules.wordAmount,
+            wordsContext.wordsConstraint,
+            wordsContext.wordsTheme,
+            wordsContext.wordsOption,
         );
-        if (payload.filterAgainstRules) {
+        if (filterAgainstRules) {
             dataWords = wordSelection.filterWordsOnRule(
                 dataWords,
-                payload.levelRules,
-                payload.wordsSelectionRules,
-                null,
+                levelRules,
+                wordsSelectionRules,
             );
         }
 
-        const randomSelectedDataWords = random.selectRandomEntities(payload.levelRules.wordAmount, dataWords);
+        const randomSelectedDataWords = random.selectRandomEntities(levelRules.wordAmount, dataWords);
 
         const words = wordSelection.cleanDataWords(randomSelectedDataWords);
 
-        const changedWords = wordSelection.randomlyChangeCase(words, payload.wordsSelectionRules.capitalizeProbability);
+        const changedWords = wordSelection.randomlyChangeCase(words, wordsSelectionRules.capitalizeProbability);
 
         return changedWords;
     } catch (error) {

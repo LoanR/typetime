@@ -82,6 +82,7 @@ export default {
         },
 
         returnHome() {
+            this.$store.commit('stopGame');
             this.$emit('rematch');
         },
     },

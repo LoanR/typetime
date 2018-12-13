@@ -36,7 +36,6 @@
 import random from '@/core/random.js';
 import gameTuning from '@/core/gameTuning.js';
 import wordSelection from '@/core/wordSelection.js';
-import {searchForWordsToType} from '@/mixins/wordSetter.js';
 
 import buttonComponent from '@/components/buttons/Button.vue';
 import checkboxesComponent from '@/components/sections/Checkboxes.vue';
@@ -117,12 +116,9 @@ export default {
             const toggledModifier = this.selectedModifiers.find(modifier => modifier.id === toggledModifierId);
             this.uncheckRelatedModifiers(toggledModifier);
             toggledModifier.isChecked = !toggledModifier.isChecked;
-            this.$store.commit(
-                'setWordsContext',
-                {
-                    wordsContext: gameTuning.getWordsContext(this.modifiers, this.selectedModifiers),
-                }
-            );
+            this.$store.commit('setWordsContext', {
+                wordsContext: gameTuning.getWordsContext(this.modifiers, this.selectedModifiers),
+            });
         },
 
         uncheckRelatedModifiers(toggledModifier) {
@@ -145,201 +141,40 @@ export default {
                 this.shouldSlideFromRight = true;
                 this.$store.commit('resetLevelRules'); // reusable -> store action ?
                 this.$store.commit('resetScore'); // reusable -> store action ?
-                this.defineDifficultyNaming();
-                this.$store.commit('togglePlay');
+                this.$store.commit('setDifficultyNaming', {
+                    difficultyNaming: gameTuning.buildDifficultyNaming(this.difficulties.filter(d => d.isChecked)),
+                });
+                this.$store.commit('startGame');
                 this.$store.commit('setWordsSelectionRules', {wordsSelectionRules: wordSelection.getLevelRule(this.$store.state.rules.gameDifficulties.isMasochist, this.$store.state.rules.levelRules.currentLevel)}); // reusable -> store action ?
-                searchForWordsToType(this.$store); // reusable -> store action ?
-                // const query = this.getUrlQuery();
-                // this.wordsToType = await this.requestDataWords(this.startingWordsToTypeCount, query[0], query[1], query[2]);
-                // this.requestNextWordsNoWait(this.wordsToTypeCount + 1);
+                this.$store.dispatch('requestAndSetWordsToType', {
+                    levelRules: this.$store.state.rules.levelRules,
+                    wordsContext: this.$store.state.wordsContext,
+                    wordsSelectionRules: this.$store.state.rules.wordsSelectionRules,
+                    filterAgainstRules: true,
+                });
             } catch (err) {
                 this.restartGame();
-                window.alert('We couldn\'t find enough words to type, please launch a new game...');
+                // window.alert('We couldn\'t find enough words to type, please launch a new game...');
+                window.alert(err);
             }
-        },
-
-        // async requestDataWords(wordCount, queryParameter, queryValue, option = '', filterAgainstRules = true) {
-        //     try {
-        //         let unformattedData = [];
-        //         let i = 1;
-        //         while (unformattedData.length < wordCount) {
-        //             if (i > 1) {
-        //                 queryParameter = 'ml=';
-        //                 if (i > 2) {
-        //                     queryValue = 'effect';
-        //                 }
-        //             }
-        //             const response = await fetch(this.apiEndpoint + queryParameter + queryValue + option + this.frequencyParameter);
-        //             if (i > 1) {
-        //                 unformattedData.unshift(...await response.json());
-        //             } else {
-        //                 unformattedData.push(...await response.json());
-        //             }
-        //             i += 1;
-        //         }
-        //         return this.selectWords(unformattedData, wordCount, filterAgainstRules);
-        //     } catch (err) {
-        //         throw new Error(err);
-        //     }
-        // },
-
-        // requestNextWordsNoWait(wordCount) {
-        //     const query = this.getUrlQuery();
-        //     fetch(this.apiEndpoint + query[0] + query[1] + query[2] + this.frequencyParameter).then(response => {
-        //         if (response.ok) {
-        //             return response.json();
-        //         }
-        //     }).then(unformattedData => {
-        //         this.nextWordsToType = this.selectWords(unformattedData, Math.min(wordCount, unformattedData.length));
-        //     });
-        // },
-
-        // selectWords(jsonResponse, wordCount, filterAgainstRules = true) {
-        //     let selectedWords = [];
-        //     const filteredData = filterAgainstRules ? wordSelection.filterWordsOnRule(jsonResponse, this.gameLevel, gameTuning.isMasochist(this.difficulties), wordCount) : jsonResponse;
-        //     for (let i = 1; i <= wordCount; i++) {
-        //         const wordData = filteredData.splice(random.randomNum(filteredData.length, 0), 1)[0];
-        //         selectedWords.push(this.mayMutateCase(wordData.word));
-        //     }
-        //     return selectedWords;
-        // },
-
-        // mayMutateCase(word) {
-        //     const rand = random.randomNum(3, 0);
-        //     if (!rand && ((gameTuning.isMasochist(this.difficulties) && this.gameLevel >= 3) || this.gameLevel >= 5)) {
-        //         return word.charAt(0).toUpperCase() + word.slice(1);
-        //     }
-        //     return word;
-        // },
-
-        // async nextLevel() {
-        //     try {
-        //         this.gameLevel += 1;
-        //         const query = this.getUrlQuery();
-        //         // while (this.nextWordsToType.length < this.wordsToTypeCount) {
-        //         //     const remainingWordCount = this.wordsToTypeCount - this.nextWordsToType.length;
-        //         //     this.nextWordsToType.unshift(...await this.requestDataWords(remainingWordCount, query[0], query[1], query[2]));
-        //         // }
-        //         this.$store.dispatch(
-        //             'requestAndSetWordsToType',
-        //             {
-        //                 wordAmount: this.wordsToTypeCount,
-        //                 queryParameter: query[0],
-        //                 queryValue: query[1],
-        //                 queryOption: query[2],
-        //                 gameLevel: this.gameLevel,
-        //                 isMasochist: gameTuning.isMasochist(this.difficulties),
-        //                 capitalizeProbability: wordSelection.getLevelRule(gameTuning.isMasochist(this.difficulties), this.gameLevel).capitalizeProbability,
-        //             }, // all in state level rule
-        //         );
-        //         // this.wordsToType = this.nextWordsToType;
-        //         // this.requestNextWordsNoWait(this.wordsToTypeCount + 1);
-        //     } catch (error) {
-        //         this.restartGame();
-        //         window.alert('We couldn\'t find enough words for the next level, please launch a new game...');
-        //     }
-        // },
-
-        // getUrlQuery() {
-        //     const checkedMods = this.selectedModifiers.filter(mod => !!mod.isChecked);
-        //     const randWordModifier = this.modifiers.find(mod => mod.modCluster === 'word');
-        //     let param = 'ml=';
-        //     let value = !randWordModifier ? 'care' : randWordModifier.value;
-        //     let option = '';
-        //     if (checkedMods.length) {
-        //         param = this.getParamFromMods(checkedMods) || param; // state level rule constraint
-        //         value = this.getValueFromMods(checkedMods) || value; // state level rule theme
-        //         option = this.getOptionFromMods(checkedMods) || option; // state level rule option
-        //     }
-        //     const levelTheme = this.thematiseGame();
-        //     if (levelTheme) {
-        //         value = levelTheme;
-        //     }
-        //     return [param, value, option];
-        // },
-
-        // getParamFromMods(mods) {
-        //     const m = mods.filter(mod => mod.param !== '');
-        //     if (m.length === 1) {
-        //         return m[0].param;
-        //     }
-        // },
-
-        // getValueFromMods(mods) {
-        //     const m = mods.filter(mod => mod.value !== '');
-        //     if (m.length === 1) {
-        //         return m[0].value;
-        //     }
-        // },
-
-        // getOptionFromMods(mods) {
-        //     const m = mods.filter(mod => mod.option !== '');
-        //     if (m.length === 1) {
-        //         return m[0].option;
-        //     }
-        // },
-
-        thematiseGame() { // get theme level from state
-            if (this.$store.state.wordsRelated.wordsToType.length) {
-                return this.$store.state.wordsRelated.wordsToType[this.$store.state.wordsRelated.wordsToType.length - 1];
-            }
-            return null;
         },
 
         async selectModifiers() {
-            // this.availableModifiers.push(...await this.getNewModifiers());
-            this.modifiers.push(...await this.getNewModifiers());
-            for (let i = 0; i < 4; i++) {
-                // this.gameModifiers.splice(i, 1, this.modifiers.splice(random.randomNum(this.modifiers.length, 0), 1)[0]); // why [0] ?
-                this.selectedModifiers.splice(i, 1, this.modifiers.splice(random.randomNum(this.modifiers.length, 0), 1)[0]);
-            }
-            this.$store.commit(
-                'setWordsContext',
-                {
-                    wordsContext: gameTuning.getWordsContext(this.modifiers, this.selectedModifiers),
-                }
-            );
+            const modSearchValues = gameTuning.getSpecificModifierSearchValues();
+            const pSelectedModWords = modSearchValues.map(async(searchInstructions) => {
+                return this.addWordModifier(searchInstructions.param, searchInstructions.value);
+            });
+            const selectedModWords = await Promise.all(pSelectedModWords);
+            this.modifiers.push(...gameTuning.buildNewModifiers(selectedModWords));
+            this.selectedModifiers = random.selectRandomEntities(4, this.modifiers);
+            this.$store.commit('setWordsContext', {
+                wordsContext: gameTuning.getWordsContext(this.modifiers, this.selectedModifiers),
+            });
         },
 
-        async getNewModifiers() {
-            const accentValues = ['*é*', '*è*', '*ê*', '*ë*', '*â*', '*ï*'];
-            const rareAccentValues = ['*á*', '*å*', '*ë*', '*â*', '*í*', '*ö*', '*ó*', '*ü*', '*ú*'];
-            const modWords = [
-                {param: 'ml=', value: 'toujours'}, // need more random
-                {param: 'ml=', value: 'voiture'}, // need more random
-                {param: 'ml=', value: 'live'}, // need more random
-                {param: 'ml=', value: 'reason'}, // need more random
-                {param: 'sp=', value: accentValues[random.randomNum(accentValues.length, 0)]},
-                {param: 'sp=', value: rareAccentValues[random.randomNum(rareAccentValues.length, 0)]},
-            ];
-            let mods = [];
-            for (const modWord of modWords) {
-                mods = await this.addWordModifier(mods, modWord.param, modWord.value);
-            }
-            const modsToAdd = [];
-            for (const mod of mods) {
-                modsToAdd.push(
-                    {
-                        id: '"' + mod + '"',
-                        label: '"' + mod + '"',
-                        values: {wordsTheme: mod},
-                        isChecked: false,
-                        modCluster: 'word',
-                        description: 'Suggest the game to search for words around "' + mod + '".',
-                    }
-                );
-            }
-            return modsToAdd;
-        },
-
-        async addWordModifier(mods, param, value) {
+        async addWordModifier(param, value) {
             try {
-                const word = random.selectRandomEntities(1, wordSelection.cleanDataWords(await requestDataWords(1, param, value, '', false)))[0];
-                if (mods.indexOf(word) !== -1) {
-                    return null;
-                }
-                mods.push(word);
-                return mods;
+                return random.selectRandomEntities(1, wordSelection.cleanDataWords(await requestDataWords(1, param, value, '', false)))[0];
             } catch (error) {
                 this.restartGame();
                 window.alert('We couldn\'t build consistent modifiers, please launch a new game...');
@@ -354,14 +189,6 @@ export default {
             }
         },
 
-        defineDifficultyNaming() {
-            let checkedDifficulties = this.difficulties.filter(d => d.isChecked);
-            checkedDifficulties.sort((d1, d2) => d1.stringOrder - d2.stringOrder);
-            this.$store.commit('setDifficultyNaming', {
-                difficultyNaming: checkedDifficulties.length ? ('as ' + checkedDifficulties[0].article + ' "' + checkedDifficulties.map(d => d.label).join(' ') + '", ') : '',
-            });
-        },
-
         restartGame() {
             this.shouldSlideFromRight = false;
             this.shouldShuffleTitle = true;
@@ -369,9 +196,6 @@ export default {
             this.selectedModifiers = gameTuning.getEmptyMods();
             this.modifiers = gameTuning.getModifiers();
             this.selectModifiers();
-            this.$store.commit('togglePlay');
-            // this.wordsToType = [];
-            // this.nextWordsToType = [];
         },
     },
 
@@ -394,21 +218,9 @@ export default {
                 return difficulty;
             });
         },
-
-        // selectedModifiers() {
-        //     console.log('---------');
-        //     console.log(this.modifiers);
-        //     console.log('---------');
-        //     const selectedModifiers = this.modifiers.filter(mod => mod.isSelected);
-        //     if (selectedModifiers.length < 4) {
-        //         return gameTuning.getEmptyMods();
-        //     }
-        //     return selectedModifiers;
-        // },
     },
 
     mounted() {
-        console.log('new mount');
         if (this.shouldShuffleTitle) {
             this.timeOut = window.setTimeout(() => {
                 this.overwriteTitleCycle();
