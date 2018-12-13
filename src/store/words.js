@@ -1,64 +1,66 @@
 import wordSelection from '../core/wordSelection';
-
-const API_ENDPOINT = 'https://api.datamuse.com/words?'; // in store or in conf file ?
-const FREQUENCY_PARAMETER = '&md=f';
+import random from '@/core/random';
+import {requestDataWords} from '../core/wordRequest';
 
 export const wordsMutations = {
     setWordsToType(state, payload) {
         state.wordsRelated.wordsToType = payload.levelWords;
+    },
+
+    setNextWordsToType(state, payload) {
+        state.wordsRelated.nextWordsToType = payload.nextLevelWords;
+    },
+
+    setNewLevelWords(state) {
+        state.wordsRelated.wordsToType = state.wordsRelated.nextWordsToType;
     },
 };
 
 export const wordsActions = {
     async requestAndSetWordsToType({commit}, payload) {
         try {
-            let jsonWordsData = await requestWords(
-                payload.wordAmount,
-                payload.queryParameter,
-                payload.queryValue,
-                payload.queryOption,
-            );
-            if (payload.filterAgainstRules) {
-                jsonWordsData = wordSelection.filterWordsOnRule(
-                    jsonWordsData,
-                    payload.gameLevel,
-                    payload.isMasochist,
-                    payload.wordAmount,
-                );
-            }
-
-            commit('setWordsToType', {
-                levelWords: wordSelection.randomlyChangeCase(
-                    wordSelection.selectRandomWords(jsonWordsData, payload.wordAmount),
-                    payload.capitalizeProbability,
-                ),
-            });
+            const words = await requestAndSelectWords(payload);
+            commit('setWordsToType', {levelWords: words});
         } catch (error) {
-            window.alert(error);
+            throw new Error(error);
+        }
+    },
+
+    async requestAndSetNextWordsToType({commit}, payload) {
+        try {
+            const words = await requestAndSelectWords(payload);
+            commit('setNextWordsToType', {nextLevelWords: words});
+        } catch (error) {
+            throw new Error(error);
         }
     },
 };
 
-// func ensure minimum words
-// if not ensure, new request => how to test ? => mocking the request
-
-async function requestWords(wordAmount, queryParameter, queryValue, queryOption = '') { // generisize and modulize => this func doesnt only request
+async function requestAndSelectWords(payload) {
     try {
-        let apiWords = [];
-        let i = 1;
-        while (apiWords.length < wordAmount) {
-            if (i > 1) {
-                queryParameter = 'ml=';
-                if (i > 2) {
-                    queryValue = 'effect'; // need more random than default 'effect' word
-                }
-            }
-            const response = await fetch(API_ENDPOINT + queryParameter + queryValue + queryOption + FREQUENCY_PARAMETER);
-            apiWords.unshift(...await response.json());
-            i += 1;
+        let dataWords = await requestDataWords(
+            payload.levelRules.wordAmount,
+            payload.wordsContext.wordsConstraint,
+            payload.wordsContext.wordsTheme,
+            payload.wordsContext.wordsOption,
+        );
+        if (payload.filterAgainstRules) {
+            dataWords = wordSelection.filterWordsOnRule(
+                dataWords,
+                payload.levelRules,
+                payload.wordsSelectionRules,
+                null,
+            );
         }
-        return apiWords;
+
+        const randomSelectedDataWords = random.selectRandomEntities(payload.levelRules.wordAmount, dataWords);
+
+        const words = wordSelection.cleanDataWords(randomSelectedDataWords);
+
+        const changedWords = wordSelection.randomlyChangeCase(words, payload.wordsSelectionRules.capitalizeProbability);
+
+        return changedWords;
     } catch (error) {
         throw new Error(error);
     }
-};
+}

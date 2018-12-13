@@ -2,19 +2,11 @@
     <div>
         <transition name="fade-out">
             <game-component v-if="playLevel"
-                :level="level"
-                :wordsPerMinute="wordsPerMinute"
-                :difficulties="difficulties"
-                :timeAccount="timeAccount"
-                :previousScore="previousScore"
-                :previousLetterCombo="previousLetterCombo"
                 @nextLevel="nextLevel"
                 @gameOver="gameOver">
             </game-component>
             <transition-screen-component v-else
                 :isGameLaunched="isGameLaunched"
-                :level="level"
-                :difficulties="difficulties"
                 :gameScore="endGameScore"
                 :nemesisLetter="nemesisLetter"
                 :stuckWord="stuckWord"
@@ -25,8 +17,8 @@
 </template>
 
 <script>
-import gameTuning from '../../core/gameTuning.js';
-import {randomNum} from '../../core/random.js';
+// import gameTuning from '../../core/gameTuning.js';
+import random from '../../core/random.js';
 
 import gameComponent from './Game.vue';
 import transitionScreenComponent from './TransitionScreen.vue';
@@ -38,8 +30,6 @@ export default {
         'game-component': gameComponent,
         'transition-screen-component': transitionScreenComponent,
     },
-
-    props: ['words', 'level', 'levelWordsCount', 'wordsPerMinute', 'difficulties'],
 
     data() {
         return {
@@ -62,19 +52,12 @@ export default {
     },
 
     methods: {
-        nextLevel(payload) {
+        nextLevel() {
             this.isGameLaunched = false;
-            this.previousScore = payload.levelScore; // vuex
-            this.previousLetterCombo = payload.letterCombo; // vuex
-            if (gameTuning.isEconomist(this.difficulties)) {
-                this.timeAccount = payload.timeAccount; // vuex
-            }
-            if (gameTuning.isResilient(this.difficulties)) {
+            if (this.$store.state.rules.gameDifficulties.isResilient) {
                 this.playLevel = true;
-                this.$emit('nextLevel');
             } else {
                 this.playLevel = false;
-                this.$emit('nextLevel');
                 this.waitThenExecute(this.isGameReady, 3000);
             }
         },
@@ -85,8 +68,8 @@ export default {
 
         isGameReady() {
             window.clearInterval(this.waitingTime);
-            if (this.$store.state.wordsRelated.wordsToType.length === this.levelWordsCount) {
-                new Audio(this.startSignals[randomNum(this.startSignals.length)]).play();
+            if (this.$store.state.wordsRelated.wordsToType.length === this.$store.state.rules.levelRules.wordAmount) {
+                new Audio(this.startSignals[random.randomNum(this.startSignals.length)]).play(); // random entity
                 this.playLevel = true;
             } else {
                 this.waitThenExecute(this.isGameReady, 500);

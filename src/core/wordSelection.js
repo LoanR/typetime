@@ -1,143 +1,151 @@
-import {randomNum} from './random.js';
+import random from './random.js';
 
 // globale de correspondance settings et rule key
 
-const LEVEL_MAPPING = {
+const WORD_SELECTION_MAPPING = {
     1: {
         default: {
             wordLength: {min: 0, max: 4},
-            frequency: {min: 10, max: 90000},
+            wordFrequencyInLanguage: {min: 10, max: 90000},
             capitalizeProbability: 0,
         },
         masochist: {
             wordLength: {min: 3, max: 6},
-            frequency: {min: 1, max: 100},
+            wordFrequencyInLanguage: {min: 1, max: 100},
             capitalizeProbability: 0,
         },
     },
     2: {
         default: {
             wordLength: {min: 3, max: 5},
-            frequency: {min: 10, max: 90000},
+            wordFrequencyInLanguage: {min: 10, max: 90000},
             capitalizeProbability: 0,
         },
         masochist: {
             wordLength: {min: 4, max: 7},
-            frequency: {min: 1, max: 100},
+            wordFrequencyInLanguage: {min: 1, max: 100},
             capitalizeProbability: 0,
         },
     },
     3: {
         default: {
             wordLength: {min: 4, max: 7},
-            frequency: {min: 10, max: 90000},
+            wordFrequencyInLanguage: {min: 10, max: 90000},
             capitalizeProbability: 0,
         },
         masochist: {
             wordLength: {min: 5, max: 8},
-            frequency: {min: 1, max: 100},
+            wordFrequencyInLanguage: {min: 1, max: 100},
             capitalizeProbability: 0.2,
         },
     },
     4: {
         default: {
             wordLength: {min: 4, max: 8},
-            frequency: {min: 10, max: 90000},
+            wordFrequencyInLanguage: {min: 10, max: 90000},
             capitalizeProbability: 0,
         },
         masochist: {
             wordLength: {min: 6, max: 10},
-            frequency: {min: 1, max: 100},
+            wordFrequencyInLanguage: {min: 1, max: 100},
             capitalizeProbability: 0.3,
         },
     },
     5: {
         default: {
             wordLength: {min: 5, max: 10},
-            frequency: {min: 1, max: 90000},
+            wordFrequencyInLanguage: {min: 1, max: 90000},
             capitalizeProbability: 0.2,
         },
         masochist: {
             wordLength: {min: 7, max: 11},
-            frequency: {min: 1, max: 100},
+            wordFrequencyInLanguage: {min: 1, max: 100},
             capitalizeProbability: 0.4,
         },
     },
     6: {
         default: {
             wordLength: {min: 6, max: 11},
-            frequency: {min: 1, max: 90000},
+            wordFrequencyInLanguage: {min: 1, max: 90000},
             capitalizeProbability: 0.2,
         },
         masochist: {
             wordLength: {min: 8, max: 12},
-            frequency: {min: 1, max: 100},
+            wordFrequencyInLanguage: {min: 1, max: 100},
             capitalizeProbability: 0.4,
         },
     },
     7: {
         default: {
             wordLength: {min: 7, max: 12},
-            frequency: {min: 1, max: 500},
+            wordFrequencyInLanguage: {min: 1, max: 500},
             capitalizeProbability: 0.3,
         },
         masochist: {
             wordLength: {min: 9, max: 13},
-            frequency: {min: 0, max: 50},
+            wordFrequencyInLanguage: {min: 0, max: 50},
             capitalizeProbability: 0.4,
         },
     },
     8: {
         default: {
             wordLength: {min: 7, max: 13},
-            frequency: {min: 1, max: 500},
+            wordFrequencyInLanguage: {min: 1, max: 500},
             capitalizeProbability: 0.3,
         },
         masochist: {
             wordLength: {min: 9, max: 14},
-            frequency: {min: 0, max: 50},
+            wordFrequencyInLanguage: {min: 0, max: 50},
             capitalizeProbability: 0.5,
         },
     },
     9: {
         default: {
             wordLength: {min: 7, max: 14},
-            frequency: {min: 1, max: 100},
+            wordFrequencyInLanguage: {min: 1, max: 100},
             capitalizeProbability: 0.3,
         },
         masochist: {
             wordLength: {min: 9, max: 15},
-            frequency: {min: 0, max: 10},
+            wordFrequencyInLanguage: {min: 0, max: 10},
             capitalizeProbability: 0.5,
         },
     },
     10: {
         default: {
             wordLength: {min: 7, max: 15},
-            frequency: {min: 1, max: 100},
+            wordFrequencyInLanguage: {min: 1, max: 100},
             capitalizeProbability: 0.4,
         },
         masochist: {
             wordLength: {min: 10, max: 20},
-            frequency: {min: 0, max: 1},
+            wordFrequencyInLanguage: {min: 0, max: 1},
             capitalizeProbability: 0.6,
         },
     },
 };
 
 export default {
-    getLevelRule(ismasochist, level) { // temporary func while waiting for level rule state
-        const ruleName = ismasochist ? 'masochist' : 'default';
-        const currentLevel = level > 10 ? 10 : level;
-        return LEVEL_MAPPING[currentLevel][ruleName];
+    getLevelRule(isMasochist, level) { // temporary func while waiting for level rule state
+        // const ruleName = isMasochist ? 'masochist' : 'default';
+        // const currentLevel = level > 10 ? 10 : level;
+        console.log('is maso ?');
+        console.log(isMasochist);
+        let rule = WORD_SELECTION_MAPPING[level > 10 ? 10 : level][isMasochist ? 'masochist' : 'default']; // magic string
+        rule.wordAmount = 4 + level; // magic base amount number => need global in conf
+        return rule;
     },
 
-    selectRandomWords(jsonWordsData, wordAmount) {
+    selectRandomWords(jsonWordsData, wordAmount) { // useless, see random
         let selectedWords = [];
         for (let i = 1; i <= wordAmount; i++) {
-            selectedWords.push(jsonWordsData.splice(randomNum(jsonWordsData.length, 0), 1)[0].word); // count somewhere for progress bar
+            selectedWords.push(jsonWordsData.splice(random.randomNum(jsonWordsData.length, 0), 1)[0].word); // count somewhere for progress bar
         }
         return selectedWords;
+    },
+
+    cleanDataWords(dataWords) {
+        return dataWords.map(dataWord => dataWord.word);
     },
 
     randomlyChangeCase(words, probability) {
@@ -146,41 +154,42 @@ export default {
         });
     },
 
-    filterWordsOnRule(jsonWordsData, level, ismasochist, wordAmount) {
-        const ruleName = ismasochist ? 'masochist' : 'default';
-        const currentLevel = level > 10 ? 10 : level;
-        const rule = LEVEL_MAPPING[currentLevel][ruleName];
-        let filteredWords = jsonWordsData.filter((wordData) => {
-            return this.doesWordRespectsRules(wordData, rule);
+    filterWordsOnRule(dataWords, levelRules, wordsSelectionRules, gameDifficulties) {
+        // const ruleName = isMasochist ? 'masochist' : 'default';
+        // const currentLevel = level > 10 ? 10 : level;
+        // const rule = WORD_SELECTION_MAPPING[currentLevel][ruleName];
+        let filteredWords = dataWords.filter((wordData) => {
+            return this.doesWordRespectsSelectionRules(wordData, wordsSelectionRules);
         });
-        if (filteredWords.length < wordAmount) {
+        if (filteredWords.length < levelRules.wordAmount) {
             filteredWords = filteredWords.filter((wordData) => {
-                return this.doesWordRespectsLengths(wordData.word.length, rule) && !filteredWords.includes(wordData);
+                return this.doesWordRespectsLengths(wordData.word.length, wordsSelectionRules) && !filteredWords.includes(wordData);
             });
         }
-        if (filteredWords.length < wordAmount) {
-            const remainingWords = wordAmount - filteredWords.length;
-            jsonWordsData.sort(this.frequencyComparison);
-            if (ismasochist) {
-                filteredWords.unshift(...jsonWordsData.slice(0, remainingWords));
+        if (filteredWords.length < levelRules.wordAmount) {
+            const remainingWords = levelRules.wordAmount - filteredWords.length;
+            dataWords.sort(this.frequencyComparison);
+            if (dataWords === false) {
+                filteredWords.unshift(...dataWords.slice(0, remainingWords));
             } else {
-                filteredWords.unshift(...jsonWordsData.slice(-remainingWords));
+                filteredWords.unshift(...dataWords.slice(-remainingWords));
             }
         }
         return filteredWords;
     },
 
-    doesWordRespectsRules(wordData, rule) {
-        const wordFreqData = wordData.tags[wordData.tags.length - 1];
-        const wordFreq = wordFreqData.substr(0, 2) === 'f:' ? parseFloat(wordFreqData.substr(2)) : 0;
-        const wordLength = wordData.word.length;
-        return this.doesWordRespectsLengths(wordLength, rule) &&
-            wordFreq >= rule.frequency.min &&
-            wordFreq <= rule.frequency.max;
+    doesWordRespectsSelectionRules(wordData, wordsSelectionRules) {
+        return this.doesWordRespectsLengths(wordData.word.length, wordsSelectionRules) && this.doesWordRespectsFrequency(wordData, wordsSelectionRules);
     },
 
-    doesWordRespectsLengths(wordLength, rule) {
-        return wordLength >= rule.wordLength.min && wordLength <= rule.wordLength.max;
+    doesWordRespectsFrequency(wordData, wordsSelectionRules) {
+        const wordFreqData = wordData.tags[wordData.tags.length - 1];
+        const wordFreq = wordFreqData.substr(0, 2) === 'f:' ? parseFloat(wordFreqData.substr(2)) : 0;
+        return wordFreq >= wordsSelectionRules.wordFrequencyInLanguage.min && wordFreq <= wordsSelectionRules.wordFrequencyInLanguage.max;
+    },
+
+    doesWordRespectsLengths(wordLength, wordsSelectionRules) {
+        return wordLength >= wordsSelectionRules.wordLength.min && wordLength <= wordsSelectionRules.wordLength.max;
     },
 
     frequencyComparison(a, b) {

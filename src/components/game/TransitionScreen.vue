@@ -6,11 +6,11 @@
         </div>
         <div class="messages-container">
             <p>{{message}}</p>
-            <p v-if="!isEndGame">Level {{level}}</p>
+            <p v-if="!isEndGame">Level {{gameLevel}}</p>
             <div v-else>
                 <p>{{endGameScoreMessage}}</p>
                 <p>
-                    You were not fast enough to type the letter "{{nemesisLetter}}" of the word "{{stuckWord}}" on level {{level}}.
+                    You were not fast enough to type the letter "{{nemesisLetter}}" of the word "{{stuckWord}}" on level {{gameLevel}}.
                 </p>
                 <button-component :content="buttonContent" @bigButtonClick="returnHome"></button-component>
                 <social-sharing
@@ -36,14 +36,14 @@
 </template>
 
 <script>
-import {randomNum} from '../../core/random.js';
+import random from '../../core/random.js';
 
 import buttonComponent from '../buttons/Button.vue';
 
 export default {
     name: 'TransitionScreen',
 
-    props: ['isGameLaunched', 'level', 'difficulties', 'gameScore', 'nemesisLetter', 'stuckWord'],
+    props: ['isGameLaunched', 'nemesisLetter', 'stuckWord'],
 
     components: {
         'button-component': buttonComponent,
@@ -93,7 +93,7 @@ export default {
                 message = this.gameOverMessage;
             }
             if (!this.isGameLaunched && !this.isEndGame) {
-                message = this.inGameMessages[randomNum(this.inGameMessages.length, 0)];
+                message = this.inGameMessages[random.randomNum(this.inGameMessages.length, 0)];
             }
             return message;
         },
@@ -121,16 +121,22 @@ export default {
             return intro + 'I made a score of ' + this.gameScore + ' points on Typetime. This game made my day. Now, come fight me!';
         },
 
+        gameLevel() {
+            return this.$store.state.rules.levelRules.currentLevel;
+        },
+
+        gameScore() {
+            return this.$store.state.score.gameScore;
+        },
+
         difficultyDescription() {
-            let checkedDifficulties = this.difficulties.filter(d => d.isChecked);
-            checkedDifficulties.sort((d1, d2) => d1.stringOrder - d2.stringOrder);
-            return checkedDifficulties.length ? ('as ' + checkedDifficulties[0].article + ' "' + checkedDifficulties.map(d => d.label).join(' ') + '", ') : '';
+            return this.$store.state.score.difficultyNaming;
         },
     },
 
     mounted() {
         if (this.isGameLaunched) {
-            new Audio(this.startSounds[randomNum(this.startSounds.length)]).play();
+            new Audio(this.startSounds[random.randomNum(this.startSounds.length)]).play();
         }
     },
 };

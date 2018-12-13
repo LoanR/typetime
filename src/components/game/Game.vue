@@ -9,8 +9,8 @@
         </p>
         <p class="countdown" ref="countdown">{{countdownDisplay}}</p>
         <div class="score-related">
-            <p class="game-level">Level {{level}}</p>
-            <p class="game-score"><span class="score-default combo" ref="comboIndicator">Combo&times;{{combo}}</span><span>{{levelScore}} pts</span><span class="score-default bonus" ref="scoreIndicator">{{scoreChange}}</span></p>
+            <p class="game-level">Level {{currentLevel}}</p>
+            <p class="game-score"><span class="score-default combo" ref="comboIndicator">Combo&times;{{combo}}</span><span>{{gameScore}} pts</span><span class="score-default bonus" ref="scoreIndicator">{{scoreChange}}</span></p>
             <div class="word-indicators">
                 <span v-for="i in this.$store.state.wordsRelated.wordsToType.length" :key="i" ref="wordIndicator">•</span>
             </div>
@@ -22,31 +22,27 @@
 
 <script>
 import scoreCalculator from '../../core/scoreCalculator.js';
-import gameTuning from '../../core/gameTuning.js';
-import {randomNum} from '../../core/random.js';
+import wordSelection from '@/core/wordSelection.js';
+// import gameTuning from '../../core/gameTuning.js';
+import random from '../../core/random.js';
+// import {searchForWordsToType, searchForNextWordsToType} from '@/mixins/wordSetter.js';
 
 export default {
     name: 'Game',
 
-    props: ['level', 'wordsPerMinute', 'difficulties', 'timeAccount', 'previousScore', 'previousLetterCombo'],
-
     data() {
         return {
+            gameScore: this.$store.state.score.gameScore,
+            letterCombo: this.$store.state.score.letterCombo,
             wordToTypeIndex: 0,
             letterToTypeIndex: 0,
-            isSnail: gameTuning.isSnail(this.difficulties), // vuex
-            isEconomist: gameTuning.isEconomist(this.difficulties), // vuex
-            isResilient: gameTuning.isResilient(this.difficulties), // vuex
-            isMasochist: gameTuning.isMasochist(this.difficulties), // vuex
             entry: '',
             previousEntry: '',
-            wordCountDown: 0,
+            wordCountDown: 10000,
             interval: null,
             showPreparation: false,
             canStillPlay: true,
             hundrethSecondMinute: 6000,
-            levelScore: 0,
-            letterCombo: 0,
             combo: 1,
             scoreChange: 0,
             errorStyle: null,
@@ -118,24 +114,30 @@ export default {
         },
 
         letterTypedCorrect(letterElement) {
+            // this.$store.commit('incrementLetterCombo'); // bad idea, too much ressources
             this.letterCombo += 1;
-            this.scoreChange = this.getLetterScore(this.entry, this.letterCombo, this.level, this.isSnail, this.isResilient, this.isMasochist);
+            this.scoreChange = this.getLetterScore(this.entry, this.letterCombo, this.currentLevel, this.isSnail, this.isResilient, this.isMasochist);
+            this.gameScore += this.scoreChange;
             this.stylizeWithClass(letterElement, true, 'letter-found');
-            this.levelScore += this.scoreChange;
+            // this.$store.commit('addScore', {scoreToAdd: this.scoreChange});  // bad idea, too much ressources
+            // this.levelScore += this.scoreChange;
             this.nextLetterToFind();
         },
 
         letterTypedIncorrect(letterElement) {
-            new Audio(this.errorSound[randomNum(this.errorSound.length)]).play();
+            new Audio(this.errorSound[random.randomNum(this.errorSound.length)]).play();
             this.stylizeWithClass(letterElement, true, 'letter-error');
             this.errorStyle = window.setTimeout(this.stylizeWithClass, 100, letterElement, false, 'letter-error');
             this.stylizeWithClass(this.$refs.scoreIndicator, true, 'score-malus');
             this.scoreIndicatorStyle = window.setTimeout(this.stylizeWithClass, 300, this.$refs.scoreIndicator, false, 'score-malus');
-            this.scoreChange = -this.getLetterScore(this.entry, this.letterCombo, this.level, this.isSnail, this.isResilient, this.isMasochist);
-            this.levelScore += this.scoreChange;
+            this.scoreChange = -this.getLetterScore(this.entry, this.letterCombo, this.currentLevel, this.isSnail, this.isResilient, this.isMasochist);
+            this.gameScore += this.scoreChange;
+            // this.$store.commit('addScore', {scoreToAdd: this.scoreChange}); // bad idea, too much ressources
+            // this.levelScore += this.scoreChange;
             this.stylizeWithClass(this.$refs.comboIndicator, true, 'score-malus');
+            // this.$store.commit('resetLetterCombo'); // bad idea, too much ressources
             this.letterCombo = 0;
-            this.combo = scoreCalculator.getFinalMultiplier(this.letterCombo, this.isSnail, this.isMasochist, this.isResilient, this.level);
+            this.combo = scoreCalculator.getFinalMultiplier(this.letterCombo, this.isSnail, this.isMasochist, this.isResilient, this.currentLevel);
             this.comboIndicatorStyle = window.setTimeout(this.stylizeWithClass, 300, this.$refs.comboIndicator, false, 'score-malus');
         },
 
@@ -150,39 +152,70 @@ export default {
             } else if (this.isSnail) {
                 timeScore = parseInt((this.wordCountDown / 3000).toFixed()) * this.combo;
             }
+            if (this.isEconomist) {
+                this.$store.commit('setSavedWordTime', {savedWordTime: this.wordCountDown});
+            }
             this.scoreChange += timeScore;
-            this.levelScore += timeScore;
+            this.gameScore += this.scoreChange;
+            // this.$store.commit('addScore', {scoreToAdd: this.scoreChange});  // bad idea, too much ressources
+            // this.levelScore += timeScore;
             this.letterToTypeIndex = 0;
             if (this.wordToTypeIndex < this.$store.state.wordsRelated.wordsToType.length - 1) {
                 this.levelWordsRemains();
             } else {
                 this.moveToNextLevel();
             }
+            if (this.wordToTypeIndex === this.$store.state.wordsRelated.wordsToType.length - 1) {
+                this.prepareNextLevel();
+            }
             this.setNewWordEnv(this.$refs.letterToType[this.letterToTypeIndex], true, 'letter-to-type');
         },
 
         levelWordsRemains() {
             this.stylizeWithClass(this.$refs.wordIndicator[this.wordToTypeIndex], true, 'word-found');
-            new Audio(this.wordSound[randomNum(this.wordSound.length)]).play();
+            new Audio(this.wordSound[random.randomNum(this.wordSound.length)]).play();
             this.wordToTypeIndex += 1;
         },
 
+        prepareNextLevel() {
+            this.$store.commit('setWordsThemeContext', {wordsTheme: this.$store.state.wordsRelated.wordsToType[this.$store.state.wordsRelated.wordsToType.length - 1]});
+            const nextLevelRules = wordSelection.getLevelRule(this.isMasochist, this.$store.state.rules.levelRules.currentLevel + 1);
+            this.$store.dispatch(
+                'requestAndSetNextWordsToType',
+                {
+                    wordsContext: this.$store.state.wordsContext,
+                    levelRules: nextLevelRules,
+                    filterAgainstRules: true,
+                    wordsSelectionRules: this.$store.state.rules.wordsSelectionRules,
+                    // wordAmount: this.wordsToTypeCount,
+                    // wordsConstraint: this.$store.state.wordsContext.wordsConstraint,
+                    // wordsTheme: this.$store.state.wordsContext.wordsTheme,
+                    // wordsOption: this.$store.state.wordsContext.wordsOption,
+                    // gameLevel: this.gameLevel,
+                    // isMasochist: gameTuning.isMasochist(this.difficulties),
+                    // capitalizeProbability: wordSelection.getLevelRule(gameTuning.isMasochist(this.difficulties), this.gameLevel).capitalizeProbability,
+                }, // all in state level rule
+            );
+        },
+
         moveToNextLevel() {
+            this.$store.commit('setNewLevelWords');
+            new Audio(this.levelSound[random.randomNum(this.levelSound.length)]).play();
             for (let span of this.$refs.wordIndicator) {
                 this.stylizeWithClass(span, false, 'word-found');
             }
             if (!this.isResilient) {
+                console.log('transition');
+                this.$store.commit('setScore', {newScore: this.gameScore});
+                this.$store.commit('setLetterCombo', {newLetterCombo: this.letterCombo});
                 this.showPreparation = true;
             }
-            new Audio(this.levelSound[randomNum(this.levelSound.length)]).play();
             this.stylizeWithClass(this.$refs.comboIndicator, false, 'score-malus');
             this.stylizeWithClass(this.$refs.comboIndicator, false, 'score-bonus');
             this.stylizeWithClass(this.$refs.scoreIndicator, false, 'score-malus');
-            this.$emit('nextLevel', {
-                timeAccount: this.wordCountDown, // vuex
-                levelScore: this.levelScore, // vuex
-                letterCombo: this.letterCombo, // vuex
-            });
+            this.$store.commit('incrementLevel');
+            this.$store.commit('setWordsSelectionRules', {wordsSelectionRules: wordSelection.getLevelRule(this.isMasochist, this.$store.state.rules.levelRules.currentLevel)});
+            this.$emit('nextLevel');
             window.clearTimeout(this.errorStyle);
             window.clearTimeout(this.scoreIndicatorStyle);
             window.clearTimeout(this.comboIndicatorStyle);
@@ -190,9 +223,9 @@ export default {
             this.wordToTypeIndex = 0;
         },
 
-        getLetterScore(letter, letterCombo, level, isSnail, isResilient, isMasochist) {
+        getLetterScore(letter, letterCombo, currentLevel, isSnail, isResilient, isMasochist) {
             const tempCombo = this.combo;
-            this.combo = scoreCalculator.getFinalMultiplier(letterCombo, isSnail, isMasochist, isResilient, level);
+            this.combo = scoreCalculator.getFinalMultiplier(letterCombo, isSnail, isMasochist, isResilient, currentLevel);
             if (this.combo > tempCombo) {
                 this.stylizeWithClass(this.$refs.comboIndicator, true, 'score-bonus');
                 this.comboIndicatorStyle2 = window.setTimeout(this.stylizeWithClass, 300, this.$refs.comboIndicator, false, 'score-bonus');
@@ -226,7 +259,7 @@ export default {
 
         modifyCountdown() {
             if (this.wordCountDown > 0) {
-                if (this.wordCountDown < this.allotedTime / 2) {
+                if (this.wordCountDown < this.allotedWordBaseTime / 2) {
                     this.countdownEnd.play();
                     if (!this.$refs.countdown.classList.contains('near-end')) {
                         this.$refs.countdown.classList.add('near-end');
@@ -245,7 +278,8 @@ export default {
 
         launchNewCountdown() {
             this.$refs.countdown.classList.remove('near-end');
-            let countDown = this.isEconomist ? (this.allotedTime + this.wordCountDown) : this.allotedTime;
+            // let countDown = this.isEconomist ? (this.allotedWordBaseTime + this.savedWordTime) : this.allotedWordBaseTime;
+            let countDown = this.allotedWordBaseTime + this.savedWordTime;
             this.wordCountDown = countDown > 3000 ? 3000 : parseInt(countDown.toFixed());
             if (!this.showPreparation) {
                 this.interval = window.setInterval(this.modifyCountdown, 10);
@@ -259,12 +293,13 @@ export default {
         },
 
         timeExceeded() {
-            new Audio(this.loseSound[randomNum(this.loseSound.length)]).play();
+            new Audio(this.loseSound[random.randomNum(this.loseSound.length)]).play();
+            this.$store.commit('setScore', {newScore: this.gameScore});
             this.wordCountDown = 0;
             this.clearCountdown();
             this.canStillPlay = false;
             this.$emit('gameOver', {
-                totalScore: parseInt(this.levelScore.toFixed()), // vuex
+                totalScore: this.gamescore, // vuex
                 nemesisLetter: this.wordToTypeLetters[this.letterToTypeIndex], // vuex
                 stuckWord: this.wordToType, // vuex
             });
@@ -288,20 +323,48 @@ export default {
     },
 
     computed: {
+        currentLevel() {
+            return this.$store.state.rules.levelRules.currentLevel;
+        },
+
+        wordsPerMinute() {
+            return this.$store.state.rules.levelRules.wordsPerMinute;
+        },
+
         wordToType() {
             return this.$store.state.wordsRelated.wordsToType[this.wordToTypeIndex];
+        },
+
+        allotedWordBaseTime() {
+            return this.$store.state.rules.levelRules.allotedWordBaseTime;
+        },
+
+        savedWordTime() {
+            return this.$store.state.rules.levelRules.savedWordTime;
         },
 
         wordToTypeLetters() {
             return this.wordToType.split('');
         },
 
-        allotedTime() {
-            return this.hundrethSecondMinute / (this.wordsPerMinute + this.level - 1);
-        },
-
         countdownDisplay() {
             return (this.wordCountDown / 100).toFixed(2);
+        },
+
+        isSnail() {
+            return this.$store.state.rules.gameDifficulties.isSnail;
+        },
+
+        isEconomist() {
+            return this.$store.state.rules.gameDifficulties.isEconomist;
+        },
+
+        isResilient() {
+            return this.$store.state.rules.gameDifficulties.isResilient;
+        },
+
+        isMasochist() {
+            return this.$store.state.rules.gameDifficulties.isMasochist;
         },
     },
 
@@ -309,10 +372,11 @@ export default {
         this.$refs.gameInput.focus();
         this.stylizeWithClass(this.$refs.letterToType[this.letterToTypeIndex], true, 'letter-to-type');
         this.launchNewCountdown();
-        this.wordCountDown += this.timeAccount; // vuex
-        this.levelScore = this.previousScore; // vuex
-        this.letterCombo = this.previousLetterCombo; // vuex
-        this.combo = scoreCalculator.getFinalMultiplier(this.letterCombo, this.isSnail, this.isMasochist, this.isResilient, this.level);
+        // this.wordCountDown += this.timeAccount; // vuex
+        // this.levelScore = this.previousScore; // vuex
+        // this.levelScore = 0;
+        // this.letterCombo = this.previousLetterCombo; // vuex
+        this.combo = scoreCalculator.getFinalMultiplier(this.letterCombo, this.isSnail, this.isMasochist, this.isResilient, this.currentLevel);
         this.showPreparation = false;
     },
 };
