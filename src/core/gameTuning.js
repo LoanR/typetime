@@ -155,7 +155,7 @@ export default {
 
     defaultTheme(modifiers) {
         const wordModifiers = modifiers.filter(mod => mod.modCluster === 'word');
-        return wordModifiers[random.randomNum(wordModifiers.length)].values.wordsTheme;
+        return random.selectRandomEntity(wordModifiers).values.wordsTheme;
     },
 
     defaultOption() {
