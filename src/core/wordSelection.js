@@ -1,5 +1,3 @@
-import random from './random.js';
-
 // globale de correspondance settings et rule key
 
 const WORD_SELECTION_MAPPING = {
@@ -134,14 +132,6 @@ export default {
         return rule;
     },
 
-    selectRandomWords(jsonWordsData, wordAmount) { // useless, see random
-        let selectedWords = [];
-        for (let i = 1; i <= wordAmount; i++) {
-            selectedWords.push(jsonWordsData.splice(random.randomNum(jsonWordsData.length, 0), 1)[0].word); // count somewhere for progress bar
-        }
-        return selectedWords;
-    },
-
     cleanDataWords(dataWords) {
         return dataWords.map(dataWord => dataWord.word);
     },
@@ -157,16 +147,16 @@ export default {
         // const currentLevel = level > 10 ? 10 : level;
         // const rule = WORD_SELECTION_MAPPING[currentLevel][ruleName];
         let filteredWords = dataWords.filter((wordData) => {
-            return this.doesWordRespectsSelectionRules(wordData, wordsSelectionRules);
+            return this._doesWordRespectsSelectionRules(wordData, wordsSelectionRules);
         });
         if (filteredWords.length < levelRules.wordAmount) {
             filteredWords = filteredWords.filter((wordData) => {
-                return this.doesWordRespectsLengths(wordData.word.length, wordsSelectionRules) && !filteredWords.includes(wordData);
+                return this._doesWordRespectsLengths(wordData.word.length, wordsSelectionRules) && !filteredWords.includes(wordData);
             });
         }
         if (filteredWords.length < levelRules.wordAmount) {
             const remainingWords = levelRules.wordAmount - filteredWords.length;
-            dataWords.sort(this.frequencyComparison);
+            dataWords.sort(this._frequencyComparison);
             if (dataWords === false) {
                 filteredWords.unshift(...dataWords.slice(0, remainingWords));
             } else {
@@ -176,25 +166,25 @@ export default {
         return filteredWords;
     },
 
-    doesWordRespectsSelectionRules(wordData, wordsSelectionRules) {
-        return this.doesWordRespectsLengths(wordData.word.length, wordsSelectionRules) && this.doesWordRespectsFrequency(wordData, wordsSelectionRules);
+    _doesWordRespectsSelectionRules(wordData, wordsSelectionRules) {
+        return this._doesWordRespectsLengths(wordData.word.length, wordsSelectionRules) && this._doesWordRespectsFrequency(wordData, wordsSelectionRules);
     },
 
-    doesWordRespectsFrequency(wordData, wordsSelectionRules) {
-        const wordFreqData = wordData.tags[wordData.tags.length - 1];
-        const wordFreq = wordFreqData.substr(0, 2) === 'f:' ? parseFloat(wordFreqData.substr(2)) : 0;
+    _doesWordRespectsFrequency(wordData, wordsSelectionRules) {
+        const wordFreqData = wordData.tags[wordData.tags.length - 1] || [];
+        const wordFreq = wordFreqData.length > 0 && wordFreqData.substr(0, 2) === 'f:' ? parseFloat(wordFreqData.substr(2)) : 0;
         return wordFreq >= wordsSelectionRules.wordFrequencyInLanguage.min && wordFreq <= wordsSelectionRules.wordFrequencyInLanguage.max;
     },
 
-    doesWordRespectsLengths(wordLength, wordsSelectionRules) {
+    _doesWordRespectsLengths(wordLength, wordsSelectionRules) {
         return wordLength >= wordsSelectionRules.wordLength.min && wordLength <= wordsSelectionRules.wordLength.max;
     },
 
-    frequencyComparison(a, b) {
-        function getWordFrequency(wordData) {
-            const wordFreqData = wordData.tags[wordData.tags.length - 1];
-            return wordFreqData.substr(0, 2) === 'f:' ? parseFloat(wordFreqData.substr(2)) : 0;
+    _frequencyComparison(a, b) {
+        function _getWordFrequency(wordData) {
+            const wordFreqData = wordData.tags[wordData.tags.length - 1] || [];
+            return wordFreqData.length > 0 && wordFreqData.substr(0, 2) === 'f:' ? parseFloat(wordFreqData.substr(2)) : 0;
         }
-        return getWordFrequency(a) - getWordFrequency(b);
+        return _getWordFrequency(a) - _getWordFrequency(b);
     },
 };
