@@ -15,16 +15,23 @@ describe('randomNum function', function() {
     });
 });
 
-describe('selectRandomEntities function', function() {
+describe('selectRandomEntity function', function() {
+    it('should return one of list', function() {
+        assert.isString(random.selectRandomEntity(['a', 'z', 'e', 'r', 't', 'y']), 'expect a string');
+        assert.isNumber(random.selectRandomEntity([1, 2, 3, 4, 5, 6]), 'expect a number');
+    });
+});
+
+describe('spliceRandomEntities function', function() {
     it('should return a list', function() {
-        assert.typeOf(random.selectRandomEntities(2, ['a', 'z', 'e', 'r', 't', 'y']), 'array', 'expect an array');
+        assert.typeOf(random.spliceRandomEntities(2, ['a', 'z', 'e', 'r', 't', 'y']), 'array', 'expect an array');
     });
 
     it('should return a given number of elements', function() {
-        assert.equal(random.selectRandomEntities(5, ['a', 'z', 'e', 'r', 't', 'y']).length, 5, 'expect 5 elements');
+        assert.equal(random.spliceRandomEntities(5, ['a', 'z', 'e', 'r', 't', 'y']).length, 5, 'expect 5 elements');
     });
 
     it('should return a list of elements included in the given one', function() {
-        assert.includeMembers(['a', 'z', 'e', 'r', 't', 'y'], random.selectRandomEntities(4, ['a', 'z', 'e', 'r', 't', 'y']), 'expect result to be in given list');
+        assert.includeMembers(['a', 'z', 'e', 'r', 't', 'y'], random.spliceRandomEntities(4, ['a', 'z', 'e', 'r', 't', 'y']), 'expect result to be in given list');
     });
 });
