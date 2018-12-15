@@ -3,7 +3,7 @@
 // };
 
 export default {
-    randomNum(range, start = 0) {
+    randomNum(range, start = 0) { // should never be exported
         return Math.floor(Math.random() * range) + start;
     },
 

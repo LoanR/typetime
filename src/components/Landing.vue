@@ -58,22 +58,15 @@ export default {
             shuffledTitle: 'TypeTime',
             shouldShuffleTitle: true,
             shouldSlideFromRight: true,
-            timeOut: null, // rules conf file
-            firstTimeOut: 3000, // rules conf file
+            shuffleTitleTimer: null,
+            firstShuffleTitleTimer: 3000,
             startContent: 'start',
             modTitle: 'Modifiers',
             diffTitle: 'Difficulties',
             selectedModifiers: gameTuning.getEmptyMods(),
             modifiers: gameTuning.getModifiers(),
-            // difficulties: gameTuning.getDifficulties(),
             wordsPerMinute: 30, // rules conf file
-            // wordsToType: [], // game run file
-            // nextWordsToType: [], // game run file
-            startingWordsToTypeCount: 5, // rules conf file
-            gameLevel: 1, // rules file
-            apiEndpoint: 'https://api.datamuse.com/words?', // game run file
-            frequencyParameter: '&md=f', // game run file
-            keySounds: [
+            keySounds: [ // conf
                 require('@/assets/sounds/key1.mp3'),
                 require('@/assets/sounds/key2.mp3'),
                 require('@/assets/sounds/key3.mp3'),
@@ -83,11 +76,11 @@ export default {
 
     methods: {
         overwriteTitleCycle() {
-            clearTimeout(this.timeOut);
+            clearTimeout(this.shuffleTitleTimer);
             if (this.shouldShuffleTitle) {
                 this.shuffledTitle = this.shuffleTitle();
-                new Audio(this.keySounds[random.randomNum(this.keySounds.length)]).play();
-                this.timeOut = window.setTimeout(this.overwriteTitleCycle, random.randomNum(3000, 200));
+                new Audio(random.selectRandomEntity(this.keySounds)).play();
+                this.shuffleTitleTimer = window.setTimeout(this.overwriteTitleCycle, random.randomNum(3000, 200));
             }
         },
 
@@ -200,10 +193,6 @@ export default {
     },
 
     computed: {
-        wordsToTypeCount() {
-            return this.startingWordsToTypeCount + this.gameLevel - 1;
-        },
-
         slideTransition() {
             return this.shouldSlideFromRight ? 'slide-fade-right' : 'slide-fade-left';
         },
@@ -222,9 +211,9 @@ export default {
 
     mounted() {
         if (this.shouldShuffleTitle) {
-            this.timeOut = window.setTimeout(() => {
+            this.shuffleTitleTimer = window.setTimeout(() => {
                 this.overwriteTitleCycle();
-            }, this.firstTimeOut);
+            }, this.firstShuffleTitleTimer);
         };
         this.selectModifiers();
     },

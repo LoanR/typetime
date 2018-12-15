@@ -19,4 +19,10 @@ export const scoreMutations = {
     setDifficultyNaming(state, payload) {
         state.score.difficultyNaming = payload.difficultyNaming;
     },
+
+    setGameOverWord(state, payload) {
+        state.score.nemesisLetter = payload.nemesisLetter;
+        state.score.stuckWordPart1 = payload.stuckWordPart1;
+        state.score.stuckWordPart2 = payload.stuckWordPart2;
+    },
 };

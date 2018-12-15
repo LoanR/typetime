@@ -2,14 +2,12 @@
     <div>
         <transition name="fade-out">
             <game-component v-if="playLevel"
-                @nextLevel="nextLevel"
+                @nextLevelBreak="nextLevelBreak"
                 @gameOver="gameOver">
             </game-component>
             <transition-screen-component v-else
                 :isGameLaunched="isGameLaunched"
-                :gameScore="endGameScore"
-                :nemesisLetter="nemesisLetter"
-                :stuckWord="stuckWord"
+                :isGameOver="isGameOver"
                 @rematch="rematch">
             </transition-screen-component>
         </transition>
@@ -34,16 +32,14 @@ export default {
     data() {
         return {
             isGameLaunched: true,
+            isGameOver: false,
             score: 0,
             playLevel: false,
             waitingTime: null,
             timeAccount: 0,
             previousScore: 0,
             previousLetterCombo: 0,
-            endGameScore: null,
-            nemesisLetter: '',
-            stuckWord: '',
-            startSignals: [
+            startSignals: [ // conf
                 require('@/assets/sounds/elevatorbell.mp3'),
                 require('@/assets/sounds/microwavebell.mp3'),
                 require('@/assets/sounds/hotelbell.mp3'),
@@ -52,14 +48,10 @@ export default {
     },
 
     methods: {
-        nextLevel() {
+        nextLevelBreak() {
             this.isGameLaunched = false;
-            if (this.$store.state.rules.gameDifficulties.isResilient) {
-                this.playLevel = true;
-            } else {
-                this.playLevel = false;
-                this.waitThenExecute(this.isGameReady, 3000);
-            }
+            this.playLevel = false;
+            this.waitThenExecute(this.isGameReady, 3000);
         },
 
         waitThenExecute(func, time) {
@@ -69,19 +61,17 @@ export default {
         isGameReady() {
             window.clearInterval(this.waitingTime);
             if (this.$store.state.wordsRelated.wordsToType.length === this.$store.state.rules.levelRules.wordAmount) {
-                new Audio(this.startSignals[random.randomNum(this.startSignals.length)]).play(); // random entity
+                new Audio(random.selectRandomEntity(this.startSignals)).play();
                 this.playLevel = true;
             } else {
                 this.waitThenExecute(this.isGameReady, 500);
             }
         },
 
-        gameOver(payload) {
+        gameOver() {
+            this.isGameOver = true;
             this.isGameLaunched = false;
-            this.endGameScore = payload.totalScore; // vuex
-            this.nemesisLetter = payload.nemesisLetter; // vuex
-            this.stuckWord = payload.stuckWord; // vuex
-            this.playLevel = false; // word count, letter count and other datas...
+            this.playLevel = false;
         },
 
         rematch() {

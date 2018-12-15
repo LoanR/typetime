@@ -45,6 +45,9 @@ const store = new Vuex.Store({
             gameScore: 0,
             letterCombo: 0,
             difficultyNaming: '',
+            nemesisLetter: '',
+            stuckWordPart1: '',
+            stuckWordPart2: '',
         },
         // score related
     },

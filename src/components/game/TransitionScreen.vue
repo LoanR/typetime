@@ -1,59 +1,37 @@
 <template>
     <div class="transition-window">
-        <div v-if="!isEndGame" class="circle-spinner spinner" data-anim="base wrapper">
+        <div v-if="!isGameOver" class="circle-spinner spinner" data-anim="base wrapper">
             <div class="half-left-circle spinner" data-anim="base left"></div>
             <div class="half-right-circle spinner" data-anim="base right"></div>
         </div>
         <div class="messages-container">
-            <p>{{message}}</p>
-            <p v-if="!isEndGame">Level {{gameLevel}}</p>
-            <div v-else>
-                <p>{{endGameScoreMessage}}</p>
-                <p>
-                    You were not fast enough to type the letter "{{nemesisLetter}}" of the word "{{stuckWord}}" on level {{gameLevel}}.
-                </p>
-                <button-component :content="buttonContent" @bigButtonClick="returnHome"></button-component>
-                <social-sharing
-                    url="https://loanr.github.io/typetime/"
-                    :title="socialMessage"
-                    description="What a funny game!"
-                    quote=""
-                    hashtags="typing,nofilter,waw"
-                    twitter-user=""
-                    inline-template>
-                    <div class="socials">
-                        <network network="facebook">
-                            <i class="fa fa-facebook"></i>
-                        </network>
-                        <network network="twitter">
-                            <i class="fa fa-twitter"></i>
-                        </network>
-                    </div>
-                </social-sharing>
+            <div v-if="!isGameOver">
+                <p>{{message}}</p>
+                <p>Level {{gameLevel}}</p>
             </div>
+            <score-screen-component v-else @rematch="rematch"></score-screen-component>
         </div>
     </div>
 </template>
 
 <script>
-import random from '../../core/random.js';
+import random from '@/core/random.js';
 
-import buttonComponent from '../buttons/Button.vue';
+import scoreScreenComponent from '@/components/game/ScoreScreen.vue';
 
 export default {
     name: 'TransitionScreen',
 
-    props: ['isGameLaunched', 'nemesisLetter', 'stuckWord'],
+    props: ['isGameLaunched', 'isGameOver'],
 
     components: {
-        'button-component': buttonComponent,
+        'score-screen-component': scoreScreenComponent,
     },
 
     data() {
         return {
-            welcomeMessage: 'Ready?',
-            gameOverMessage: 'GameOver...',
-            inGameMessages: [
+            welcomeMessage: 'Ready?', // conf
+            inGameMessages: [ // conf
                 'You\'ve seen better days, don\'t you?',
                 'You\'re not that fast actually...',
                 'You lied, you weren\'t ready.',
@@ -66,9 +44,7 @@ export default {
                 'The "H" key is near the middle of your keyboard.',
                 'This phrase in really long, so I\'m sure you won\'t be able to read it because of the long time it could take. In fact, you could even lose you\'re concentration and I surely don\'t want to do that you know.',
             ],
-            buttonContent: 'rematch',
-            snail: this.isSnail, // ?
-            startSounds: [
+            startSounds: [ // conf
                 require('@/assets/sounds/mk_startrace.mp3'),
                 require('@/assets/sounds/pkbattle.mp3'),
                 require('@/assets/sounds/pacmanintro.mp3'),
@@ -81,63 +57,27 @@ export default {
             this.$emit('nextLevel');
         },
 
-        returnHome() {
-            this.$store.commit('stopGame');
+        rematch() {
             this.$emit('rematch');
         },
     },
 
     computed: {
         message() {
-            let message = this.welcomeMessage;
-            if (this.isEndGame) {
-                message = this.gameOverMessage;
+            if (!this.isGameLaunched && !this.isGameOver) {
+                return random.selectRandomEntity(this.inGameMessages);
             }
-            if (!this.isGameLaunched && !this.isEndGame) {
-                message = this.inGameMessages[random.randomNum(this.inGameMessages.length, 0)];
-            }
-            return message;
-        },
-
-        isEndGame() {
-            return !!this.nemesisLetter && !!this.stuckWord;
-        },
-
-        endGameScoreMessage() {
-            let scoreMessage = 'You could have done better, but ' + this.difficultyDescription + ' you made a total of ' + this.gameScore + ' points. It is not that bad!';
-            if (this.gameScore < 0) {
-                scoreMessage = 'Do you know your keyboard? I mean ' + this.difficultyDescription + ' you now have a debt of ' + this.gameScore + ' points. I\'m disappointed.';
-            } else if (this.gameScore === 0) {
-                scoreMessage = 'Did you type anything? Well, ' + this.difficultyDescription + ' you made 0 points, that\'s not really time efficient...';
-            } else if (this.gameScore < 400) {
-                scoreMessage = 'You where not truly good, but ' + this.difficultyDescription + ' you made ' + this.gameScore + ' points. It is at least something...';
-            } else if (this.gameScore > 2000) {
-                scoreMessage = 'You\'re a beast, ' + this.difficultyDescription + ' you made ' + this.gameScore + ' points! Bravo!';
-            }
-            return scoreMessage;
-        },
-
-        socialMessage() {
-            const intro = this.difficultyDescription ? this.difficultyDescription.charAt(0).toUpperCase() + this.difficultyDescription.slice(1) : '';
-            return intro + 'I made a score of ' + this.gameScore + ' points on Typetime. This game made my day. Now, come fight me!';
+            return this.welcomeMessage;
         },
 
         gameLevel() {
             return this.$store.state.rules.levelRules.currentLevel;
         },
-
-        gameScore() {
-            return this.$store.state.score.gameScore;
-        },
-
-        difficultyDescription() {
-            return this.$store.state.score.difficultyNaming;
-        },
     },
 
     mounted() {
         if (this.isGameLaunched) {
-            new Audio(this.startSounds[random.randomNum(this.startSounds.length)]).play();
+            new Audio(random.selectRandomEntity(this.startSounds)).play();
         }
     },
 };
@@ -208,11 +148,6 @@ export default {
 
         .messages-container {
             max-width: 400px;
-
-            .socials {
-                display: flex;
-                justify-content: space-evenly;
-            }
         }
     }
 

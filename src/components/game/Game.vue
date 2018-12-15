@@ -49,7 +49,7 @@ export default {
             comboIndicatorBonusStyleTimer: null,
             capsStatus: false,
             countdownEnd: new Audio(require('@/assets/sounds/countdownend.mp3')),
-            loseSounds: [
+            loseSounds: [ // conf
                 require('@/assets/sounds/powerdown.wav'),
                 require('@/assets/sounds/mk64_loser.mp3'),
                 require('@/assets/sounds/tetrislose.mp3'),
@@ -58,7 +58,7 @@ export default {
                 require('@/assets/sounds/yoshiowow.mp3'),
                 require('@/assets/sounds/pacmandies.mp3'),
             ],
-            wordSounds: [
+            wordSounds: [ // conf
                 require('@/assets/sounds/mariocoin.mp3'),
                 require('@/assets/sounds/completion.mp3'),
                 require('@/assets/sounds/ding.mp3'),
@@ -66,7 +66,7 @@ export default {
                 require('@/assets/sounds/sonicring.mp3'),
                 require('@/assets/sounds/mario1up.mp3'),
             ],
-            errorSounds: [
+            errorSounds: [ // conf
                 require('@/assets/sounds/denied.wav'),
                 require('@/assets/sounds/kirby_powerdown.mp3'),
                 require('@/assets/sounds/moderatehit.mp3'),
@@ -78,7 +78,7 @@ export default {
                 require('@/assets/sounds/funk.mp3'),
                 require('@/assets/sounds/susomi.mp3'),
             ],
-            levelSounds: [
+            levelSounds: [ // conf
                 require('@/assets/sounds/powerup.wav'),
                 require('@/assets/sounds/sprout.wav'),
                 require('@/assets/sounds/yoshiyoshi.wav'),
@@ -157,17 +157,19 @@ export default {
             this.gameScore += this.scoreChange;
             this.letterToTypeIndex = 0;
             if (this.wordToTypeIndex < this.$store.state.wordsRelated.wordsToType.length - 1) {
-                this.levelWordsRemains();
+                this.approveTypedWordAndMoveToNextWord();
             } else {
                 this.moveToNextLevel();
             }
             if (this.wordToTypeIndex === this.$store.state.wordsRelated.wordsToType.length - 1) {
                 this.prepareNextLevel();
             }
-            this.setNewWordEnv(this.$refs.letterToType[this.letterToTypeIndex], true, 'letter-to-type');
+            if (!this.showPreparation) {
+                this.setNewWordEnvironment(this.$refs.letterToType[this.letterToTypeIndex], true, 'letter-to-type');
+            };
         },
 
-        levelWordsRemains() {
+        approveTypedWordAndMoveToNextWord() {
             this.stylizeWithClass(this.$refs.wordIndicator[this.wordToTypeIndex], true, 'word-found');
             new Audio(random.selectRandomEntity(this.wordSounds)).play();
             this.wordToTypeIndex += 1;
@@ -197,13 +199,13 @@ export default {
                 this.$store.commit('setScore', {newScore: this.gameScore});
                 this.$store.commit('setLetterCombo', {newLetterCombo: this.letterCombo});
                 this.showPreparation = true;
+                this.$emit('nextLevelBreak');
             }
             this.stylizeWithClass(this.$refs.comboIndicator, false, 'score-malus');
             this.stylizeWithClass(this.$refs.comboIndicator, false, 'score-bonus');
             this.stylizeWithClass(this.$refs.scoreIndicator, false, 'score-malus');
             this.$store.commit('incrementLevel');
             this.$store.commit('setWordsSelectionRules', {wordsSelectionRules: wordSelection.getLevelRule(this.isMasochist, this.currentLevel)});
-            this.$emit('nextLevel');
             window.clearTimeout(this.errorStyle);
             window.clearTimeout(this.scoreIndicatorStyleTimer);
             window.clearTimeout(this.comboIndicatorMalusStyleTimer);
@@ -254,9 +256,7 @@ export default {
             this.$refs.countdown.classList.remove('near-end');
             let countDown = this.allotedWordBaseTime + this.savedWordTime;
             this.wordCountDown = countDown > 3000 ? 3000 : parseInt(countDown.toFixed());
-            if (!this.showPreparation) {
-                this.interval = window.setInterval(this.modifyCountdown, 10);
-            };
+            this.interval = window.setInterval(this.modifyCountdown, 10);
         },
 
         clearCountdown() {
@@ -271,22 +271,17 @@ export default {
             this.wordCountDown = 0;
             this.clearCountdown();
             this.canStillPlay = false;
-            this.$emit('gameOver', {
+            this.$store.commit('setGameOverWord', {
                 nemesisLetter: this.wordToTypeLetters[this.letterToTypeIndex],
-                stuckWord: this.wordToType,
+                stuckWordPart1: this.wordToType.slice(0, this.letterToTypeIndex),
+                stuckWordPart2: this.wordToType.slice(this.letterToTypeIndex + 1),
             });
+            this.$emit('gameOver');
         },
 
-        setNewWordEnv(element, shouldAdd, styleClass) {
-            if (this.isResilient) {
-                this.$nextTick(function() {
-                    this.launchNewCountdown();
-                    this.stylizeWithClass(element, shouldAdd, styleClass);
-                });
-            } else {
-                this.launchNewCountdown();
-                this.stylizeWithClass(element, shouldAdd, styleClass);
-            }
+        setNewWordEnvironment(element, shouldAdd, styleClass) {
+            this.launchNewCountdown();
+            this.stylizeWithClass(element, shouldAdd, styleClass);
         },
 
         checkCapsKeyDown(event) {
