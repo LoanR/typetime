@@ -6,9 +6,12 @@
         <div class="switch-container">
             <checkbox-component v-for="(sw, i) in switches"
                 :key="sw.label + i"
+                :swId="sw.id"
                 :label="sw.label"
                 :isChecked="sw.isChecked"
                 :desc="sw.description"
+                :mutation="sw.ruleMutation"
+                :values="sw.values"
                 @toggleCheck="toggleCheck"
                 @changeDesc="changeDesc">
             </checkbox-component>
@@ -37,8 +40,8 @@ export default {
     },
 
     methods: {
-        toggleCheck(modLabel) {
-            this.$emit('toggleCheck', modLabel);
+        toggleCheck(modId) {
+            this.$emit('toggleCheck', modId);
         },
 
         changeDesc(desc) {

@@ -1,4 +1,4 @@
-const letterScoreMapping = {
+const LETTER_SCORE_MAPPING = {
     ' ': 1,
     'e': 1,
     't': 1,
@@ -63,7 +63,7 @@ const letterScoreMapping = {
     'ū': 6,
 };
 
-const letterComboMapping = {
+const LETTER_COMBO_MAPPING = {
     0: {
         default: 1,
         snail: 1,
@@ -93,7 +93,7 @@ const letterComboMapping = {
 
 export default {
     getLetterScoreMapping() {
-        return letterScoreMapping;
+        return LETTER_SCORE_MAPPING;
     },
 
     getFinalMultiplier(letterCombo, isSnail, isMasochist, isResilient, level) {
@@ -102,7 +102,7 @@ export default {
     },
 
     _getCurrentCombo(letterCombo, isSnail, isMasochist) {
-        const mappingKey = Object.keys(letterComboMapping).reduce((prev, current) => {
+        const mappingKey = Object.keys(LETTER_COMBO_MAPPING).reduce((prev, current) => {
             return letterCombo > current ? current : prev;
         });
         let comboDifficulty = 'default';
@@ -111,6 +111,14 @@ export default {
         } else if (isMasochist && !isSnail) {
             comboDifficulty = 'masochist';
         }
-        return letterComboMapping[mappingKey][comboDifficulty];
+        return LETTER_COMBO_MAPPING[mappingKey][comboDifficulty];
+    },
+
+    getLetterScore(combo, letter) {
+        const lsMapping = this.getLetterScoreMapping();
+        if (letter.toLowerCase() === letter) {
+            return lsMapping[letter] ? lsMapping[letter] * combo : 1 * combo;
+        }
+        return lsMapping[letter] ? (lsMapping[letter] + 1) * combo : 1 * combo;
     },
 };

@@ -12,11 +12,11 @@
 export default {
     name: 'Checkbox',
 
-    props: ['label', 'modifier', 'isChecked', 'desc'],
+    props: ['swId', 'label', 'modifier', 'isChecked', 'desc', 'mutation', 'values'],
 
     methods: {
         toggleCheck() {
-            this.$emit('toggleCheck', this.label);
+            this.$emit('toggleCheck', this.swId);
         },
 
         itemHover() {
