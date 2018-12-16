@@ -14,13 +14,21 @@ export const gameMutations = {
         state.rules.levelRules.currentLevel = 1;
         state.rules.levelRules.wordAmount = BASE_WORD_AMOUNT;
         state.rules.levelRules.wordsPerMinute = BASE_WORD_PER_MINUTE;
-        state.rules.levelRules.allotedWordBaseTime = parseInt(6000 / BASE_WORD_PER_MINUTE);
-        // state.rules.levelRules.allotedWordBaseTime = 600; // by hand tests purpose
         state.rules.levelRules.savedWordTime = 0;
+    },
+
+    setAllotedWordBaseTime(state) {
+        state.rules.levelRules.allotedWordBaseTime = parseInt((6000 / state.rules.levelRules.wordsPerMinute).toFixed());
+        // state.rules.levelRules.allotedWordBaseTime = 600; // by hand tests purpose
     },
 
     setSavedWordTime(state, payload) {
         state.rules.levelRules.savedWordTime = payload.savedWordTime;
+    },
+
+    setWordsPerMinute(state, payload) {
+        console.log(payload);
+        state.rules.levelRules.wordsPerMinute = payload.wordsPerMinute;
     },
 
     startGame(state) {
