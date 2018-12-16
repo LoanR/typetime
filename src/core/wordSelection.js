@@ -3,7 +3,7 @@
 const WORD_SELECTION_MAPPING = {
     1: {
         default: {
-            wordLength: {min: 0, max: 4},
+            wordLength: {min: 1, max: 4},
             wordFrequencyInLanguage: {min: 10, max: 90000},
             capitalizeProbability: 0,
         },
