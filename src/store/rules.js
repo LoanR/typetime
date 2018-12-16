@@ -1,5 +1,3 @@
-import wordSelection from '../core/wordSelection';
-
 // export const levelRulesMutations = {
 //     setLevelRules(state, payload) {
 //         console.log('level rules');
@@ -39,8 +37,8 @@ export const difficultiesMutations = {
 // action for new level and then level rules mutation
 
 // action for new level and then level rules mutation
-export const rulesActions = {
-    setCurrentLevelRules({commit}, payload) {
-        commit('setLevelRules', {levelRules: wordSelection.getLevelRule(payload.isMasochist, payload.level)}); // useless, directly on app
-    },
-};
+// export const rulesActions = {
+//     setCurrentLevelRules({commit}, payload) {
+//         commit('setLevelRules', {levelRules: wordSelection.getLevelRule(payload.isMasochist, payload.level)}); // useless, directly on app
+//     },
+// };

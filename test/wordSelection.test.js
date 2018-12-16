@@ -102,18 +102,34 @@ describe('_doesWordRespectsSelectionRules function', function() {
         {word: 'crystal', tags: ['', 'f:10']},
         {word: 'planets', tags: ['', 'f:10']},
     ];
-    const levelRules1 = {wordAmount: 2};
-    const levelRules2 = {wordAmount: 4};
     const wordsSelectionRules1 = {wordLength: {min: 5, max: 9}, wordFrequencyInLanguage: {min: 99, max: 101}};
     it('should return a list', function() {
-        assert.isArray(wordSelection.filterWordsOnRule(dataWords, levelRules1, wordsSelectionRules1), 'expect an array');
+        assert.isArray(wordSelection.filterWordsOnRule(dataWords, 2, wordsSelectionRules1), 'expect an array');
     });
     it('should return a list of objects', function() {
-        assert.typeOf(random.selectRandomEntity(wordSelection.filterWordsOnRule(dataWords, levelRules1, wordsSelectionRules1)), 'object', 'expect an array of objects');
-        assert.equal(Object.keys(random.selectRandomEntity(wordSelection.filterWordsOnRule(dataWords, levelRules1, wordsSelectionRules1))).length, 2, 'expect an array of objects with 2 keys');
+        assert.typeOf(random.selectRandomEntity(wordSelection.filterWordsOnRule(dataWords, 2, wordsSelectionRules1)), 'object', 'expect an array of objects');
+        assert.equal(Object.keys(random.selectRandomEntity(wordSelection.filterWordsOnRule(dataWords, 2, wordsSelectionRules1))).length, 2, 'expect an array of objects with 2 keys');
     });
     it('should return a specific list of objects', function() {
-        assert.equal(wordSelection.filterWordsOnRule(dataWords, levelRules1, wordsSelectionRules1).length, 2, 'expect an array of 2 objects');
-        assert.equal(wordSelection.filterWordsOnRule(dataWords, levelRules2, wordsSelectionRules1).length, 4, 'expect an array of 4 objects, even if it does not respects rules');
+        assert.equal(wordSelection.filterWordsOnRule(dataWords, 2, wordsSelectionRules1).length, 2, 'expect an array of 2 objects');
+        assert.equal(wordSelection.filterWordsOnRule(dataWords, 4, wordsSelectionRules1).length, 4, 'expect an array of 4 objects, even if it does not respects rules');
+    });
+});
+
+describe('cleanWordContext function', function() {
+    it('should return a string', function() {
+        assert.isString(wordSelection.cleanWordContext('whale'), 'expect a string');
+    });
+    it('should return the given string if already clean', function() {
+        assert.equal(wordSelection.cleanWordContext('whale'), 'whale', 'expect the same string');
+    });
+    it('should return a trimed string', function() {
+        assert.equal(wordSelection.cleanWordContext('        whale '), 'whale', 'expect the trimed string');
+    });
+    it('should return a cleaned string', function() {
+        assert.equal(wordSelection.cleanWordContext('blue whale'), 'blue', 'expect a substring');
+        assert.equal(wordSelection.cleanWordContext('blue-whale'), 'blue', 'expect a substring');
+        assert.equal(wordSelection.cleanWordContext('blue@whale'), 'blue', 'expect a substring');
+        assert.equal(wordSelection.cleanWordContext('bluewhale'), 'bluewhale', 'expect the same string');
     });
 });

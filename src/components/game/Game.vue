@@ -176,15 +176,17 @@ export default {
         },
 
         prepareNextLevel() {
-            this.$store.commit('setWordsThemeContext', {wordsTheme: this.$store.state.wordsRelated.wordsToType[this.$store.state.wordsRelated.wordsToType.length - 1]});
+            let lastLevelWord = this.$store.state.wordsRelated.wordsToType[this.$store.state.wordsRelated.wordsToType.length - 1];
+            let nextLevelWordContext = wordSelection.cleanWordContext(lastLevelWord);
+            this.$store.commit('setWordsThemeContext', {wordsTheme: nextLevelWordContext});
             const nextLevelRules = wordSelection.getLevelRule(this.isMasochist, this.currentLevel + 1);
             this.$store.dispatch(
                 'requestAndSetNextWordsToType',
                 {
                     wordsContext: this.$store.state.wordsContext,
-                    levelRules: nextLevelRules,
+                    wordAmount: this.$store.state.rules.levelRules.wordAmount + 1,
                     filterAgainstRules: true,
-                    wordsSelectionRules: this.$store.state.rules.wordsSelectionRules,
+                    wordsSelectionRules: nextLevelRules,
                 },
             );
         },

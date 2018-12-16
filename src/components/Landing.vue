@@ -41,7 +41,7 @@ import buttonComponent from '@/components/buttons/Button.vue';
 import checkboxesComponent from '@/components/sections/Checkboxes.vue';
 import gameHubComponent from '@/components/game/GameHub.vue';
 
-import {requestDataWords} from '@/core/wordRequest';
+import {requestDataWords} from '@/core/wordRequest'; // never use this func
 
 export default {
     name: 'Landing',
@@ -140,7 +140,7 @@ export default {
                 this.$store.commit('startGame');
                 this.$store.commit('setWordsSelectionRules', {wordsSelectionRules: wordSelection.getLevelRule(this.$store.state.rules.gameDifficulties.isMasochist, this.$store.state.rules.levelRules.currentLevel)}); // reusable -> store action ?
                 this.$store.dispatch('requestAndSetWordsToType', {
-                    levelRules: this.$store.state.rules.levelRules,
+                    wordAmount: this.$store.state.rules.levelRules.wordAmount,
                     wordsContext: this.$store.state.wordsContext,
                     wordsSelectionRules: this.$store.state.rules.wordsSelectionRules,
                     filterAgainstRules: true,

@@ -142,20 +142,20 @@ export default {
         });
     },
 
-    filterWordsOnRule(dataWords, levelRules, wordsSelectionRules) {
+    filterWordsOnRule(dataWords, wordAmount, wordsSelectionRules) {
         // const ruleName = isMasochist ? 'masochist' : 'default';
         // const currentLevel = level > 10 ? 10 : level;
         // const rule = WORD_SELECTION_MAPPING[currentLevel][ruleName];
         let filteredWords = dataWords.filter((wordData) => {
             return this._doesWordRespectsSelectionRules(wordData, wordsSelectionRules);
         });
-        if (filteredWords.length < levelRules.wordAmount) {
+        if (filteredWords.length < wordAmount) {
             filteredWords = filteredWords.filter((wordData) => {
                 return this._doesWordRespectsLengths(wordData.word.length, wordsSelectionRules) && !filteredWords.includes(wordData);
             });
         }
-        if (filteredWords.length < levelRules.wordAmount) {
-            const remainingWords = levelRules.wordAmount - filteredWords.length;
+        if (filteredWords.length < wordAmount) {
+            const remainingWords = wordAmount - filteredWords.length;
             dataWords.sort(this._frequencyComparison);
             if (dataWords === false) {
                 filteredWords.unshift(...dataWords.slice(0, remainingWords));
@@ -164,6 +164,15 @@ export default {
             }
         }
         return filteredWords;
+    },
+
+    cleanWordContext(word) {
+        word = word.trim();
+        let badCharIndex = word.indexOf(word.match(/\W/));
+        if (badCharIndex > 0) {
+            return word.substring(0, badCharIndex);
+        }
+        return word;
     },
 
     _doesWordRespectsSelectionRules(wordData, wordsSelectionRules) {
