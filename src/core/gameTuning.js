@@ -1,4 +1,5 @@
-import random from './random';
+import random from '@/core/random';
+import wordSeeds from '@/conf/wordSeeds';
 
 const BASE_MODIFIER = {
     label: '',
@@ -163,17 +164,15 @@ export default {
     },
 
     getSpecificModifierSearchValues() {
-        const accentValues = ['*é*', '*è*', '*ê*', '*ë*', '*â*', '*ï*']; // conf
-        const rareAccentValues = ['*á*', '*å*', '*ë*', '*â*', '*í*', '*ö*', '*ó*', '*ü*', '*ú*']; // conf
-        const modWords = [
-            {param: 'ml=', value: 'toujours'}, // need more random conf
-            {param: 'ml=', value: 'voiture'}, // need more random conf
-            {param: 'ml=', value: 'live'}, // need more random conf
-            {param: 'ml=', value: 'reason'}, // need more random conf
-            {param: 'sp=', value: random.selectRandomEntity(accentValues)},
-            {param: 'sp=', value: random.selectRandomEntity(rareAccentValues)},
+        return [
+            {wordsConstraint: 'ml=', wordsTheme: random.selectRandomEntity(wordSeeds.thingsFr()), wordsOption: ''},
+            {wordsConstraint: 'ml=', wordsTheme: random.selectRandomEntity(wordSeeds.othersFr()), wordsOption: ''},
+            {wordsConstraint: 'ml=', wordsTheme: random.selectRandomEntity(wordSeeds.things()), wordsOption: ''},
+            {wordsConstraint: 'ml=', wordsTheme: random.selectRandomEntity(wordSeeds.places()), wordsOption: ''},
+            {wordsConstraint: 'ml=', wordsTheme: random.selectRandomEntity(wordSeeds.ideas()), wordsOption: ''},
+            {wordsConstraint: 'sp=', wordsTheme: random.selectRandomEntity(wordSeeds.accents()), wordsOption: ''},
+            {wordsConstraint: 'sp=', wordsTheme: random.selectRandomEntity(wordSeeds.rareAccents()), wordsOption: ''},
         ];
-        return modWords;
     },
 
     buildNewModifiers(modWords) {

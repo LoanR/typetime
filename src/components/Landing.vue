@@ -41,7 +41,7 @@ import buttonComponent from '@/components/buttons/Button.vue';
 import checkboxesComponent from '@/components/sections/Checkboxes.vue';
 import gameHubComponent from '@/components/game/GameHub.vue';
 
-import {requestDataWords} from '@/core/wordRequest'; // never use this func
+import {requestAndSelectWords} from '@/core/wordRequest'; // never use this func
 
 export default {
     name: 'Landing',
@@ -154,9 +154,7 @@ export default {
 
         async selectModifiers() {
             const modSearchValues = gameTuning.getSpecificModifierSearchValues();
-            const pSelectedModWords = modSearchValues.map(async(searchInstructions) => {
-                return this.addWordModifier(searchInstructions.param, searchInstructions.value);
-            });
+            const pSelectedModWords = modSearchValues.map(async(modTheme) => this.addWordModifier(modTheme));
             const selectedModWords = await Promise.all(pSelectedModWords);
             this.modifiers.push(...gameTuning.buildNewModifiers(selectedModWords));
             this.selectedModifiers = random.spliceRandomEntities(4, this.modifiers); // magic
@@ -165,9 +163,14 @@ export default {
             });
         },
 
-        async addWordModifier(param, value) {
+        async addWordModifier(modTheme) {
             try {
-                return random.selectRandomEntity(wordSelection.cleanDataWords(await requestDataWords(1, param, value, '', false)));
+                const modSelectionRule = {
+                    wordLength: {min: 3, max: 5},
+                    wordFrequencyInLanguage: {min: 50, max: 90000},
+                    capitalizeProbability: 0,
+                };
+                return random.selectRandomEntity(await requestAndSelectWords(1, modTheme, modSelectionRule, true));
             } catch (error) {
                 this.restartGame();
                 window.alert('We couldn\'t build consistent modifiers, please launch a new game...');
