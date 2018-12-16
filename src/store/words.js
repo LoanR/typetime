@@ -1,6 +1,4 @@
-import wordSelection from '../core/wordSelection';
-import random from '@/core/random';
-import {requestDataWords} from '../core/wordRequest';
+import {requestAndSelectWords} from '../core/wordRequest';
 
 export const wordsMutations = {
     setWordsToType(state, payload) {
@@ -20,7 +18,7 @@ export const wordsActions = {
     async requestAndSetWordsToType({commit}, payload) {
         try {
             const words = await requestAndSelectWords(
-                payload.levelRules,
+                payload.wordAmount,
                 payload.wordsContext,
                 payload.wordsSelectionRules,
                 payload.filterAgainstRules,
@@ -34,7 +32,7 @@ export const wordsActions = {
     async requestAndSetNextWordsToType({commit}, payload) {
         try {
             const words = await requestAndSelectWords(
-                payload.levelRules,
+                payload.wordAmount,
                 payload.wordsContext,
                 payload.wordsSelectionRules,
                 payload.filterAgainstRules,
@@ -45,31 +43,3 @@ export const wordsActions = {
         }
     },
 };
-
-async function requestAndSelectWords(levelRules, wordsContext, wordsSelectionRules, filterAgainstRules) {
-    try {
-        let dataWords = await requestDataWords(
-            levelRules.wordAmount,
-            wordsContext.wordsConstraint,
-            wordsContext.wordsTheme,
-            wordsContext.wordsOption,
-        );
-        if (filterAgainstRules) { // words are always filtered, yes?
-            dataWords = wordSelection.filterWordsOnRule(
-                dataWords,
-                levelRules,
-                wordsSelectionRules,
-            );
-        }
-
-        const randomSelectedDataWords = random.spliceRandomEntities(levelRules.wordAmount, dataWords);
-
-        const words = wordSelection.cleanDataWords(randomSelectedDataWords);
-
-        const changedWords = wordSelection.randomlyChangeCase(words, wordsSelectionRules.capitalizeProbability);
-
-        return changedWords;
-    } catch (error) {
-        throw new Error(error);
-    }
-}
