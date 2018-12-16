@@ -133,6 +133,10 @@ export default {
                 this.shouldShuffleTitle = false;
                 this.shouldSlideFromRight = true;
                 this.$store.commit('resetLevelRules'); // reusable -> store action ?
+                this.$store.commit('setWordsPerMinute', {
+                    wordsPerMinute: this.difficulties.filter(d => d.id === 'isSnail')[0].isChecked ? 10 : 30, // magic
+                });
+                this.$store.commit('setAllotedWordBaseTime');
                 this.$store.commit('resetScore'); // reusable -> store action ?
                 this.$store.commit('setDifficultyNaming', {
                     difficultyNaming: gameTuning.buildDifficultyNaming(this.difficulties.filter(d => d.isChecked)),
@@ -180,9 +184,6 @@ export default {
         toggleDifficulties(toggledDifficultyId) {
             const toggledDifficulty = this.difficulties.find(dif => dif.id === toggledDifficultyId);
             this.$store.commit('setDifficulty', {settingId: toggledDifficultyId, isChecked: !toggledDifficulty.isChecked});
-            if (toggledDifficultyId === 'isSnail') {
-                this.wordsPerMinute = this.wordsPerMinute === 30 ? 10 : 30; // magic
-            }
         },
 
         restartGame() {
