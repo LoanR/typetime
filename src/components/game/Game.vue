@@ -177,7 +177,7 @@ export default {
 
         prepareNextLevel() {
             let lastLevelWord = this.$store.state.wordsRelated.wordsToType[this.$store.state.wordsRelated.wordsToType.length - 1];
-            let nextLevelWordContext = wordSelection.cleanWordContext(lastLevelWord);
+            let nextLevelWordContext = wordSelection.cleanWord(lastLevelWord);
             this.$store.commit('setWordsThemeContext', {wordsTheme: nextLevelWordContext});
             const nextLevelRules = wordSelection.getLevelRule(this.isMasochist, this.currentLevel + 1);
             this.$store.dispatch(

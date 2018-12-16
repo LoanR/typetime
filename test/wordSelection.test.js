@@ -79,21 +79,7 @@ describe('_doesWordRespectsSelectionRules function', function() {
     });
 });
 
-describe('_frequencyComparison function', function() {
-    const a = {tags: ['f:50']};
-    const b = {tags: ['f:100']};
-    const c = {tags: ['f:100']};
-    it('should return a number', function() {
-        assert.isNumber(wordSelection._frequencyComparison(a, b), 'expect a number');
-    });
-    it('should return the corresponding number', function() {
-        assert.isAbove(wordSelection._frequencyComparison(b, a), 0, 'expect a positive number');
-        assert.isBelow(wordSelection._frequencyComparison(a, b), 0, 'expect a negative number');
-        assert.equal(wordSelection._frequencyComparison(b, c), 0, 'expect 0');
-    });
-});
-
-describe('_doesWordRespectsSelectionRules function', function() {
+describe('filterWordsOnRule function', function() {
     const dataWords = [
         {word: 'spaceship', tags: ['', 'f:100']},
         {word: 'this', tags: ['', 'f:1000']},
@@ -102,7 +88,17 @@ describe('_doesWordRespectsSelectionRules function', function() {
         {word: 'crystal', tags: ['', 'f:10']},
         {word: 'planets', tags: ['', 'f:10']},
     ];
+    const dataWords2 = [
+        {word: 'spaceship', tags: ['', 'f:100']},
+        {word: 'this', tags: ['', 'f:1000']},
+        {word: 'plane', tags: ['', 'f:100']},
+        {word: 'green onions', tags: ['', 'f:100']},
+        {word: 'various-artists', tags: ['', 'f:100']},
+        {word: 'planets', tags: ['', 'f:10']},
+        {word: 'xylophones', tags: ['', 'f:100']},
+    ];
     const wordsSelectionRules1 = {wordLength: {min: 5, max: 9}, wordFrequencyInLanguage: {min: 99, max: 101}};
+    const wordsSelectionRules2 = {wordLength: {min: 5, max: 5}, wordFrequencyInLanguage: {min: 99, max: 101}};
     it('should return a list', function() {
         assert.isArray(wordSelection.filterWordsOnRule(dataWords, 2, wordsSelectionRules1), 'expect an array');
     });
@@ -112,24 +108,25 @@ describe('_doesWordRespectsSelectionRules function', function() {
     });
     it('should return a specific list of objects', function() {
         assert.equal(wordSelection.filterWordsOnRule(dataWords, 2, wordsSelectionRules1).length, 2, 'expect an array of 2 objects');
-        assert.equal(wordSelection.filterWordsOnRule(dataWords, 4, wordsSelectionRules1).length, 4, 'expect an array of 4 objects, even if it does not respects rules');
+        assert.equal(wordSelection.filterWordsOnRule(dataWords2, 4, wordsSelectionRules2).length, 2, 'expect an array of 2 objects because no onther respects rules');
+        assert.equal(wordSelection.filterWordsOnRule(dataWords2, 5, wordsSelectionRules1).length, 5, 'expect an array of 5 objects after word cleaning, never select words out of length');
     });
 });
 
-describe('cleanWordContext function', function() {
+describe('cleanWord function', function() {
     it('should return a string', function() {
-        assert.isString(wordSelection.cleanWordContext('whale'), 'expect a string');
+        assert.isString(wordSelection.cleanWord('whale'), 'expect a string');
     });
     it('should return the given string if already clean', function() {
-        assert.equal(wordSelection.cleanWordContext('whale'), 'whale', 'expect the same string');
+        assert.equal(wordSelection.cleanWord('whale'), 'whale', 'expect the same string');
     });
     it('should return a trimed string', function() {
-        assert.equal(wordSelection.cleanWordContext('        whale '), 'whale', 'expect the trimed string');
+        assert.equal(wordSelection.cleanWord('        whale '), 'whale', 'expect the trimed string');
     });
     it('should return a cleaned string', function() {
-        assert.equal(wordSelection.cleanWordContext('blue whale'), 'blue', 'expect a substring');
-        assert.equal(wordSelection.cleanWordContext('blue-whale'), 'blue', 'expect a substring');
-        assert.equal(wordSelection.cleanWordContext('blue@whale'), 'blue', 'expect a substring');
-        assert.equal(wordSelection.cleanWordContext('bluewhale'), 'bluewhale', 'expect the same string');
+        assert.equal(wordSelection.cleanWord('blue whale'), 'blue', 'expect a substring');
+        assert.equal(wordSelection.cleanWord('blue-whale'), 'blue', 'expect a substring');
+        assert.equal(wordSelection.cleanWord('blue@whale'), 'blue', 'expect a substring');
+        assert.equal(wordSelection.cleanWord('bluewhale'), 'bluewhale', 'expect the same string');
     });
 });
