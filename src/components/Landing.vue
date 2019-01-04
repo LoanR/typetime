@@ -36,12 +36,13 @@
 import random from '@/core/random.js';
 import gameTuning from '@/core/gameTuning.js';
 import wordSelection from '@/core/wordSelection.js';
+import {KEY_SOUNDS} from '@/conf/sounds.js';
+import {BASE_WORDS_PER_MINUTE, SNAIL_WORDS_PER_MINUTE} from '@/conf/gameSettings';
+import {MODS_TO_SHOW} from '@/conf/modifiersFrame';
 
 import buttonComponent from '@/components/buttons/Button.vue';
 import checkboxesComponent from '@/components/sections/Checkboxes.vue';
 import gameHubComponent from '@/components/game/GameHub.vue';
-
-import {requestAndSelectWords} from '@/core/wordRequest'; // never use this func
 
 export default {
     name: 'Landing',
@@ -65,12 +66,7 @@ export default {
             diffTitle: 'Difficulties',
             selectedModifiers: gameTuning.getEmptyMods(),
             modifiers: gameTuning.getModifiers(),
-            wordsPerMinute: 30, // rules conf file
-            keySounds: [ // conf
-                require('@/assets/sounds/key1.mp3'),
-                require('@/assets/sounds/key2.mp3'),
-                require('@/assets/sounds/key3.mp3'),
-            ],
+            keySounds: KEY_SOUNDS,
         };
     },
 
@@ -132,52 +128,42 @@ export default {
             try {
                 this.shouldShuffleTitle = false;
                 this.shouldSlideFromRight = true;
-                this.$store.commit('resetLevelRules'); // reusable -> store action ?
+                this.$store.commit('resetLevelRules');
                 this.$store.commit('setWordsPerMinute', {
-                    wordsPerMinute: this.difficulties.filter(d => d.id === 'isSnail')[0].isChecked ? 10 : 30, // magic
+                    wordsPerMinute: this.difficulties.filter(d => d.id === 'isSnail')[0].isChecked ? SNAIL_WORDS_PER_MINUTE : BASE_WORDS_PER_MINUTE, // special case
                 });
                 this.$store.commit('setAllotedWordBaseTime');
-                this.$store.commit('resetScore'); // reusable -> store action ?
+                this.$store.commit('resetScore');
                 this.$store.commit('setDifficultyNaming', {
                     difficultyNaming: gameTuning.buildDifficultyNaming(this.difficulties.filter(d => d.isChecked)),
                 });
                 this.$store.commit('startGame');
-                this.$store.commit('setWordsSelectionRules', {wordsSelectionRules: wordSelection.getLevelRule(this.$store.state.rules.gameDifficulties.isMasochist, this.$store.state.rules.levelRules.currentLevel)}); // reusable -> store action ?
+                this.$store.commit('setWordsSelectionRules', {
+                    wordsSelectionRules: wordSelection.getLevelRule(this.$store.state.rules.gameDifficulties.isMasochist, this.$store.state.rules.levelRules.currentLevel),
+                });
                 this.$store.dispatch('requestAndSetWordsToType', {
                     wordAmount: this.$store.state.rules.levelRules.wordAmount,
                     wordsContext: this.$store.state.wordsContext,
                     wordsSelectionRules: this.$store.state.rules.wordsSelectionRules,
-                    filterAgainstRules: true,
                 });
             } catch (err) {
                 this.restartGame();
                 // window.alert('We couldn\'t find enough words to type, please launch a new game...');
-                window.alert(err);
+                window.alert(err); // safe mode
             }
         },
 
         async selectModifiers() {
-            const modSearchValues = gameTuning.getSpecificModifierSearchValues();
-            const pSelectedModWords = modSearchValues.map(async(modTheme) => this.addWordModifier(modTheme));
-            const selectedModWords = await Promise.all(pSelectedModWords);
-            this.modifiers.push(...gameTuning.buildNewModifiers(selectedModWords));
-            this.selectedModifiers = random.spliceRandomEntities(4, this.modifiers); // magic
-            this.$store.commit('setWordsContext', {
-                wordsContext: gameTuning.getWordsContext(this.modifiers, this.selectedModifiers),
-            });
-        },
-
-        async addWordModifier(modTheme) {
             try {
-                const modSelectionRule = {
-                    wordLength: {min: 3, max: 5},
-                    wordFrequencyInLanguage: {min: 50, max: 90000},
-                    capitalizeProbability: 0,
-                };
-                return random.selectRandomEntity(await requestAndSelectWords(1, modTheme, modSelectionRule, true));
+                this.modifiers.push(...await gameTuning.getNewModifiers());
+                this.selectedModifiers = random.spliceRandomEntities(MODS_TO_SHOW, this.modifiers);
+                this.$store.commit('setWordsContext', {
+                    wordsContext: gameTuning.getWordsContext(this.modifiers, this.selectedModifiers),
+                });
             } catch (error) {
                 this.restartGame();
-                window.alert('We couldn\'t build consistent modifiers, please launch a new game...');
+                // window.alert('We couldn\'t build consistent modifiers, please launch a new game...');
+                window.alert(error); // safe mode
             }
         },
 
