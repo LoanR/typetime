@@ -19,7 +19,7 @@ const store = new Vuex.Store({
         rules: {
             levelRules: {
                 currentLevel: 0,
-                wordAmount: 0, // set with rules conf file
+                wordAmount: 0,
                 wordsPerMinute: 0,
                 allotedWordBaseTime: 0,
                 savedWordTime: 0,
@@ -49,20 +49,17 @@ const store = new Vuex.Store({
             stuckWordPart1: '',
             stuckWordPart2: '',
         },
-        // score related
     },
     mutations: {
         ...gameMutations,
         ...wordsMutations,
         ...contextMutations,
-        // ...levelRulesMutations,
         ...wordsSelectionRulesMutations,
         ...difficultiesMutations,
         ...scoreMutations,
     },
     actions: {
         ...wordsActions,
-        // ...rulesActions,
     },
 });
 

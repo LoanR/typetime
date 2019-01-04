@@ -25,6 +25,8 @@ import scoreCalculator from '../../core/scoreCalculator.js';
 import wordSelection from '@/core/wordSelection.js';
 import random from '../../core/random.js';
 
+import {LOSE_SOUNDS, WORD_SOUNDS, ERROR_SOUNDS, LEVEL_SOUNDS} from '@/conf/sounds.js';
+
 export default {
     name: 'Game',
 
@@ -49,45 +51,10 @@ export default {
             comboIndicatorBonusStyleTimer: null,
             capsStatus: false,
             countdownEnd: new Audio(require('@/assets/sounds/countdownend.mp3')),
-            loseSounds: [ // conf
-                require('@/assets/sounds/powerdown.wav'),
-                require('@/assets/sounds/mk64_loser.mp3'),
-                require('@/assets/sounds/tetrislose.mp3'),
-                require('@/assets/sounds/mario1down.mp3'),
-                require('@/assets/sounds/mariogameover.mp3'),
-                require('@/assets/sounds/yoshiowow.mp3'),
-                require('@/assets/sounds/pacmandies.mp3'),
-            ],
-            wordSounds: [ // conf
-                require('@/assets/sounds/mariocoin.mp3'),
-                require('@/assets/sounds/completion.mp3'),
-                require('@/assets/sounds/ding.mp3'),
-                require('@/assets/sounds/crashselect.mp3'),
-                require('@/assets/sounds/sonicring.mp3'),
-                require('@/assets/sounds/mario1up.mp3'),
-            ],
-            errorSounds: [ // conf
-                require('@/assets/sounds/denied.wav'),
-                require('@/assets/sounds/kirby_powerdown.mp3'),
-                require('@/assets/sounds/moderatehit.mp3'),
-                require('@/assets/sounds/moderatehit2.mp3'),
-                require('@/assets/sounds/shellhit.mp3'),
-                require('@/assets/sounds/stronghit.mp3'),
-                require('@/assets/sounds/basso.mp3'),
-                require('@/assets/sounds/frog.mp3'),
-                require('@/assets/sounds/funk.mp3'),
-                require('@/assets/sounds/susomi.mp3'),
-            ],
-            levelSounds: [ // conf
-                require('@/assets/sounds/powerup.wav'),
-                require('@/assets/sounds/sprout.wav'),
-                require('@/assets/sounds/yoshiyoshi.wav'),
-                require('@/assets/sounds/tetrisclear.mp3'),
-                require('@/assets/sounds/pkbattlewin.mp3'),
-                require('@/assets/sounds/zeldaitem.mp3'),
-                require('@/assets/sounds/mariopowerup.mp3'),
-                require('@/assets/sounds/mariowarp.mp3'),
-            ],
+            loseSounds: LOSE_SOUNDS,
+            wordSounds: WORD_SOUNDS,
+            errorSounds: ERROR_SOUNDS,
+            levelSounds: LEVEL_SOUNDS,
         };
     },
 
@@ -185,7 +152,6 @@ export default {
                 {
                     wordsContext: this.$store.state.wordsContext,
                     wordAmount: this.$store.state.rules.levelRules.wordAmount + 1,
-                    filterAgainstRules: true,
                     wordsSelectionRules: nextLevelRules,
                 },
             );

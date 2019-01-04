@@ -29,6 +29,7 @@
 </template>
 <script>
 import buttonComponent from '@/components/buttons/Button.vue';
+import {SCORE_MESSAGES, GAME_OVER_MESSAGE, REMATCH_BUTTON_CONTENT, END_GAME_SOCIAL_MESSAGE} from '@/conf/strings.js';
 
 export default {
     name: 'ScoreScreen',
@@ -39,8 +40,8 @@ export default {
 
     data() {
         return {
-            gameOverMessage: 'GameOver...', // conf
-            buttonContent: 'rematch', // conf
+            gameOverMessage: GAME_OVER_MESSAGE,
+            buttonContent: REMATCH_BUTTON_CONTENT,
         };
     },
 
@@ -52,23 +53,14 @@ export default {
     },
 
     computed: {
-        endGameScoreMessage() { // conf ?
-            let scoreMessage = 'You could have done better, but ' + this.difficultyDescription + ' you made a total of ' + this.gameScore + ' points. It is not that bad!';
-            if (this.gameScore < 0) {
-                scoreMessage = 'Do you know your keyboard? I mean ' + this.difficultyDescription + ' you now have a debt of ' + this.gameScore + ' points. I\'m disappointed.';
-            } else if (this.gameScore === 0) {
-                scoreMessage = 'Did you type anything? Well, ' + this.difficultyDescription + ' you made 0 points, that\'s not really time efficient...';
-            } else if (this.gameScore < 400) {
-                scoreMessage = 'You where not truly good, but ' + this.difficultyDescription + ' you made ' + this.gameScore + ' points. It is at least something...';
-            } else if (this.gameScore > 2000) {
-                scoreMessage = 'You\'re a beast, ' + this.difficultyDescription + ' you made ' + this.gameScore + ' points! Bravo!';
-            }
-            return scoreMessage;
+        endGameScoreMessage() {
+            const scoreMessage = SCORE_MESSAGES[Object.keys(SCORE_MESSAGES).find(scoreKey => this.gameScore < scoreKey)];
+            return scoreMessage[0] + this.difficultyDescription + scoreMessage[1] + this.gameScore + scoreMessage[2];
         },
 
         socialMessage() {
             const intro = this.difficultyDescription ? this.difficultyDescription.charAt(0).toUpperCase() + this.difficultyDescription.slice(1) : '';
-            return intro + 'I made a score of ' + this.gameScore + ' points on Typetime. This game made my day. Now, come fight me!'; // conf
+            return intro + END_GAME_SOCIAL_MESSAGE[0] + this.gameScore + END_GAME_SOCIAL_MESSAGE[1];
         },
 
         gameLevel() {

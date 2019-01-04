@@ -16,6 +16,8 @@
 
 <script>
 import random from '@/core/random.js';
+import {START_SOUNDS} from '@/conf/sounds.js';
+import {GAME_START_MESSAGE, IN_GAME_MESSAGES} from '@/conf/strings.js';
 
 import scoreScreenComponent from '@/components/game/ScoreScreen.vue';
 
@@ -30,25 +32,9 @@ export default {
 
     data() {
         return {
-            welcomeMessage: 'Ready?', // conf
-            inGameMessages: [ // conf
-                'You\'ve seen better days, don\'t you?',
-                'You\'re not that fast actually...',
-                'You lied, you weren\'t ready.',
-                'Time to stretch your fingers!',
-                'Shouldn\'t you be working?',
-                'Come on, shake yourself up!',
-                'Are you sure you can continue?',
-                'The previous level was simpler, wasn\'t it?',
-                'You were better last time...',
-                'The "H" key is near the middle of your keyboard.',
-                'This phrase in really long, so I\'m sure you won\'t be able to read it because of the long time it could take. In fact, you could even lose you\'re concentration and I surely don\'t want to do that you know.',
-            ],
-            startSounds: [ // conf
-                require('@/assets/sounds/mk_startrace.mp3'),
-                require('@/assets/sounds/pkbattle.mp3'),
-                require('@/assets/sounds/pacmanintro.mp3'),
-            ],
+            gameStartMessage: GAME_START_MESSAGE,
+            inGameMessages: IN_GAME_MESSAGES,
+            startSounds: START_SOUNDS,
         };
     },
 
@@ -67,7 +53,7 @@ export default {
             if (!this.isGameLaunched && !this.isGameOver) {
                 return random.selectRandomEntity(this.inGameMessages);
             }
-            return this.welcomeMessage;
+            return this.gameStartMessage;
         },
 
         gameLevel() {

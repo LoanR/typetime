@@ -21,7 +21,6 @@ export const wordsActions = {
                 payload.wordAmount,
                 payload.wordsContext,
                 payload.wordsSelectionRules,
-                payload.filterAgainstRules,
             );
             commit('setWordsToType', {levelWords: words});
         } catch (error) {
@@ -35,7 +34,6 @@ export const wordsActions = {
                 payload.wordAmount,
                 payload.wordsContext,
                 payload.wordsSelectionRules,
-                payload.filterAgainstRules,
             );
             commit('setNextWordsToType', {nextLevelWords: words});
         } catch (error) {

@@ -15,8 +15,8 @@
 </template>
 
 <script>
-// import gameTuning from '../../core/gameTuning.js';
 import random from '../../core/random.js';
+import {START_SIGNALS} from '@/conf/sounds.js';
 
 import gameComponent from './Game.vue';
 import transitionScreenComponent from './TransitionScreen.vue';
@@ -39,11 +39,7 @@ export default {
             timeAccount: 0,
             previousScore: 0,
             previousLetterCombo: 0,
-            startSignals: [ // conf
-                require('@/assets/sounds/elevatorbell.mp3'),
-                require('@/assets/sounds/microwavebell.mp3'),
-                require('@/assets/sounds/hotelbell.mp3'),
-            ],
+            startSignals: START_SIGNALS,
         };
     },
 

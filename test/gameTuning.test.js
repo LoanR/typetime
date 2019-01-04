@@ -48,11 +48,12 @@ describe('getSpecificModifierSearchValues function', function() {
         assert.typeOf(gameTuning.getSpecificModifierSearchValues()[0], 'object', 'expects an array of objects');
     });
     it('should return a list of objects containing 2 keys', function() {
-        assert.equal(Object.keys(random.selectRandomEntity(gameTuning.getSpecificModifierSearchValues())).length, 2, 'expects an array of objects with 2 keys');
+        assert.equal(Object.keys(random.selectRandomEntity(gameTuning.getSpecificModifierSearchValues())).length, 3, 'expects an array of objects with 3 keys');
     });
     it('should return a list of objects containing specific keys', function() {
-        assert.strictEqual(Object.keys(random.selectRandomEntity(gameTuning.getSpecificModifierSearchValues()))[0], 'param', 'expects an array of objects with "param" key');
-        assert.strictEqual(Object.keys(random.selectRandomEntity(gameTuning.getSpecificModifierSearchValues()))[1], 'value', 'expects an array of objects with "value" key');
+        assert.strictEqual(Object.keys(random.selectRandomEntity(gameTuning.getSpecificModifierSearchValues()))[0], 'wordsConstraint', 'expects an array of objects with "wordsConstraint" key');
+        assert.strictEqual(Object.keys(random.selectRandomEntity(gameTuning.getSpecificModifierSearchValues()))[1], 'wordsTheme', 'expects an array of objects with "wordsTheme" key');
+        assert.strictEqual(Object.keys(random.selectRandomEntity(gameTuning.getSpecificModifierSearchValues()))[2], 'wordsOption', 'expects an array of objects with "wordsOption" key');
     });
 });
 
@@ -99,6 +100,27 @@ describe('buildDifficultyNaming function', function() {
         assert.isString(gameTuning.buildDifficultyNaming(checkedDifficulties), 'expects a string');
     });
     it('should return a specific string', function() {
-        assert.equal(gameTuning.buildDifficultyNaming(checkedDifficulties), 'as an "exceptional stray cat"', 'excepts a certain string');
+        assert.equal(gameTuning.buildDifficultyNaming(checkedDifficulties), 'as an "exceptional stray cat", ', 'excepts a certain string');
+    });
+});
+
+describe('getNewModifiers function', function() {
+    it('should return a list', async() => {
+        assert.isArray(await gameTuning.getNewModifiers(false), 'expects an array');
+    });
+    it('should return a list of objects containing specific keys', async() => {
+        const newMods = await gameTuning.getNewModifiers(false);
+        assert.strictEqual(Object.keys(random.selectRandomEntity(newMods))[0], 'id', 'expects an array of objects with "id" key');
+        assert.strictEqual(Object.keys(random.selectRandomEntity(newMods))[1], 'label', 'expects an array of objects with "label" key');
+        assert.strictEqual(Object.keys(random.selectRandomEntity(newMods))[2], 'values', 'expects an array of objects with "values" key');
+        assert.strictEqual(Object.keys(random.selectRandomEntity(newMods))[3], 'isChecked', 'expects an array of objects with "isChecked" key');
+        assert.strictEqual(Object.keys(random.selectRandomEntity(newMods))[4], 'modCluster', 'expects an array of objects with "modCluster" key');
+        assert.strictEqual(Object.keys(random.selectRandomEntity(newMods))[5], 'description', 'expects an array of objects with "description" key');
+    });
+});
+
+describe('_addWordModifier function', function() {
+    it('should return a string', async() => {
+        assert.isString(await gameTuning._addWordModifier('truc', false), 'expects a string');
     });
 });

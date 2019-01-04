@@ -1,144 +1,29 @@
-import random from '@/core/random';
-import wordSeeds from '@/conf/wordSeeds';
-
-const BASE_MODIFIER = {
-    label: '',
-    values: {},
-    isChecked: false,
-    modCluster: '',
-    description: '',
-};
-
-const DEFAULT_CONSTRAINT = 'ml=';
-const DEFAULT_OPTION = '';
-
-const EMPTY_MODS = [
-    {
-        label: '',
-        isChecked: false,
-    },
-    {
-        label: '',
-        isChecked: false,
-    },
-    {
-        label: '',
-        isChecked: false,
-    },
-    {
-        label: '',
-        isChecked: false,
-    },
-];
-
-const MODIFIERS = [
-    {
-        id: 'lexical',
-        label: 'lexical',
-        values: {wordsConstraint: 'rel_trg='},
-        isSelected: false,
-        isChecked: false,
-        modCluster: 'parameter',
-        description: 'Guide the game towards lexical fields.',
-    },
-    {
-        id: 'semantic',
-        label: 'semantic',
-        values: {wordsConstraint: 'ml='},
-        isSelected: false,
-        isChecked: false,
-        modCluster: 'parameter',
-        description: 'The game will try to associate meaning of words.',
-    },
-    {
-        id: 'phonetic',
-        label: 'phonetic',
-        values: {wordsConstraint: 'sl='},
-        isSelected: false,
-        isChecked: false,
-        modCluster: 'parameter',
-        description: 'The game will search for similar sounds.',
-    },
-    {
-        id: 'rhyme',
-        label: 'rhyme',
-        values: {wordsConstraint: 'rel_rhy='},
-        isSelected: false,
-        isChecked: false,
-        modCluster: 'parameter',
-        description: 'The game will search for rhymes.',
-    },
-    {
-        id: 'español',
-        label: 'español',
-        values: {
-            wordsConstraint: 'ml=',
-            wordsTheme: 'ahora', // need more random
-            wordsOption: '&v=es',
-        },
-        isSelected: false,
-        isChecked: false,
-        modCluster: 'all',
-        description: 'Gives a higher probability of Spanish words. With accentuation.',
-    },
-];
-
-const DIFFICULTIES = [
-    {
-        id: 'isSnail',
-        label: 'snail',
-        article: 'a',
-        isChecked: false,
-        stringOrder: 3,
-        description: 'Need more time to type a word? This also mean smaller score combo...',
-    },
-    {
-        id: 'isEconomist',
-        label: 'economist',
-        article: 'an',
-        isChecked: false,
-        stringOrder: 2,
-        description: 'Keep time between each words but no time bonus score for you.',
-    },
-    {
-        id: 'isResilient',
-        label: 'resilient',
-        article: 'a',
-        isChecked: false,
-        stringOrder: 0,
-        description: 'No break time between each levels but a really better score multiplier...',
-    },
-    {
-        id: 'isMasochist',
-        label: 'masochist',
-        article: 'a',
-        isChecked: false,
-        stringOrder: 1,
-        description: 'They say there is more point to do when you\'re in hell...',
-    },
-];
+import random from './random';
+import {ACCENTS, RARE_ACCENTS, THINGS, PLACES, IDEAS, THINGS_FR, OTHERS_FR} from '../conf/wordSeed';
+import {MODS_TO_SHOW, BASE_MODIFIER, MODIFIERS, DIFFICULTIES, DEFAULT_CONSTRAINT, DEFAULT_OPTION, MOD_SELECTION_RULE} from '../conf/modifiersFrame';
+import {requestAndSelectWords} from './wordRequest';
 
 export default {
     getEmptyMods() {
         let emptyMods = [];
-        for (let i = 4; i > 0; i--) { // magic number '4' should be a global with number of visible modifiers.
+        for (let i = MODS_TO_SHOW; i > 0; i--) {
             emptyMods.push(BASE_MODIFIER);
         }
-        return EMPTY_MODS;
+        return emptyMods;
     },
 
-    getModifiers() {
+    getModifiers() { // usefull?
         return MODIFIERS;
     },
 
-    getDifficulties() {
+    getDifficulties() { // usefull?
         return DIFFICULTIES;
     },
 
     getWordsContext(modifiers, selectedModifiers) {
         let wordsContext = {
             wordsConstraint: this.defaultConstraint(),
-            wordsTheme: this.defaultTheme(modifiers), // need more random
+            wordsTheme: this.defaultTheme(modifiers),
             wordsOption: this.defaultOption(),
         };
         const checkedModifiers = selectedModifiers.filter(mod => !!mod.isChecked);
@@ -150,7 +35,7 @@ export default {
         return wordsContext;
     },
 
-    defaultConstraint() {
+    defaultConstraint() { // usefull?
         return DEFAULT_CONSTRAINT;
     },
 
@@ -159,19 +44,19 @@ export default {
         return random.selectRandomEntity(wordModifiers).values.wordsTheme;
     },
 
-    defaultOption() {
+    defaultOption() { // usefull?
         return DEFAULT_OPTION;
     },
 
     getSpecificModifierSearchValues() {
         return [
-            {wordsConstraint: 'ml=', wordsTheme: random.selectRandomEntity(wordSeeds.thingsFr()), wordsOption: ''},
-            {wordsConstraint: 'ml=', wordsTheme: random.selectRandomEntity(wordSeeds.othersFr()), wordsOption: ''},
-            {wordsConstraint: 'ml=', wordsTheme: random.selectRandomEntity(wordSeeds.things()), wordsOption: ''},
-            {wordsConstraint: 'ml=', wordsTheme: random.selectRandomEntity(wordSeeds.places()), wordsOption: ''},
-            {wordsConstraint: 'ml=', wordsTheme: random.selectRandomEntity(wordSeeds.ideas()), wordsOption: ''},
-            {wordsConstraint: 'sp=', wordsTheme: random.selectRandomEntity(wordSeeds.accents()), wordsOption: ''},
-            {wordsConstraint: 'sp=', wordsTheme: random.selectRandomEntity(wordSeeds.rareAccents()), wordsOption: ''},
+            {wordsConstraint: 'ml=', wordsTheme: random.selectRandomEntity(THINGS_FR), wordsOption: ''},
+            {wordsConstraint: 'ml=', wordsTheme: random.selectRandomEntity(OTHERS_FR), wordsOption: ''},
+            {wordsConstraint: 'ml=', wordsTheme: random.selectRandomEntity(THINGS), wordsOption: ''},
+            {wordsConstraint: 'ml=', wordsTheme: random.selectRandomEntity(PLACES), wordsOption: ''},
+            {wordsConstraint: 'ml=', wordsTheme: random.selectRandomEntity(IDEAS), wordsOption: ''},
+            {wordsConstraint: 'sp=', wordsTheme: random.selectRandomEntity(ACCENTS), wordsOption: ''},
+            {wordsConstraint: 'sp=', wordsTheme: random.selectRandomEntity(RARE_ACCENTS), wordsOption: ''},
         ];
     },
 
@@ -186,7 +71,7 @@ export default {
                     isChecked: false,
                     modCluster: 'word',
                     description: 'Suggest the game to search for words around "' + mod + '".',
-                } // use BASE_MODIFIER
+                }
             );
         }
         return modsToAdd;
@@ -195,5 +80,24 @@ export default {
     buildDifficultyNaming(checkedDifficulties) {
         checkedDifficulties.sort((d1, d2) => d1.stringOrder - d2.stringOrder);
         return checkedDifficulties.length ? ('as ' + checkedDifficulties[0].article + ' "' + checkedDifficulties.map(d => d.label).join(' ') + '", ') : '';
+    },
+
+    async getNewModifiers(isExternalRequest = true) {
+        try {
+            const modSearchValues = this.getSpecificModifierSearchValues();
+            const pSelectedModWords = modSearchValues.map(async(modTheme) => this._addWordModifier(modTheme, isExternalRequest));
+            const selectedModWords = await Promise.all(pSelectedModWords);
+            return this.buildNewModifiers(selectedModWords);
+        } catch (error) {
+            throw new Error(error);
+        }
+    },
+
+    async _addWordModifier(modTheme, isExternalRequest) {
+        try {
+            return random.selectRandomEntity(await requestAndSelectWords(1, modTheme, MOD_SELECTION_RULE, isExternalRequest));
+        } catch (error) {
+            throw new Error(error);
+        }
     },
 };
