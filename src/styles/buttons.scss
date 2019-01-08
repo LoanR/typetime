@@ -108,4 +108,17 @@
         //         1px 1px 1px rgba(255, 255, 255, 0.13);
         // }
     }
+
+    &:disabled, &.disabled-button {
+        background: repeating-linear-gradient(-45deg, darken($base-color, 2%), darken($base-color, 2%) 10px, darken($base-color, 4%) 10px, darken($base-color, 4%) 20px) !important;
+        cursor: not-allowed !important;
+        border: 2px solid darken($light-base-color, 5%) !important;
+        box-shadow: none !important;
+
+        span {
+            color: darken($light-base-color, 5%) !important;
+            top: 0 !important;
+            text-shadow: none !important;
+        }
+    }
 }

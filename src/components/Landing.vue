@@ -9,7 +9,7 @@
                 </header>
                 <div class="interactions">
                     <div>
-                        <button-component :content="startContent" @bigButtonClick="launchGame"></button-component>
+                        <button-component :content="startContent" :disableButton="!launchableGame" @bigButtonClick="launchGame"></button-component>
                     </div>
                     <div class="mod-diff-container">
                         <checkboxes-component
@@ -62,6 +62,7 @@ export default {
             shuffleTitleTimer: null,
             firstShuffleTitleTimer: 3000,
             startContent: 'start',
+            launchableGame: false,
             modTitle: 'Modifiers',
             diffTitle: 'Difficulties',
             selectedModifiers: gameTuning.getEmptyMods(),
@@ -160,6 +161,7 @@ export default {
                 this.$store.commit('setWordsContext', {
                     wordsContext: gameTuning.getWordsContext(this.modifiers, this.selectedModifiers),
                 });
+                this.launchableGame = true;
             } catch (error) {
                 this.restartGame();
                 // window.alert('We couldn\'t build consistent modifiers, please launch a new game...');

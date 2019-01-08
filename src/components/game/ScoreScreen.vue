@@ -7,7 +7,7 @@
             "{{stuckWordPart1}}<span class="nemesis-letter">{{nemesisLetter}}</span>{{stuckWordPart2}}"
             on level {{gameLevel}}.
         </p>
-        <button-component :content="buttonContent" @bigButtonClick="returnHome"></button-component>
+        <button-component :content="buttonContent" :disableButton="false" @bigButtonClick="returnHome"></button-component>
         <social-sharing
             url="https://loanr.github.io/typetime/"
             :title="socialMessage"
