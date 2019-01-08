@@ -37,12 +37,10 @@ export default {
             wordToTypeIndex: 0,
             letterToTypeIndex: 0,
             entry: '',
-            previousEntry: '',
             wordCountDown: 0,
-            interval: null,
+            refreshCountdownTimer: null,
             showPreparation: false,
             canStillPlay: true,
-            hundrethSecondMinute: 6000,
             combo: 1,
             scoreChange: 0,
             errorStyle: null,
@@ -147,14 +145,27 @@ export default {
             let nextLevelWordContext = wordSelection.cleanWord(lastLevelWord);
             this.$store.commit('setWordsThemeContext', {wordsTheme: nextLevelWordContext});
             const nextLevelRules = wordSelection.getLevelRule(this.isMasochist, this.currentLevel + 1);
-            this.$store.dispatch(
-                'requestAndSetNextWordsToType',
-                {
-                    wordsContext: this.$store.state.wordsContext,
-                    wordAmount: this.$store.state.rules.levelRules.wordAmount + 1,
-                    wordsSelectionRules: nextLevelRules,
-                },
-            );
+            try {
+                this.$store.dispatch(
+                    'requestAndSetNextWordsToType',
+                    {
+                        wordsContext: this.$store.state.wordsContext,
+                        wordAmount: this.$store.state.rules.levelRules.wordAmount + 1,
+                        wordsSelectionRules: nextLevelRules,
+                        isSafeMode: false,
+                    },
+                );
+            } catch (error) {
+                this.$store.dispatch(
+                    'requestAndSetNextWordsToType',
+                    {
+                        wordsContext: this.$store.state.wordsContext,
+                        wordAmount: this.$store.state.rules.levelRules.wordAmount + 1,
+                        wordsSelectionRules: nextLevelRules,
+                        isSafeMode: true,
+                    },
+                );
+            }
         },
 
         moveToNextLevel() {
@@ -224,13 +235,13 @@ export default {
             this.$refs.countdown.classList.remove('near-end');
             let countDown = this.allotedWordBaseTime + this.savedWordTime;
             this.wordCountDown = countDown > 3000 ? 3000 : parseInt(countDown.toFixed());
-            this.interval = window.setInterval(this.modifyCountdown, 10);
+            this.refreshCountdownTimer = window.setInterval(this.modifyCountdown, 10);
         },
 
         clearCountdown() {
             this.countdownEnd.pause();
             this.countdownEnd.currentTime = 0;
-            window.clearInterval(this.interval);
+            window.clearInterval(this.refreshCountdownTimer);
         },
 
         timeExceeded() {

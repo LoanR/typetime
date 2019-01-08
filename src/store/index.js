@@ -11,6 +11,7 @@ Vue.use(Vuex);
 
 const store = new Vuex.Store({
     state: {
+        safeMode: false,
         wordsRelated: {
             wordsToType: [],
             nextWordsToType: [],
@@ -30,8 +31,8 @@ const store = new Vuex.Store({
                 capitalizeProbability: 0,
             },
             gameDifficulties: {
-                isSnail: false,
-                isEconomist: true,
+                isSnail: true,
+                isEconomist: false,
                 isResilient: false,
                 isMasochist: false,
             },

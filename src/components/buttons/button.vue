@@ -1,6 +1,6 @@
 <template>
     <div>
-        <button class="button-style" @click.prevent="$emit('bigButtonClick')">
+        <button class="button-style" :disabled="disableButton" @click.prevent="$emit('bigButtonClick')">
             <span>{{content}}</span>
         </button>
     </div>
@@ -10,7 +10,7 @@
 export default {
     name: 'Button',
 
-    props: ['content'],
+    props: ['content', 'disableButton'],
 };
 </script>
 
