@@ -21,6 +21,7 @@ export const wordsActions = {
                 payload.wordAmount,
                 payload.wordsContext,
                 payload.wordsSelectionRules,
+                !payload.isSafeMode,
             );
             commit('setWordsToType', {levelWords: words});
         } catch (error) {
@@ -34,6 +35,7 @@ export const wordsActions = {
                 payload.wordAmount,
                 payload.wordsContext,
                 payload.wordsSelectionRules,
+                !payload.isSafeMode,
             );
             commit('setNextWordsToType', {nextLevelWords: words});
         } catch (error) {

@@ -3,8 +3,12 @@
         <input type="checkbox"
             :id="label"
             :checked="isChecked"
+            :disabled="disableButton"
             v-on:change="toggleCheck">
-        <label :for="label" class="button-style" @mouseover="itemHover" @mouseout="itemOut"><span>{{label}}</span></label>
+        <label :for="label" :class="labelClass" @mouseover="itemHover" @mouseout="itemOut">
+            <span>{{label}}</span>
+            <span class="pend1"></span><span class="pend2"></span><span class="pend3"></span>
+        </label>
     </div>
 </template>
 
@@ -12,7 +16,7 @@
 export default {
     name: 'Checkbox',
 
-    props: ['swId', 'label', 'modifier', 'isChecked', 'desc', 'mutation', 'values'],
+    props: ['swId', 'label', 'modifier', 'isChecked', 'desc', 'mutation', 'values', 'disableButton'],
 
     methods: {
         toggleCheck() {
@@ -27,12 +31,24 @@ export default {
             this.$emit('changeDesc', '');
         },
     },
+
+    computed: {
+        labelClass() {
+            return 'button-style' + (this.disableButton ? ' disabled-button' : '') + (this.label === '' ? ' pending-construction' : '');
+        },
+    },
 };
 </script>
 
 <style lang="scss" scoped>
     @import '../../styles/common';
     @import '../../styles/buttons';
+
+    @keyframes pulse {
+        0% {background: $light-base-color; width: 5px; height: 5px;}
+        33% {background: $contrast-color; width: 7px; height: 7px;}
+        66% {background: $light-base-color; width: 5px; height: 5px;}
+    }
 
     input {
         display: none;
@@ -46,6 +62,34 @@ export default {
         justify-content: center;
         margin: 1rem 1rem;
 
+        &.pending-construction {
+            position: relative;
+
+            .pend1, .pend2, .pend3 {
+                position: absolute;
+                width: 5px;
+                height: 5px;
+                top: 50%;
+                transform: translateY(-50%);
+                background: $light-base-color;
+                border-radius: 1px;
+            }
+
+            .pend1 {
+                left: 1.5rem;
+                animation: pulse 1s ease-in-out 0s infinite;
+            }
+
+            .pend2 {
+                animation: pulse 1s ease-in-out 0.25s infinite;
+            }
+
+            .pend3 {
+                right: 1.5rem;
+                animation: pulse 1s ease-in-out 0.5s infinite;
+            }
+        }
+
         span {
             font-size: $small-font-size;
         }
@@ -54,8 +98,8 @@ export default {
     input:active + .button-style, input:checked + .button-style {
         border: 2px solid $brand-color;
         box-shadow:
-            0px 0px 5px 0px rgba(lighten( $brand-color, 30% ), 0.9),
-            0px 0px 30px 0px rgba(lighten( $brand-color, 20% ), 0.5),
+            0px 0px 5px 0px rgba(lighten($brand-color, 30%), 0.9),
+            0px 0px 30px 0px rgba(lighten($brand-color, 20%), 0.5),
             0px 0px 0px 1px rgba(lighten($brand-color, 15%), 1);
         //     inset 0 1px rgba($contrast-color, 0.5),
         //     inset 0 2rem 30px rgba(255, 255, 255, 0.08),

@@ -35,6 +35,21 @@ export const SPANISH = [
     'barcelona', 'españa', 'eso', 'usted', 'digo', 'luis', 'juan', 'francesca', 'entonces',
 ];
 
+const FURTHER = [
+    'expand', 'animals', 'dusty', 'unfasten', 'north', 'texture', 'gullible', 'cemetery', 'slimy',
+    'disapprove', 'employ', 'purple', 'pause', 'responsible', 'brawny', 'sneaky', 'match', 'deafening',
+    'meddle', 'hour', 'suffer', 'show', 'vacuous', 'squirrel', 'size', 'way', 'secdhand', 'slimy',
+    'mammoth', 'murky', 'capable', 'escape', 'majestic', 'cute', 'modern', 'lovely', 'grab', 'society',
+    'tickle', 'ill', 'ludicrous', 'spicy', 'possible', 'teytiny', 'friend', 'year', 'reduce',
+    'adjustment', 'wealthy', 'tight', 'wave', 'thankful', 'coach', 'knowledge', 'silky', 'development',
+    'bang', 'jumbled', 'piquant', 'various', 'curious', 'squash', 'ray', 'hook', 'swift', 'hot',
+    'zesty', 'tart', 'hand', 'spotless', 'hope', 'acceptable', 'recognise', 'peck', 'question',
+    'grip', 'oatmeal', 'fire', 'twig', 'tow', 'romantic', 'shut', 'nimble', 'caring', 'charge',
+    'spoon', 'receipt', 'vast', 'rock', 'head', 'choke', 'welcome', 'fact', 'silver', 'punishment',
+    'jittery', 'comfortable', 'crabby', 'earn', 'obedient', 'playground', 'dangerous', 'godly',
+    'relieved', 'health', 'long', 'calculating', 'clumsy', 'compete', 'tie', 'risk', 'illustrious',
+];
+
 export const EMERGENCY = [...THINGS, ...PLACES, ...IDEAS];
 
-export const ALL_WORDS = [...ACCENTS, ...RARE_ACCENTS, ...THINGS, ...PLACES, ...IDEAS, ...OTHERS_FR, ...SPANISH];
+export const ALL_WORDS = [...THINGS, ...PLACES, ...IDEAS, ...THINGS_FR, ...OTHERS_FR, ...SPANISH, ...FURTHER];

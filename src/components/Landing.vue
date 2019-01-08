@@ -15,11 +15,16 @@
                         <checkboxes-component
                             :switches="selectedModifiers"
                             :titleCategory="modTitle"
+                            :disableButtons="safeMode"
+                            :refreshable="true"
+                            @refreshCheckboxes="refreshModifiers"
                             @toggleCheck="toggleModifiers">
                         </checkboxes-component>
                         <checkboxes-component
                             :switches="difficulties"
                             :titleCategory="diffTitle"
+                            :disableButtons="false"
+                            :refreshable="false"
                             @toggleCheck="toggleDifficulties">
                         </checkboxes-component>
                     </div>
@@ -146,27 +151,35 @@ export default {
                     wordAmount: this.$store.state.rules.levelRules.wordAmount,
                     wordsContext: this.$store.state.wordsContext,
                     wordsSelectionRules: this.$store.state.rules.wordsSelectionRules,
+                    isSafeMode: this.safeMode,
                 });
             } catch (err) {
+                const askForSafeMode = window.confirm('It seems the internets does\'nt gave us enough words.\r\rDo you want to try in "safe mode"?');
+                this.$store.commit('setSafeMode', {safeMode: askForSafeMode});
                 this.restartGame();
-                // window.alert('We couldn\'t find enough words to type, please launch a new game...');
-                window.alert(err); // safe mode
             }
         },
 
         async selectModifiers() {
             try {
-                this.modifiers.push(...await gameTuning.getNewModifiers());
+                this.modifiers.push(...await gameTuning.getNewModifiers(!this.safeMode));
                 this.selectedModifiers = random.spliceRandomEntities(MODS_TO_SHOW, this.modifiers);
                 this.$store.commit('setWordsContext', {
                     wordsContext: gameTuning.getWordsContext(this.modifiers, this.selectedModifiers),
                 });
                 this.launchableGame = true;
             } catch (error) {
+                const askForSafeMode = window.confirm('It seems the internets does\'nt gave us enough modifiers.\r\rDo you want to try in "safe mode"?');
+                this.$store.commit('setSafeMode', {safeMode: askForSafeMode});
                 this.restartGame();
-                // window.alert('We couldn\'t build consistent modifiers, please launch a new game...');
-                window.alert(error); // safe mode
             }
+        },
+
+        refreshModifiers() {
+            if (this.safeMode) {
+                this.$store.commit('setSafeMode', {safeMode: false});
+            }
+            this.selectModifiers();
         },
 
         toggleDifficulties(toggledDifficultyId) {
@@ -198,6 +211,10 @@ export default {
                 difficulty.isChecked = this.$store.state.rules.gameDifficulties[difficulty.id];
                 return difficulty;
             });
+        },
+
+        safeMode() {
+            return this.$store.state.safeMode;
         },
     },
 

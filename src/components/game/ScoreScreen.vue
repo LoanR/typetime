@@ -47,6 +47,7 @@ export default {
 
     methods: {
         returnHome() {
+            this.$store.commit('setSafeMode', {safeMode: false});
             this.$store.commit('stopGame');
             this.$emit('rematch');
         },
