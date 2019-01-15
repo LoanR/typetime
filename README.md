@@ -21,8 +21,8 @@ If the timer reaches 0, the game will display your score and let you send it on 
 The word selection is done through requests on the [Datamuse API](http://www.datamuse.com/api/) which is a great ressource for generating lists of related words.
 
 ### Difficulty progression
-By default, on the first level, **5** words needs to be type at a ratio of **30** words per minute (namely 2 seconds per words, which is pretty short). Then on level 2, **6** words needs to be type at a ratio of **31** words per minute, and so on.
-Words also gets longer and less used in the laguage.
+By default, on the first level, **5** words need to be type at a ratio of **30** words per minute (namely 2 seconds per words, which is pretty short). Then on level 2, **6** words need to be type at a ratio of **31** words per minute, and so on.
+Words also gets longer and less used in language.
 
 ### Modifiers and words
 The [Datamuse API](http://www.datamuse.com/api/) is a great playground with many possibilities. On the landing page, you can refresh modifiers which can give your game a topic to follow.
@@ -63,6 +63,7 @@ new function is added in the core.
 
 ## Future iterations
 A project never really ends and there are topics that need handling:
+- :family: *composability*: better usage of Vue.js composability, generisize and reuse possibility mindset
 - :beetle: *CORS bug*: handle dev & prod cookies
 - :alarm_clock: *preparation - break time screen*: real progress bar with a real meaning
 - :white_check_mark: *testing*: upgrade with mocks, testing interface in browser, relative paths
