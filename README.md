@@ -63,7 +63,8 @@ new function is added in the core.
 
 ## Future iterations
 A project never really ends and there are topics that need handling:
-- :family: *composability*: better usage of Vue.js composability, generisize and reuse possibility mindset
+- :family_woman_girl_girl: *composability*: better usage of Vue.js composability, generisize and reuse possibility mindset
+- :scroll: *documentation*: not everyone seem to be ok with absolutely no comment policy...
 - :beetle: *CORS bug*: handle dev & prod cookies
 - :alarm_clock: *preparation - break time screen*: real progress bar with a real meaning
 - :white_check_mark: *testing*: upgrade with mocks, testing interface in browser, relative paths
